@@ -5,6 +5,8 @@ import math
 ### Enter values below ===> ####
 ################################
 
+# Instructions: you must provide either a 95% CI, or an estimate and one of p and standard error.
+
 # Estimated quantity
 estimate = None
 
@@ -29,7 +31,7 @@ is_ratio = False
 # This will cause everything to be evaluated on the log scale,
 # and exponentiated back before being returned by the program.
 # Although the estimate of the ratio has an asymptotically normal
-# distribution around the true ratio (via central limit theorem),
+# distribution around the true ratio (via taking logs and using the delta method),
 # the log of a ratio converges to normality much faster.
 
 
@@ -51,7 +53,7 @@ is_ratio = False
 p_or_se = not(p is None and standard_error is None)
 
 if ci95 is None and (estimate is None or p_or_se is False):
-	raise ValueError("You must provide either 95% CI, or an estimate and one of p and standard error")
+	raise ValueError("You must provide either a 95% CI, or an estimate and one of p and standard error")
 
 if [p,standard_error,ci95].count(None)<2:
 	raise ValueError("You must provide at most one of p, standard error, and 95% CI")
@@ -61,7 +63,7 @@ if [ci95,estimate].count(None)<1:
 
 if is_ratio and standard_error is not None:
 	raise ValueError('''Supplying a standard error for a ratio is not supported.
-     Supply a p-value instead.''')
+     Supply a p-value or a 95% CI instead.''')
 
 
 #### Math
@@ -103,12 +105,13 @@ if is_ratio:
 	ci95_left,ci95_right=math.exp(ci95_left),math.exp(ci95_right)
 
 
+# Print output
 print_width = 20
 
 print('estimate'.ljust(print_width),estimate)
 print('estimate_null_value'.ljust(print_width),estimate_null_value)
 print('ci95_left'.ljust(print_width),ci95_left)
 print('ci95_right'.ljust(print_width),ci95_right)
-print('p'.ljust(print_width),p)
-print('z'.ljust(print_width),z)
+print('p-value'.ljust(print_width),p)
+print('z-score'.ljust(print_width),z)
 print('standard_error'.ljust(print_width),standard_error)
