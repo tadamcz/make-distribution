@@ -43,6 +43,13 @@ pdf = metalog.d(m=metalog_obj,term=term,q=domain_to_plot)
 cdf = metalog.p(m=metalog_obj,term=term,q=domain_to_plot)
 
 
+# Normal case
+def normal_parameters(x1, p1, x2, p2):
+    "Find parameters for a normal random variable X so that P(X < x1) = p1 and P(X < x2) = p2."
+    denom = stats.norm.ppf(p2) - stats.norm.ppf(p1)
+    sigma = (x2 - x1) / denom
+    mu = (x1*stats.norm.ppf(p2) - x2*stats.norm.ppf(p1)) / denom
+    return (mu, sigma)
 
 '''
 Get percentiles from distribution
