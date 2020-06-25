@@ -30,7 +30,11 @@ least squares will be used for fitting.
 family = 'metalog'
 
 # a list of (p,x) tuples, where P(X<x)=p
-percentiles = [(0.1,1),(0.4,20),(0.5,30),(0.9,60),(0.95,100)]
+percentiles = [(0.1,0),
+			   (0.2,50),
+			   (0.3,100),
+			   (0.9,200)]
+
 
 # list of percentiles to print
 percentiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
@@ -49,7 +53,7 @@ def guess_domain_to_plot(percentiles):
 	minp = min(ps)
 	maxp = max(ps)
 	width = maxp-minp
-	buffer = 0.5*width
+	buffer = 0.2*width
 	return np.linspace(minp-buffer,maxp+buffer,50)
 
 domain_to_plot = guess_domain_to_plot(percentiles)
@@ -95,7 +99,7 @@ if family == 'metalog':
 	print("Percentiles:")
 
 	# Todo: understand why passing term=term does not work, while term=term-1 works
-	quantiles = pm.qmetalog(metalog_obj,percentiles_out,term=term-1)
+	quantiles = pm.qmetalog(metalog_obj,percentiles_out,term=term)
 	for i in range(len(percentiles_out)):
 		print(percentiles_out[i],quantiles[i])
 
@@ -103,13 +107,19 @@ if family == 'metalog':
 	# todo: understand why passing a long domain causes dmetalog and qmetalog to
 	# return lists that are too short
 
-	domain_for_debugging = [i for i in range(22)]
-	pdf_values = pm.dmetalog(metalog_obj,domain_for_debugging,term=term-1)
-	cdf_values = pm.pmetalog(metalog_obj,domain_for_debugging,term=term-1)
+	domain_for_debugging = domain_to_plot
+	pdf_values = pm.dmetalog(metalog_obj,domain_for_debugging,term=term)
+	if len(pdf_values)!=len(domain_for_debugging):
+		raise RuntimeError("dmetalog gave",len(pdf_values),"results, instead of",len(domain_for_debugging))
+
+	cdf_values = pm.pmetalog(metalog_obj,domain_for_debugging,term=term)
+	if len(cdf_values)!=len(domain_for_debugging):
+		raise RuntimeError("dmetalog gave",len(cdf_values),"results, instead of",len(domain_for_debugging))
 
 	fig, (ax1, ax2) = plt.subplots(2,1)
-	ax1.plot(domain_for_debugging,cdf_values)
 	ax1.plot([x[1] for x in percentiles],[x[0] for x in percentiles],'b+')
+
+	ax1.plot(domain_for_debugging,cdf_values)
 	ax1.set_title('CDF')
 	ax2.plot(domain_for_debugging,pdf_values)
 	ax2.set_title('PDF')
