@@ -170,9 +170,7 @@ if family =='normal':
 	if len(percentiles)==2:
 		print('Two percentiles provided, using exact fit')
 		mu,sigma = normal_parameters(percentiles[0][1],percentiles[0][0],percentiles[1][1],percentiles[1][0])
-		print('Normal distribution')
-		print('mu',mu)
-		print('sigma',sigma)
+
 
 	if len(percentiles)>2:
 		print('More than two percentiles provided, using least squares fit')
@@ -188,6 +186,10 @@ if family =='normal':
 
 		mu, sigma = fit[0]
 
+	print('Normal distribution')
+	print('mu', mu)
+	print('sigma', sigma)
+
 	def pdf(x):
 		return stats.norm.pdf(x,loc=mu,scale=sigma)
 	def cdf(x):
@@ -200,9 +202,6 @@ if family == 'lognormal':
 		print('Two percentiles provided, using exact fit')
 		(p1,q1),(p2,q2) = percentiles
 		mu,sigma = normal_parameters(math.log(q1),p1,math.log(q2),p2)
-		print('Lognormal distribution')
-		print('mu',mu)
-		print('sigma',sigma)
 
 	if len(percentiles)>2:
 		print('More than two percentiles provided, using least squares fit')
@@ -218,6 +217,9 @@ if family == 'lognormal':
 
 		mu, sigma = fit[0]
 
+	print('Lognormal distribution')
+	print('mu', mu)
+	print('sigma', sigma)
 
 	'''From scipy docs:
 	A common parametrization for a lognormal random variable Y is in terms of the mean,
