@@ -2,6 +2,7 @@ from scipy import optimize
 from scipy import stats
 import math
 import pymetalog as pm
+from metalog import metalog
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -32,8 +33,9 @@ family = 'metalog'
 # a list of (p,x) tuples, where P(X<x)=p
 percentiles = [(0.1,0),
 			   (0.2,50),
-			   (0.3,100),
-			   (0.9,200)]
+			   (0.3,51),
+			   (0.4,53),
+			   (0.5,70)]
 
 
 # list of percentiles to print
@@ -88,7 +90,16 @@ def initial_guess_params(percentiles):
 
 if family == 'metalog':
 	term = len(percentiles)
-	metalog_obj = pm.metalog(
+
+	# metalog_obj = pm.metalog(
+	# 	x = [tuple[1] for tuple in percentiles],
+	# 	probs =[tuple[0] for tuple in percentiles],
+	# 	boundedness = 'u',
+	# 	term_limit = term,
+	# 	step_len=0.001)
+
+	term = 3 #debugging
+	metalog_obj = metalog.fit(
 		x = [tuple[1] for tuple in percentiles],
 		probs =[tuple[0] for tuple in percentiles],
 		boundedness = 'u',
@@ -99,7 +110,7 @@ if family == 'metalog':
 	print("Percentiles:")
 
 	# Todo: understand why passing term=term does not work, while term=term-1 works
-	quantiles = pm.qmetalog(metalog_obj,percentiles_out,term=term)
+	quantiles = metalog.q(metalog_obj,percentiles_out,term=term)
 	for i in range(len(percentiles_out)):
 		print(percentiles_out[i],quantiles[i])
 
@@ -108,11 +119,22 @@ if family == 'metalog':
 	# return lists that are too short
 
 	domain_for_debugging = domain_to_plot
-	pdf_values = pm.dmetalog(metalog_obj,domain_for_debugging,term=term)
+
+
+	# pdf_values = pm.dmetalog(metalog_obj,domain_for_debugging,term=term)
+	# pdf_values = metalog.d(metalog_obj, domain_for_debugging, term=term)
+	import rmetalog
+
+	pdf_values = rmetalog.pdf_values
+
 	if len(pdf_values)!=len(domain_for_debugging):
 		raise RuntimeError("dmetalog gave",len(pdf_values),"results, instead of",len(domain_for_debugging))
 
-	cdf_values = pm.pmetalog(metalog_obj,domain_for_debugging,term=term)
+	# cdf_values = pm.pmetalog(metalog_obj,domain_for_debugging,term=term)
+	# cdf_values = metalog.p(metalog_obj,domain_for_debugging,term=term)
+	cdf_values = rmetalog.cdf_values
+
+
 	if len(cdf_values)!=len(domain_for_debugging):
 		raise RuntimeError("dmetalog gave",len(cdf_values),"results, instead of",len(domain_for_debugging))
 
