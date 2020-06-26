@@ -1,41 +1,26 @@
 from scipy import optimize
 from scipy import stats
 import math
-import pymetalog as pm
-from metalog import metalog
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-'''
-Get distribution from percentiles
-
-First, choose a distribution family
-
-2-parameter distributions
-	normal
-	log-normal
-	beta
-
-meta-logistic distribution.
-
-If you provide more than two percentiles for a 2-parameter distribution.
-least squares will be used for fitting.
-'''
-
+import rpy2.robjects as robjects
+import rpy2.robjects.packages as rpackages
 
 ################################
 ### Enter values below ===> ####
 ################################
 
-# family can be 'normal', 'lognormal', 'beta', 'metalog'
-family = 'metalog'
+# family can be 'normal', 'lognormal', 'metalog'
+family = 'lognormal'
 
 # a list of (p,x) tuples, where P(X<x)=p
-percentiles = [(0.1,0),
-			   (0.2,50),
-			   (0.3,51),
-			   (0.4,53),
-			   (0.5,70)]
+'''(If you provide more than two percentiles for a 2-parameter distribution.
+ least squares will be used for fitting. You may provide unlimited
+ percentiles for the metalog distribution)'''
+percentiles = [(0.25,10),
+			   (0.5,50),
+			   (0.7,100)]
 
 
 # list of percentiles to print
@@ -45,10 +30,7 @@ percentiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
 ### <=== Enter values above ####
 ################################
 
-
-
-percentiles_x_p = [(b,a) for (a,b) in percentiles]
-
+# todo: implement beta distribution: https://stats.stackexchange.com/questions/112614/determining-beta-distribution-parameters-alpha-and-beta-from-two-arbitrary
 
 def guess_domain_to_plot(percentiles):
 	ps = [q for p,q in percentiles]
@@ -89,63 +71,100 @@ def initial_guess_params(percentiles):
 	return mean,stdev
 
 if family == 'metalog':
+	print("Meta-logistic distribution")
 	term = len(percentiles)
+	step_len = 0.01
 
-	# metalog_obj = pm.metalog(
-	# 	x = [tuple[1] for tuple in percentiles],
-	# 	probs =[tuple[0] for tuple in percentiles],
-	# 	boundedness = 'u',
-	# 	term_limit = term,
-	# 	step_len=0.001)
+	# import R's utility package
+	utils = rpackages.importr('utils')
 
-	term = 3 #debugging
-	metalog_obj = metalog.fit(
-		x = [tuple[1] for tuple in percentiles],
-		probs =[tuple[0] for tuple in percentiles],
-		boundedness = 'u',
-		term_limit = term,
-		step_len=0.001)
+	# select a mirror for R packages
+	utils.chooseCRANmirror(ind=1)  # select the first mirror in the list
 
+	# install and import rmetalog
+	packnames = ['rmetalog']
+	names_to_install = [x for x in packnames if not rpackages.isinstalled(x)]
+	if len(names_to_install) > 0:
+		utils.install_packages(robjects.StrVector(names_to_install))
 
-	print("Percentiles:")
-
-	# Todo: understand why passing term=term does not work, while term=term-1 works
-	quantiles = metalog.q(metalog_obj,percentiles_out,term=term)
-	for i in range(len(percentiles_out)):
-		print(percentiles_out[i],quantiles[i])
+	rpackages.importr('rmetalog')
 
 
-	# todo: understand why passing a long domain causes dmetalog and qmetalog to
-	# return lists that are too short
+	r_metalog_func = robjects.r('''
+	function(x,probs,boundedness,term_limit,step_len) {
+	          metalog(
+	              x = x,
+	              probs = probs,
+	              boundedness = 'u',
+	              term_limit = term_limit,
+	              step_len=step_len)
+	            }
+	''')
 
-	domain_for_debugging = domain_to_plot
+	r_pmetalog_func = robjects.r('''
+	function (metalog_obj,q,term) {
+	    pmetalog(
+			metalog_obj,
+			q=q,
+			term=term
+		)
+	}''')
+
+	r_dmetalog_func = robjects.r('''
+	function (metalog_obj,q,term) {
+	    dmetalog(
+			metalog_obj,
+			q=q,
+			term=term
+		)
+	}''')
+
+	r_qmetalog_func = robjects.r('''
+		function (metalog_obj,y,term) {
+		    qmetalog(
+				metalog_obj,
+				y=y,
+				term=term
+			)
+		}''')
 
 
-	# pdf_values = pm.dmetalog(metalog_obj,domain_for_debugging,term=term)
-	# pdf_values = metalog.d(metalog_obj, domain_for_debugging, term=term)
-	import rmetalog
+	r_x = robjects.FloatVector([q for p, q in percentiles])
+	r_probs = robjects.FloatVector([p for p, q in percentiles])
+	boundedness = 'u'
+	r_term_limit = robjects.FloatVector([term])
+	r_step_len = robjects.FloatVector([step_len])
 
-	pdf_values = rmetalog.pdf_values
+	s = time.time()
+	r_metalog_obj = r_metalog_func(x=r_x, probs=r_probs, boundedness=boundedness, term_limit=r_term_limit,
+								   step_len=r_step_len)
+	e = time.time()
+	print(e-s,"seconds to fit metalog object")
 
-	if len(pdf_values)!=len(domain_for_debugging):
-		raise RuntimeError("dmetalog gave",len(pdf_values),"results, instead of",len(domain_for_debugging))
+	r_domain = robjects.FloatVector(domain_to_plot)
+	r_percentiles_out = robjects.FloatVector(percentiles_out)
 
-	# cdf_values = pm.pmetalog(metalog_obj,domain_for_debugging,term=term)
-	# cdf_values = metalog.p(metalog_obj,domain_for_debugging,term=term)
-	cdf_values = rmetalog.cdf_values
+	s = time.time()
+	cdf_values = r_pmetalog_func(metalog_obj=r_metalog_obj, q=r_domain, term=r_term_limit)
+	pdf_values = r_dmetalog_func(metalog_obj=r_metalog_obj, q=r_domain, term=r_term_limit)
+	e = time.time()
+	print(e-s,"seconds to compute cdf and pdf")
 
+	quantiles_values = r_qmetalog_func(metalog_obj=r_metalog_obj, y=r_percentiles_out, term=r_term_limit)
 
-	if len(cdf_values)!=len(domain_for_debugging):
-		raise RuntimeError("dmetalog gave",len(cdf_values),"results, instead of",len(domain_for_debugging))
 
 	fig, (ax1, ax2) = plt.subplots(2,1)
 	ax1.plot([x[1] for x in percentiles],[x[0] for x in percentiles],'b+')
 
-	ax1.plot(domain_for_debugging,cdf_values)
+	ax1.plot(domain_to_plot,cdf_values)
 	ax1.set_title('CDF')
-	ax2.plot(domain_for_debugging,pdf_values)
+	ax2.plot(domain_to_plot,pdf_values)
 	ax2.set_title('PDF')
 	plt.show()
+
+	print("Percentiles:")
+	for i in range(len(percentiles_out)):
+		print(percentiles_out[i],quantiles_values[i])
 
 if family =='normal':
 	if len(percentiles)==2:
@@ -176,6 +195,42 @@ if family =='normal':
 	def ppf(x):
 		return stats.norm.ppf(x,loc=mu,scale=sigma)
 
+if family == 'lognormal':
+	if len(percentiles)==2:
+		print('Two percentiles provided, using exact fit')
+		(p1,q1),(p2,q2) = percentiles
+		mu,sigma = normal_parameters(math.log(q1),p1,math.log(q2),p2)
+		print('Lognormal distribution')
+		print('mu',mu)
+		print('sigma',sigma)
+
+	if len(percentiles)>2:
+		print('More than two percentiles provided, using least squares fit')
+		percentiles_logtransformed = [(p,math.log(q)) for p,q in percentiles]
+		mu_init,sigma_init = initial_guess_params(percentiles_logtransformed)
+
+		fit = optimize.curve_fit(
+			lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
+			xdata=[q for p,q in percentiles_logtransformed],
+			ydata=[p for p,q in percentiles_logtransformed],
+			p0 = [mu_init,sigma_init]
+		)
+
+		mu, sigma = fit[0]
+
+
+	'''From scipy docs:
+	A common parametrization for a lognormal random variable Y is in terms of the mean,
+	mu, and standard deviation, sigma, of the unique normally distributed random variable
+	X such that exp(X) = Y. This parametrization corresponds to setting s = sigma
+	and scale = exp(mu).
+	'''
+	def pdf(x):
+		return stats.lognorm.pdf(x,s=sigma,scale=math.exp(mu))
+	def cdf(x):
+		return stats.lognorm.cdf(x,s=sigma,scale=math.exp(mu))
+	def ppf(x):
+		return stats.lognorm.ppf(x,s=sigma,scale=math.exp(mu))
 
 ## create ouput
 if family != 'metalog':
@@ -186,17 +241,8 @@ if family != 'metalog':
 	ax2.plot(domain_to_plot,pdf(domain_to_plot))
 	ax2.set_title('PDF')
 
-
 	print("Percentiles:")
 	for x in percentiles_out:
 		print(x,ppf(x))
 
 	plt.show()
-
-
-'''
-Get percentiles from distribution
-
-Choose a distribution family and provide its parameters
-(I can reuse code from bayes-continuous for this)
-'''
