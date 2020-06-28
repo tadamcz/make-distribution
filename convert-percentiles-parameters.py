@@ -16,9 +16,8 @@ import rpy2.robjects.packages as rpackages
 # Provide either percentiles or parameters for the distribution.
 
 # family can be 'normal', 'lognormal', 'metalog'
-family = 'metalog'
+family = 'lognormal'
 
-# todo: bounds for metalog
 
 # a list of (p,x) tuples, where P(X<x)=p
 '''(If you provide more than two percentiles for a 2-parameter distribution.
@@ -37,6 +36,8 @@ percentiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
 ################################
 ### <=== Enter values above ####
 ################################
+
+# todo: bounds for metalog
 
 # argument checking
 if [mu,sigma].count(None)<2 and percentiles is not None:
