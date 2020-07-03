@@ -18,6 +18,10 @@ import rpy2.robjects.packages as rpackages
 # family can be 'normal', 'lognormal', 'metalog'
 family = 'lognormal'
 
+# Bounds for metalog
+# The metalog distribution can be unbounded, or bounded to the left or the right
+metalog_leftbound = None
+metalog_rightbound = None
 
 # a list of (p,x) tuples, where P(X<x)=p
 '''(If you provide more than two percentiles for a 2-parameter distribution.
@@ -33,11 +37,13 @@ mu,sigma = None,None
 # list of percentiles to print
 percentiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
 
+# Override defaults for domain to plot?
+# example: domain_override = [-50,100]
+domain_override = [0,100]
+
 ################################
 ### <=== Enter values above ####
 ################################
-
-# todo: bounds for metalog
 
 # argument checking
 if [mu,sigma].count(None)<2 and percentiles is not None:
@@ -82,6 +88,18 @@ if family == 'metalog':
 	print("Meta-logistic distribution")
 	term = len(percentiles)
 	step_len = 0.01
+	if metalog_leftbound is not None and metalog_rightbound is not None:
+		boundedness = 'b'
+		bounds = [metalog_leftbound,metalog_rightbound]
+	elif metalog_leftbound is not None:
+		boundedness = 'sl'
+		bounds = [metalog_leftbound]
+	elif metalog_rightbound is not None:
+		boundedness = 'su'
+		bounds = [metalog_rightbound]
+	else:
+		boundedness = 'u'
+		bounds = []
 
 	s = time.time()
 	# import R's utility package
@@ -101,11 +119,12 @@ if family == 'metalog':
 	print(e-s,'seconds to create R instance and import packages')
 
 	r_metalog_func = robjects.r('''
-	function(x,probs,boundedness,term_limit,step_len) {
+	function(x,probs,boundedness,bounds,term_limit,step_len) {
 			  metalog(
 				  x = x,
 				  probs = probs,
-				  boundedness = 'u',
+				  boundedness = boundedness,
+				  bounds = bounds,
 				  term_limit = term_limit,
 				  step_len=step_len)
 				}
@@ -138,21 +157,23 @@ if family == 'metalog':
 			)
 		}''')
 
-
 	r_x = robjects.FloatVector([q for p, q in percentiles])
 	r_probs = robjects.FloatVector([p for p, q in percentiles])
-	boundedness = 'u'
 	r_term_limit = robjects.FloatVector([term])
 	r_step_len = robjects.FloatVector([step_len])
+	r_bounds = robjects.FloatVector(bounds)
 
 	s = time.time()
 	r_metalog_obj = r_metalog_func(x=r_x, probs=r_probs, boundedness=boundedness, term_limit=r_term_limit,
-								   step_len=r_step_len)
+								   step_len=r_step_len, bounds=r_bounds)
 	e = time.time()
 	print(e-s,"seconds to fit metalog object")
 
 
-	domain_to_plot_left,domain_to_plot_right = r_qmetalog_func(metalog_obj=r_metalog_obj, y=robjects.FloatVector([0.01,0.99]), term=r_term_limit)
+	if domain_override is not None:
+		domain_to_plot_left,domain_to_plot_right = domain_override
+	else:
+		domain_to_plot_left,domain_to_plot_right = r_qmetalog_func(metalog_obj=r_metalog_obj, y=robjects.FloatVector([0.01,0.99]), term=r_term_limit)
 	domain_to_plot = np.linspace(domain_to_plot_left,domain_to_plot_right,50)
 
 	r_domain = robjects.FloatVector(domain_to_plot)
@@ -259,7 +280,10 @@ if family == 'lognormal':
 # create ouput for non-metalog
 if family != 'metalog':
 	def guess_domain_to_plot(points=50):
-		left, right = ppf(0.01), ppf(0.99)
+		if domain_override is not None:
+			left,right = domain_override
+		else:
+			left, right = ppf(0.01), ppf(0.99)
 		return np.linspace(left, right, points)
 
 	domain_to_plot = guess_domain_to_plot()
