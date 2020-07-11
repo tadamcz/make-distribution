@@ -7,39 +7,42 @@ import time
 import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
 
-################################
-### Enter values below ===> ####
-################################
+try:
+   google_colab
+except NameError:
+	################################
+	### Enter values below ===> ####
+	################################
 
-# Instructions:
-# Choose a distribution family.
-# Provide quantiles for the distribution
+	# Instructions:
+	# Choose a distribution family.
+	# Provide quantiles for the distribution
 
-# family can be 'normal', 'lognormal', 'metalog'
-family = 'lognormal'
+	# family can be 'normal', 'lognormal', 'metalog'
+	family = 'lognormal'
 
-# Bounds for metalog
-# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
-# Specify between 0 and 2 bounds, leaving the others as None
-metalog_leftbound = None
-metalog_rightbound = None
+	# Bounds for metalog
+	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
+	# Specify between 0 and 2 bounds, leaving the others as None
+	metalog_leftbound = None
+	metalog_rightbound = None
 
-# a list of (p,x) tuples, where P(X<x)=p
-'''(If you provide more than two quantiles for a 2-parameter distribution.
- least squares will be used for fitting. You may provide unlimited
- quantiles for the metalog distribution)'''
-quantiles = [(0.1,50),(0.5,70),(0.6,75),(0.65,100)]
+	# a list of (p,x) tuples, where P(X<x)=p
+	'''(If you provide more than two quantiles for a 2-parameter distribution.
+	 least squares will be used for fitting. You may provide unlimited
+	 quantiles for the metalog distribution)'''
+	quantiles = [(0.1,50),(0.5,70),(0.6,75),(0.65,100)]
 
-# list of quantiles to print
-quantiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
+	# list of quantiles to print
+	quantiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
 
-# Override defaults for domain to plot?
-# example: domain_override = [-50,100]
-domain_override = None
+	# Override defaults for domain to plot?
+	# example: domain_override = [-50,100]
+	domain_override = None
 
-################################
-### <=== Enter values above ####
-################################
+	################################
+	### <=== Enter values above ####
+	################################
 
 # todo: implement beta distribution: https://stats.stackexchange.com/questions/112614/determining-beta-distribution-parameters-alpha-and-beta-from-two-arbitrary
 
@@ -143,9 +146,19 @@ if family == 'metalog':
 			)
 		}''')
 
+	r_metalog_samples_func = robjects.r('''
+			function (metalog_obj,n,term) {
+				rmetalog(
+					metalog_obj,
+					n=n,
+					term=term
+				)
+			}''')
+
 	r_x = robjects.FloatVector([q for p, q in quantiles])
 	r_probs = robjects.FloatVector([p for p, q in quantiles])
-	r_term_limit = robjects.FloatVector([term])
+	r_term_limit = robjects.IntVector([term])
+	r_n_samples = robjects.IntVector(5000)
 	r_step_len = robjects.FloatVector([step_len])
 	r_bounds = robjects.FloatVector(bounds)
 
@@ -186,6 +199,9 @@ if family == 'metalog':
 	print("quantiles:")
 	for i in range(len(quantiles_out)):
 		print(quantiles_out[i],quantiles_values[i])
+
+	print("samples:")
+	print(r_metalog_samples_func(metalog_obj=r_metalog_obj, n=r_n_samples, term=r_term_limit))
 
 if family =='normal':
 	if quantiles:

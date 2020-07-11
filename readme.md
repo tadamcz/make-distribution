@@ -17,7 +17,8 @@ Run it in your browser: https://colab.research.google.com/drive/1YfS9JUMdXpilfxc
 family = 'lognormal'
 
 # Bounds for metalog
-# The metalog distribution can be unbounded, or bounded to the left or the right
+# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
+# Specify between 0 and 2 bounds, leaving the others as None
 metalog_leftbound = None
 metalog_rightbound = None
 
