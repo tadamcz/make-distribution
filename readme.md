@@ -1,7 +1,4 @@
-Provide percentiles, and this script will find the the distribution that fits them best.
-It will give you the distribution's parameters and some lodestar percentiles.
-
-(For completeness, you can also do the reverse: supply the parameters and obtain lodestar percentiles)
+Provide quantiles, and this script will find the the distribution that fits them best. It will give you the distribution's parameters and some commonly-used quantiles.
 
 Run it in your browser: https://colab.research.google.com/drive/1YfS9JUMdXpilfxcgWwZUMvyRSKWrXxRE
 
@@ -14,25 +11,28 @@ Run it in your browser: https://colab.research.google.com/drive/1YfS9JUMdXpilfxc
 
 # Instructions:
 # Choose a distribution family.
-# Provide either percentiles or parameters for the distribution.
+# Provide quantiles for the distribution
 
 # family can be 'normal', 'lognormal', 'metalog'
 family = 'lognormal'
 
+# Bounds for metalog
+# The metalog distribution can be unbounded, or bounded to the left or the right
+metalog_leftbound = None
+metalog_rightbound = None
 
 # a list of (p,x) tuples, where P(X<x)=p
-'''(If you provide more than two percentiles for a 2-parameter distribution.
+'''(If you provide more than two quantiles for a 2-parameter distribution.
  least squares will be used for fitting. You may provide unlimited
- percentiles for the metalog distribution)'''
-percentiles = [(0.1,50),(0.5,70),(0.6,75),(0.65,100)]
+ quantiles for the metalog distribution)'''
+quantiles = [(0.1,50),(0.5,70),(0.75,100),(0.9,150)]
 
-# parameters for distribution
-# (currently only normal and lognormal are supported, so the
-# parameters are mu and sigma).
-mu,sigma = None,None
+# list of quantiles to print
+quantiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
 
-# list of percentiles to print
-percentiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
+# Override defaults for domain to plot?
+# example: domain_override = [-50,100]
+domain_override = None
 
 ################################
 ### <=== Enter values above ####
@@ -40,16 +40,16 @@ percentiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
 ```
 ## Output
 ```python
-More than two percentiles provided, using least squares fit
+More than two quantiles provided, using least squares fit
 Lognormal distribution
-mu 4.305985861552688
-sigma 0.4527404563264039
-Percentiles:
-0.01 25.861466048620933
-0.1 41.50341117979741
-0.25 54.631850997030796
-0.5 74.14227345121989
-0.75 100.62036361927821
-0.9 132.44879291250342
-0.99 212.55858821695062
+mu 4.313122980928514
+sigma 0.409687416531683
+quantiles:
+0.01 28.79055927521217
+0.1 44.17183774344628
+0.25 56.64439363937313
+0.5 74.67332855521319
+0.75 98.44056294458953
+0.9 126.2366766332274
+0.99 193.67827989071688
 ```
