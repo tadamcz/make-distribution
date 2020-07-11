@@ -160,8 +160,8 @@ if family == 'metalog':
 
 	r_x = robjects.FloatVector([q for p, q in quantiles])
 	r_probs = robjects.FloatVector([p for p, q in quantiles])
-	r_term_limit = robjects.IntVector([term])
-	r_n_samples = robjects.IntVector([nsamples])
+	r_term_limit = robjects.FloatVector([term])
+	r_n_samples = robjects.FloatVector([nsamples])
 	r_step_len = robjects.FloatVector([step_len])
 	r_bounds = robjects.FloatVector(bounds)
 
