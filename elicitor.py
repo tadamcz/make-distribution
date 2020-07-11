@@ -304,6 +304,7 @@ if family != 'metalog':
 	ax1.set_title('CDF')
 	ax2.plot(domain_to_plot,pdf(domain_to_plot))
 	ax2.set_title('PDF')
+	plt.show()
 
 	print("quantiles:")
 	for x in quantiles_out:
@@ -313,4 +314,3 @@ if family != 'metalog':
 	print([i for i in rvs(nsamples)])
 
 
-	plt.show()
