@@ -204,7 +204,7 @@ if family == 'metalog':
 		print(quantiles_out[i],quantiles_values[i])
 
 	print("samples:")
-	print(type(r_metalog_samples_func(metalog_obj=r_metalog_obj, n=r_n_samples, term=r_term_limit)))
+	print([i for i in r_metalog_samples_func(metalog_obj=r_metalog_obj, n=r_n_samples, term=r_term_limit)])
 
 if family =='normal':
 	if quantiles:
