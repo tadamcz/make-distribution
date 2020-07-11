@@ -241,6 +241,8 @@ if family =='normal':
 		return stats.norm.cdf(x,loc=mu,scale=sigma)
 	def ppf(x):
 		return stats.norm.ppf(x,loc=mu,scale=sigma)
+	def rvs(n):
+		return stats.norm.rvs(size=n,loc=mu,scale=sigma)
 
 if family == 'lognormal':
 	if quantiles:
@@ -281,6 +283,8 @@ if family == 'lognormal':
 		return stats.lognorm.cdf(x,s=sigma,scale=math.exp(mu))
 	def ppf(x):
 		return stats.lognorm.ppf(x,s=sigma,scale=math.exp(mu))
+	def rvs(n):
+		return stats.lognorm.rvs(size=n,s=sigma,scale=math.exp(mu))
 
 # create ouput for non-metalog
 if family != 'metalog':
@@ -304,5 +308,9 @@ if family != 'metalog':
 	print("quantiles:")
 	for x in quantiles_out:
 		print(x,ppf(x))
+
+	print("samples:")
+	print(rvs(nsamples))
+
 
 	plt.show()
