@@ -310,7 +310,7 @@ if family != 'metalog':
 		print(x,ppf(x))
 
 	print("samples:")
-	print(rvs(nsamples))
+	print([i for i in rvs(nsamples)])
 
 
 	plt.show()
