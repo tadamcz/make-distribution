@@ -78,6 +78,8 @@ def initial_guess_params(quantiles):
 
 if family == 'metalog':
 	print("Meta-logistic distribution")
+	print("This will be slow the first time you run it, because we need to create an R instance."
+		  "Subsequent runs will be much faster.")
 	term = len(quantiles)
 	step_len = 0.01
 	if metalog_leftbound is not None and metalog_rightbound is not None:
@@ -93,7 +95,6 @@ if family == 'metalog':
 		boundedness = 'u'
 		bounds = []
 
-	s = time.time()
 	# import R's utility package
 	utils = rpackages.importr('utils')
 
@@ -105,11 +106,8 @@ if family == 'metalog':
 	names_to_install = [x for x in packnames if not rpackages.isinstalled(x)]
 	if len(names_to_install) > 0:
 		utils.install_packages(robjects.StrVector(names_to_install))
-		print("Installing R packages",names_to_install)
 
 	rpackages.importr('rmetalog')
-	e = time.time()
-	print(e-s,'seconds to create R instance and import packages')
 
 	r_metalog_func = robjects.r('''
 	function(x,probs,boundedness,bounds,term_limit,step_len) {
@@ -166,12 +164,8 @@ if family == 'metalog':
 	r_step_len = robjects.FloatVector([step_len])
 	r_bounds = robjects.FloatVector(bounds)
 
-	s = time.time()
 	r_metalog_obj = r_metalog_func(x=r_x, probs=r_probs, boundedness=boundedness, term_limit=r_term_limit,
 								   step_len=r_step_len, bounds=r_bounds)
-	e = time.time()
-	print(e-s,"seconds to fit metalog object")
-
 
 	if domain_override is not None:
 		domain_to_plot_left,domain_to_plot_right = domain_override
@@ -182,11 +176,8 @@ if family == 'metalog':
 	r_domain = robjects.FloatVector(domain_to_plot)
 	r_quantiles_out = robjects.FloatVector(quantiles_out)
 
-	s = time.time()
 	cdf_values = r_pmetalog_func(metalog_obj=r_metalog_obj, q=r_domain, term=r_term_limit)
 	pdf_values = r_dmetalog_func(metalog_obj=r_metalog_obj, q=r_domain, term=r_term_limit)
-	e = time.time()
-	print(e-s,"seconds to compute cdf and pdf")
 
 	quantiles_values = r_qmetalog_func(metalog_obj=r_metalog_obj, y=r_quantiles_out, term=r_term_limit)
 
