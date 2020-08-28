@@ -28,9 +28,9 @@ except NameError:
 	metalog_rightbound = None
 
 	# a list of (p,x) tuples, where P(X<x)=p
-	'''(If you provide more than two quantiles for a 2-parameter distribution.
-	 least squares will be used for fitting. You may provide unlimited
-	 quantiles for the metalog distribution)'''
+	# (If you provide more than two quantiles for a 2-parameter distribution.
+	# least squares will be used for fitting. You may provide unlimited
+	# quantiles for the metalog distribution)
 	quantiles = [(0.1,50),(0.5,70),(0.6,75),(0.65,100)]
 
 	# list of quantiles to print
