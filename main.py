@@ -105,6 +105,7 @@ if family == 'metalog':
 	names_to_install = [x for x in packnames if not rpackages.isinstalled(x)]
 	if len(names_to_install) > 0:
 		utils.install_packages(robjects.StrVector(names_to_install))
+		print("Installing R packages",names_to_install)
 
 	rpackages.importr('rmetalog')
 	e = time.time()
