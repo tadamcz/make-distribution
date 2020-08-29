@@ -1,6 +1,8 @@
-Provide quantiles, and this script will find the the distribution that fits them best. It will give you the distribution's parameters and some commonly-used quantiles.
-
-Run it in your browser: https://colab.research.google.com/drive/1YfS9JUMdXpilfxcgWwZUMvyRSKWrXxRE
+* Provide points on the cumulative distribution function, and this script will find the the distribution that fits them best.
+It will return a graph, the distribution's parameters, and some commonly-used quantiles.
+* Supports the innovative and highly flexible metalog family of distributions.
+* [In-depth explanatory blog post](https://fragile-credences.github.io/quantiles/)
+* [Run it in your browser](https://colab.research.google.com/drive/1YfS9JUMdXpilfxcgWwZUMvyRSKWrXxRE)
 
 # Example usage
 ## input
@@ -23,9 +25,9 @@ metalog_leftbound = None
 metalog_rightbound = None
 
 # a list of (p,x) tuples, where P(X<x)=p
-'''(If you provide more than two quantiles for a 2-parameter distribution.
- least squares will be used for fitting. You may provide unlimited
- quantiles for the metalog distribution)'''
+# (If you provide more than two quantiles for a 2-parameter distribution.
+# least squares will be used for fitting. You may provide unlimited
+# quantiles for the metalog distribution)'''
 quantiles = [(0.1,50),(0.5,70),(0.75,100),(0.9,150)]
 
 # list of quantiles to print
@@ -54,3 +56,5 @@ quantiles:
 0.9 126.2366766332274
 0.99 193.67827989071688
 ```
+![](https://fragile-credences.github.io/images/quantiles/lognormal.png)
+
