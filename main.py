@@ -19,7 +19,7 @@ except NameError:
 	# Provide quantiles for the distribution
 
 	# family can be 'normal', 'lognormal', 'metalog'
-	family = 'beta'
+	family = 'metalog'
 
 	# Bounds for metalog
 	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
@@ -31,7 +31,7 @@ except NameError:
 	# (If you provide more than two quantiles for a 2-parameter distribution.
 	# least squares will be used for fitting. You may provide unlimited
 	# quantiles for the metalog distribution)
-	quantiles = [(0.1,.3),(0.9,.99)]
+	quantiles = [(0,1),(0.05,2),(0.5,7),(0.75,20)]
 
 	# list of quantiles to print
 	quantiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
@@ -80,6 +80,14 @@ if family == 'metalog':
 		  "Subsequent runs will be much faster.")
 	term = len(quantiles)
 	step_len = 0.01
+
+	metalog_leftbound,metalog_rightbound = None,None
+	for p,q in quantiles:
+		if p==0:
+			metalog_leftbound = q
+		if p==1:
+			metalog_rightbound = q
+
 	if metalog_leftbound is not None and metalog_rightbound is not None:
 		boundedness = 'b'
 		bounds = [metalog_leftbound,metalog_rightbound]
@@ -197,29 +205,24 @@ if family == 'metalog':
 	print([i for i in r_metalog_samples_func(metalog_obj=r_metalog_obj, n=r_n_samples, term=r_term_limit)])
 
 if family =='normal':
-	if quantiles:
-		if len(quantiles)==2:
-			print('Two quantiles provided, using exact fit')
-			mu,sigma = normal_parameters(quantiles[0][1],quantiles[0][0],quantiles[1][1],quantiles[1][0])
+	if len(quantiles)==2:
+		print('Two quantiles provided, using exact fit')
+		mu,sigma = normal_parameters(quantiles[0][1],quantiles[0][0],quantiles[1][1],quantiles[1][0])
 
 
-		if len(quantiles)>2:
-			print('More than two quantiles provided, using least squares fit')
+	if len(quantiles)>2:
+		print('More than two quantiles provided, using least squares fit')
 
-			mu_init,sigma_init = initial_guess_params(quantiles)
+		mu_init,sigma_init = initial_guess_params(quantiles)
 
-			fit = optimize.curve_fit(
-				lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
-				xdata=[x[1] for x in quantiles],
-				ydata=[x[0] for x in quantiles],
-				p0 = [mu_init,sigma_init]
-			)
+		fit = optimize.curve_fit(
+			lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
+			xdata=[x[1] for x in quantiles],
+			ydata=[x[0] for x in quantiles],
+			p0 = [mu_init,sigma_init]
+		)
 
-			mu, sigma = fit[0]
-
-	else:
-		pass
-
+		mu, sigma = fit[0]
 
 	print('Normal distribution')
 	print('mu', mu)
@@ -235,27 +238,24 @@ if family =='normal':
 		return stats.norm.rvs(size=n,loc=mu,scale=sigma)
 
 if family == 'lognormal':
-	if quantiles:
-		if len(quantiles)==2:
-			print('Two quantiles provided, using exact fit')
-			(p1,q1),(p2,q2) = quantiles
-			mu,sigma = normal_parameters(math.log(q1),p1,math.log(q2),p2)
+	if len(quantiles)==2:
+		print('Two quantiles provided, using exact fit')
+		(p1,q1),(p2,q2) = quantiles
+		mu,sigma = normal_parameters(math.log(q1),p1,math.log(q2),p2)
 
-		if len(quantiles)>2:
-			print('More than two quantiles provided, using least squares fit')
-			quantiles_logtransformed = [(p,math.log(q)) for p,q in quantiles]
-			mu_init,sigma_init = initial_guess_params(quantiles_logtransformed)
+	if len(quantiles)>2:
+		print('More than two quantiles provided, using least squares fit')
+		quantiles_logtransformed = [(p,math.log(q)) for p,q in quantiles]
+		mu_init,sigma_init = initial_guess_params(quantiles_logtransformed)
 
-			fit = optimize.curve_fit(
-				lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
-				xdata=[q for p,q in quantiles_logtransformed],
-				ydata=[p for p,q in quantiles_logtransformed],
-				p0 = [mu_init,sigma_init]
-			)
+		fit = optimize.curve_fit(
+			lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
+			xdata=[q for p,q in quantiles_logtransformed],
+			ydata=[p for p,q in quantiles_logtransformed],
+			p0 = [mu_init,sigma_init]
+		)
 
-			mu, sigma = fit[0]
-	else:
-		pass
+		mu, sigma = fit[0]
 
 	print('Lognormal distribution')
 	print('mu', mu)
@@ -275,7 +275,6 @@ if family == 'lognormal':
 		return stats.lognorm.ppf(x,s=sigma,scale=math.exp(mu))
 	def rvs(n):
 		return stats.lognorm.rvs(size=n,s=sigma,scale=math.exp(mu))
-
 
 if family == 'beta':
 	for p,q in quantiles:
