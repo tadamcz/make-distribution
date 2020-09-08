@@ -85,8 +85,10 @@ if family == 'metalog':
 	for p,q in quantiles:
 		if p==0:
 			metalog_leftbound = q
+			quantiles.remove((p,q))
 		if p==1:
 			metalog_rightbound = q
+			quantiles.remove((p, q))
 
 	if metalog_leftbound is not None and metalog_rightbound is not None:
 		boundedness = 'b'
