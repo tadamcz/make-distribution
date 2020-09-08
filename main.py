@@ -78,7 +78,6 @@ if family == 'metalog':
 	print("Meta-logistic distribution")
 	print("This will be slow the first time you run it, because we need to create an R instance."
 		  "Subsequent runs will be much faster.")
-	term = len(quantiles)
 	step_len = 0.01
 
 	metalog_leftbound,metalog_rightbound = None,None
@@ -102,6 +101,8 @@ if family == 'metalog':
 	else:
 		boundedness = 'u'
 		bounds = []
+
+	term = len(quantiles)
 
 	# import R's utility package
 	utils = rpackages.importr('utils')
