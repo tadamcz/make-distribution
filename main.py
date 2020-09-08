@@ -19,7 +19,7 @@ except NameError:
 	# Provide quantiles for the distribution
 
 	# family can be 'normal', 'lognormal', 'metalog'
-	family = 'lognormal'
+	family = 'beta'
 
 	# Bounds for metalog
 	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
@@ -31,7 +31,7 @@ except NameError:
 	# (If you provide more than two quantiles for a 2-parameter distribution.
 	# least squares will be used for fitting. You may provide unlimited
 	# quantiles for the metalog distribution)
-	quantiles = [(0.1,50),(0.5,70),(0.6,75),(0.65,100)]
+	quantiles = [(0.1,.3),(0.9,.99)]
 
 	# list of quantiles to print
 	quantiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
@@ -46,8 +46,6 @@ except NameError:
 	################################
 	### <=== Enter values above ####
 	################################
-
-# todo: implement beta distribution: https://stats.stackexchange.com/questions/112614/determining-beta-distribution-parameters-alpha-and-beta-from-two-arbitrary
 
 def normal_parameters(x1, p1, x2, p2):
 	"Find parameters for a normal random variable X so that P(X < x1) = p1 and P(X < x2) = p2."
@@ -277,6 +275,36 @@ if family == 'lognormal':
 		return stats.lognorm.ppf(x,s=sigma,scale=math.exp(mu))
 	def rvs(n):
 		return stats.lognorm.rvs(size=n,s=sigma,scale=math.exp(mu))
+
+
+if family == 'beta':
+	for p,q in quantiles:
+		if not 0<=q<=1:
+			raise ValueError("Quantiles out of bounds. Beta distribution defined on [0,1]")
+
+	alpha_init, beta_init = 1,1
+
+	fit = optimize.curve_fit(
+		lambda x, alpha, beta: stats.beta(alpha, beta).cdf(x),
+		xdata=[x[1] for x in quantiles],
+		ydata=[x[0] for x in quantiles],
+		p0=[alpha_init, beta_init]
+	)
+
+	alpha,beta = fit[0]
+
+	print('Beta distribution, using least squares fit')
+	print('alpa', alpha)
+	print('beta', beta)
+
+	def pdf(x):
+		return stats.beta.pdf(x,alpha,beta)
+	def cdf(x):
+		return stats.beta.cdf(x,alpha,beta)
+	def ppf(x):
+		return stats.beta.ppf(x,alpha,beta)
+	def rvs(n):
+		return stats.beta.rvs(alpha,beta,size=n)
 
 # create ouput for non-metalog
 if family != 'metalog':
