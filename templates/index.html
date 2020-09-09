@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Elicit probability distributions from quantiles</title>
+</head>
+<body>
+<form method="POST">
+    <div>{{form.family.label}}{{form.family}}</div>
+    <div>{{form.nb_pairs.label}}{{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+    <div id="pair1">{{form.pair1.label}}{{form.pair1}}</div>
+    <div id="pair2">{{form.pair2.label}}{{form.pair2}}</div>
+    <div id="pair3">{{form.pair3.label}}{{form.pair3}}</div>
+    <div id="pair4">{{form.pair4.label}}{{form.pair4}}</div>
+    <div id="pair5">{{form.pair5.label}}{{form.pair5}}</div>
+
+    <div><input type="submit"> </div>
+</form>
+
+<script>
+function display_nb_pairs() {
+    const nb_pairs = document.getElementById("nb_pairs").value;
+    const max_pairs = 5;
+    let i;
+    for (i = 1; i <= max_pairs; i++) {
+        if (i <= nb_pairs) {
+            document.getElementById("pair" + i).style.display = "block"
+        } else {
+            document.getElementById("pair" + i).style.display = "none"
+        }
+    }
+}
+display_nb_pairs()
+</script>
+
+<div>{{data}}</div>
+
+</body>
+</html>
