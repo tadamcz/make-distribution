@@ -3,13 +3,13 @@ from wtforms import SelectField, StringField, FloatField, FormField, validators,
 import secrets
 import backend
 import mpld3
+import os
 
 from flask_wtf import FlaskForm, CSRFProtect  # Flask-WTF provides your Flask application integration with WTForms.
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
-app.secret_key = secrets.csrf
-
+app.secret_key = os.environ['csrf']
 
 class QuantilePairForm(FlaskForm):
     p = FloatField('P')
