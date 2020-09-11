@@ -4,8 +4,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-# import rpy2.robjects as robjects
-# import rpy2.robjects.packages as rpackages
+import rpy2.robjects as robjects
+import rpy2.robjects.packages as rpackages
 
 # try:
 #    google_colab
