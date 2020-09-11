@@ -33,7 +33,12 @@ function display_nb_pairs() {
 display_nb_pairs()
 </script>
 
-<div>{{data}}</div>
+<div>
+    <div>{{graph|safe}}</div>
+    {%for i in text%}
+    <div>{{i}}</div>
+    {%endfor%}}
+</div>
 
 </body>
 </html>

@@ -1,7 +1,8 @@
 from flask import Flask, render_template
-from wtforms import SelectField, StringField, DecimalField, FormField, validators, BooleanField
+from wtforms import SelectField, StringField, FloatField, FormField, validators, BooleanField
 import secrets
-# import backend
+import backend
+import mpld3
 
 from flask_wtf import FlaskForm, CSRFProtect  # Flask-WTF provides your Flask application integration with WTForms.
 
@@ -11,8 +12,8 @@ app.secret_key = secrets.csrf
 
 
 class QuantilePairForm(FlaskForm):
-    p = DecimalField('P')
-    q = DecimalField('Q')
+    p = FloatField('P')
+    q = FloatField('Q')
 
 
 class MyForm(FlaskForm):
@@ -39,9 +40,9 @@ def show_result():
     form = MyForm()
     data = form.data
     parsed_data = parse_user_input(data)
-    x = backend.my_function()
-
-    return render_template('index.html', form=form, data=(data, parsed_data))
+    graph,text = backend.main(parsed_data)
+    graph = mpld3.fig_to_html(graph)
+    return render_template('index.html', form=form, graph=graph, text=text)
 
 
 def parse_user_input(immutable_multi_dict):
@@ -52,7 +53,6 @@ def parse_user_input(immutable_multi_dict):
     for i in range(1, nb_pairs + 1):
         pairs.append((dictionary["pair" + str(i)]["p"], dictionary["pair" + str(i)]["q"]))
     return {"family": family, "pairs": pairs}
-
 
 if __name__ == "__main__":
     app.run(debug=True)
