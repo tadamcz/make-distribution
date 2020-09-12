@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from wtforms import SelectField, StringField, FloatField, FormField, validators, BooleanField
+import secrets
 import backend
 import mpld3
 import os
@@ -16,7 +17,7 @@ class QuantilePairForm(FlaskForm):
 
 
 class MyForm(FlaskForm):
-    family = SelectField(choices=['metalog', 'normal', 'lognormal', 'beta'])
+    family = SelectField(choices=['normal', 'lognormal', 'beta'])
     nb_pairs = SelectField(choices=[i for i in range(2, 11)])
 
     pair1 = FormField(QuantilePairForm)
@@ -24,6 +25,11 @@ class MyForm(FlaskForm):
     pair3 = FormField(QuantilePairForm)
     pair4 = FormField(QuantilePairForm)
     pair5 = FormField(QuantilePairForm)
+    pair6 = FormField(QuantilePairForm)
+    pair7 = FormField(QuantilePairForm)
+    pair8 = FormField(QuantilePairForm)
+    pair9 = FormField(QuantilePairForm)
+    pair10 = FormField(QuantilePairForm)
 
 
 @csrf.exempt  # I believe we don't need CSRF for a site without any user accounts

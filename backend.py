@@ -205,6 +205,7 @@ def main(dictionary):
 		for x in quantiles_out:
 			textout.append(str((x,ppf(x))))
 
-		textout.append("samples:\n")
-		textout.append( str([i for i in rvs(nsamples)]))
+		# taking out the below, since less useful without metalog
+		# textout.append("samples:\n")
+		# textout.append( str([i for i in rvs(nsamples)]))
 	return graphout,textout

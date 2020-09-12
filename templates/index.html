@@ -8,11 +8,18 @@
 <form method="POST">
     <div>{{form.family.label}}{{form.family}}</div>
     <div>{{form.nb_pairs.label}}{{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+
+    <!--    could clean this up into a jinja loop later-->
     <div id="pair1">{{form.pair1.label}}{{form.pair1}}</div>
     <div id="pair2">{{form.pair2.label}}{{form.pair2}}</div>
     <div id="pair3">{{form.pair3.label}}{{form.pair3}}</div>
     <div id="pair4">{{form.pair4.label}}{{form.pair4}}</div>
     <div id="pair5">{{form.pair5.label}}{{form.pair5}}</div>
+    <div id="pair6">{{form.pair6.label}}{{form.pair6}}</div>
+    <div id="pair7">{{form.pair7.label}}{{form.pair7}}</div>
+    <div id="pair8">{{form.pair8.label}}{{form.pair8}}</div>
+    <div id="pair9">{{form.pair9.label}}{{form.pair9}}</div>
+    <div id="pair10">{{form.pair10.label}}{{form.pair10}}</div>
 
     <div><input type="submit"> </div>
 </form>
@@ -20,7 +27,7 @@
 <script>
 function display_nb_pairs() {
     const nb_pairs = document.getElementById("nb_pairs").value;
-    const max_pairs = 5;
+    const max_pairs = 10;
     let i;
     for (i = 1; i <= max_pairs; i++) {
         if (i <= nb_pairs) {
@@ -37,7 +44,7 @@ display_nb_pairs()
     <div>{{graph|safe}}</div>
     {%for i in text%}
     <div>{{i}}</div>
-    {%endfor%}}
+    {%endfor%}
 </div>
 
 </body>
