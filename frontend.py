@@ -1,6 +1,5 @@
 from flask import Flask, render_template
 from wtforms import SelectField, StringField, FloatField, FormField, validators, BooleanField
-import secrets
 import backend
 import mpld3
 import os
