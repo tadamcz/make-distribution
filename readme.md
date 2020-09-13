@@ -3,6 +3,7 @@ It will return a graph, the distribution's parameters, and some commonly-used qu
 * Supports the innovative and highly flexible metalog family of distributions.
 * [In-depth explanatory blog post](https://fragile-credences.github.io/quantiles/)
 * [Run it in your browser](https://colab.research.google.com/drive/1YfS9JUMdXpilfxcgWwZUMvyRSKWrXxRE)
+* [Graphical interface](https://quantile-elicitor.herokuapp.com/) (based on `develop` branch, does not currently work with the metalog).
 
 # Example usage
 ## input
