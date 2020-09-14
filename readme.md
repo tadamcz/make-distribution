@@ -3,7 +3,7 @@ It will return a graph, the distribution's parameters, and some commonly-used qu
 * Supports the innovative and highly flexible metalog family of distributions.
 * [In-depth explanatory blog post](https://fragile-credences.github.io/quantiles/)
 * [Run the code in your browser](https://colab.research.google.com/drive/1YfS9JUMdXpilfxcgWwZUMvyRSKWrXxRE)
-* _Webapps_: Currently you must use separate webapps [for traditional distributions](https://quantile-elicitor.herokuapp.com/) and for [the metalog distribution](https://tmkadamcz.shinyapps.io/metalog/). The traditional distributions webapp is in Python and based on the `develop` branch of this repository. The metalog distribution webapp is a R Shiny app, and its code is in [another repository](https://github.com/tmkadamcz/metalog-rshiny).
+* _Webapps_: Currently you must use separate webapps [for traditional distributions](https://quantile-elicitor.herokuapp.com/) and for [the metalog distribution](https://tmkadamcz.shinyapps.io/metalog/). The traditional distributions webapp is in Python and based on the `heroku` branch of this repository. The metalog distribution webapp is a R Shiny app, and its code is in [another repository](https://github.com/tmkadamcz/metalog-rshiny).
 
 # Example usage
 ## input
