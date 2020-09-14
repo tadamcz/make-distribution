@@ -19,19 +19,17 @@ except NameError:
 	# Provide quantiles for the distribution
 
 	# family can be 'normal', 'lognormal', 'metalog'
-	family = 'lognormal'
+	family = 'metalog'
 
 	# Bounds for metalog
-	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
-	# Specify between 0 and 2 bounds, leaving the others as None
-	metalog_leftbound = None
-	metalog_rightbound = None
+	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both. Specify a bound by setting
+	# a probability to 0 (left bound) or 1 (right bound). You must provide at least 3 pairs in addition to any pairs that specify bounds.
+	# For example, if you use (0,1.2) to specify a left bound of 1.2, you must provide at least 3 other pairs.
 
-	# a list of (p,x) tuples, where P(X<x)=p
-	# (If you provide more than two quantiles for a 2-parameter distribution.
-	# least squares will be used for fitting. You may provide unlimited
-	# quantiles for the metalog distribution)
-	quantiles = [(0.1,50),(0.5,70),(0.6,75),(0.65,100)]
+	# A list of (p,x) tuples, where P(X<x)=p
+	# If you provide more than two quantiles for a 2-parameter distribution, least squares will be used for fitting.
+	# You must provide 3 or more quantiles for the metalog distribution (not counting bounds) .
+	quantiles = [(0,1),(0.05,2),(0.5,7),(0.75,20)]
 
 	# list of quantiles to print
 	quantiles_out = [0.01,0.1,0.25,0.5,0.75,0.9,0.99]
@@ -46,8 +44,6 @@ except NameError:
 	################################
 	### <=== Enter values above ####
 	################################
-
-# todo: implement beta distribution: https://stats.stackexchange.com/questions/112614/determining-beta-distribution-parameters-alpha-and-beta-from-two-arbitrary
 
 def normal_parameters(x1, p1, x2, p2):
 	"Find parameters for a normal random variable X so that P(X < x1) = p1 and P(X < x2) = p2."
@@ -80,8 +76,17 @@ if family == 'metalog':
 	print("Meta-logistic distribution")
 	print("This will be slow the first time you run it, because we need to create an R instance."
 		  "Subsequent runs will be much faster.")
-	term = len(quantiles)
 	step_len = 0.01
+
+	metalog_leftbound,metalog_rightbound = None,None
+	for p,q in quantiles:
+		if p==0:
+			metalog_leftbound = q
+			quantiles.remove((p,q))
+		if p==1:
+			metalog_rightbound = q
+			quantiles.remove((p,q))
+
 	if metalog_leftbound is not None and metalog_rightbound is not None:
 		boundedness = 'b'
 		bounds = [metalog_leftbound,metalog_rightbound]
@@ -94,6 +99,8 @@ if family == 'metalog':
 	else:
 		boundedness = 'u'
 		bounds = []
+
+	term = len(quantiles)
 
 	# import R's utility package
 	utils = rpackages.importr('utils')
@@ -199,29 +206,24 @@ if family == 'metalog':
 	print([i for i in r_metalog_samples_func(metalog_obj=r_metalog_obj, n=r_n_samples, term=r_term_limit)])
 
 if family =='normal':
-	if quantiles:
-		if len(quantiles)==2:
-			print('Two quantiles provided, using exact fit')
-			mu,sigma = normal_parameters(quantiles[0][1],quantiles[0][0],quantiles[1][1],quantiles[1][0])
+	if len(quantiles)==2:
+		print('Two quantiles provided, using exact fit')
+		mu,sigma = normal_parameters(quantiles[0][1],quantiles[0][0],quantiles[1][1],quantiles[1][0])
 
 
-		if len(quantiles)>2:
-			print('More than two quantiles provided, using least squares fit')
+	if len(quantiles)>2:
+		print('More than two quantiles provided, using least squares fit')
 
-			mu_init,sigma_init = initial_guess_params(quantiles)
+		mu_init,sigma_init = initial_guess_params(quantiles)
 
-			fit = optimize.curve_fit(
-				lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
-				xdata=[x[1] for x in quantiles],
-				ydata=[x[0] for x in quantiles],
-				p0 = [mu_init,sigma_init]
-			)
+		fit = optimize.curve_fit(
+			lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
+			xdata=[x[1] for x in quantiles],
+			ydata=[x[0] for x in quantiles],
+			p0 = [mu_init,sigma_init]
+		)
 
-			mu, sigma = fit[0]
-
-	else:
-		pass
-
+		mu, sigma = fit[0]
 
 	print('Normal distribution')
 	print('mu', mu)
@@ -237,27 +239,24 @@ if family =='normal':
 		return stats.norm.rvs(size=n,loc=mu,scale=sigma)
 
 if family == 'lognormal':
-	if quantiles:
-		if len(quantiles)==2:
-			print('Two quantiles provided, using exact fit')
-			(p1,q1),(p2,q2) = quantiles
-			mu,sigma = normal_parameters(math.log(q1),p1,math.log(q2),p2)
+	if len(quantiles)==2:
+		print('Two quantiles provided, using exact fit')
+		(p1,q1),(p2,q2) = quantiles
+		mu,sigma = normal_parameters(math.log(q1),p1,math.log(q2),p2)
 
-		if len(quantiles)>2:
-			print('More than two quantiles provided, using least squares fit')
-			quantiles_logtransformed = [(p,math.log(q)) for p,q in quantiles]
-			mu_init,sigma_init = initial_guess_params(quantiles_logtransformed)
+	if len(quantiles)>2:
+		print('More than two quantiles provided, using least squares fit')
+		quantiles_logtransformed = [(p,math.log(q)) for p,q in quantiles]
+		mu_init,sigma_init = initial_guess_params(quantiles_logtransformed)
 
-			fit = optimize.curve_fit(
-				lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
-				xdata=[q for p,q in quantiles_logtransformed],
-				ydata=[p for p,q in quantiles_logtransformed],
-				p0 = [mu_init,sigma_init]
-			)
+		fit = optimize.curve_fit(
+			lambda x,mu,sigma: stats.norm(mu,sigma).cdf(x),
+			xdata=[q for p,q in quantiles_logtransformed],
+			ydata=[p for p,q in quantiles_logtransformed],
+			p0 = [mu_init,sigma_init]
+		)
 
-			mu, sigma = fit[0]
-	else:
-		pass
+		mu, sigma = fit[0]
 
 	print('Lognormal distribution')
 	print('mu', mu)
@@ -277,6 +276,35 @@ if family == 'lognormal':
 		return stats.lognorm.ppf(x,s=sigma,scale=math.exp(mu))
 	def rvs(n):
 		return stats.lognorm.rvs(size=n,s=sigma,scale=math.exp(mu))
+
+if family == 'beta':
+	for p,q in quantiles:
+		if not 0<=q<=1:
+			raise ValueError("Quantiles out of bounds. Beta distribution defined on [0,1]")
+
+	alpha_init, beta_init = 1,1
+
+	fit = optimize.curve_fit(
+		lambda x, alpha, beta: stats.beta(alpha, beta).cdf(x),
+		xdata=[x[1] for x in quantiles],
+		ydata=[x[0] for x in quantiles],
+		p0=[alpha_init, beta_init]
+	)
+
+	alpha,beta = fit[0]
+
+	print('Beta distribution, using least squares fit')
+	print('alpa', alpha)
+	print('beta', beta)
+
+	def pdf(x):
+		return stats.beta.pdf(x,alpha,beta)
+	def cdf(x):
+		return stats.beta.cdf(x,alpha,beta)
+	def ppf(x):
+		return stats.beta.ppf(x,alpha,beta)
+	def rvs(n):
+		return stats.beta.rvs(alpha,beta,size=n)
 
 # create ouput for non-metalog
 if family != 'metalog':
@@ -304,5 +332,3 @@ if family != 'metalog':
 
 	print("samples:")
 	print([i for i in rvs(nsamples)])
-
-
