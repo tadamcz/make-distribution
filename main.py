@@ -22,15 +22,13 @@ except NameError:
 	family = 'metalog'
 
 	# Bounds for metalog
-	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both
-	# Specify between 0 and 2 bounds, leaving the others as None
-	metalog_leftbound = None
-	metalog_rightbound = None
+	# The metalog distribution can be unbounded, or bounded to the left, or the right, or both. Specify a bound by setting
+	# a probability to 0 (left bound) or 1 (right bound). You must provide at least 3 pairs in addition to any pairs that specify bounds.
+	# For example, if you use (0,1.2) to specify a left bound of 1.2, you must provide at least 3 other pairs.
 
-	# a list of (p,x) tuples, where P(X<x)=p
-	# (If you provide more than two quantiles for a 2-parameter distribution.
-	# least squares will be used for fitting. You may provide unlimited
-	# quantiles for the metalog distribution)
+	# A list of (p,x) tuples, where P(X<x)=p
+	# If you provide more than two quantiles for a 2-parameter distribution, least squares will be used for fitting.
+	# You must provide 3 or more quantiles for the metalog distribution (not counting bounds) .
 	quantiles = [(0,1),(0.05,2),(0.5,7),(0.75,20)]
 
 	# list of quantiles to print
@@ -78,15 +76,16 @@ if family == 'metalog':
 	print("Meta-logistic distribution")
 	print("This will be slow the first time you run it, because we need to create an R instance."
 		  "Subsequent runs will be much faster.")
-	term = len(quantiles)
 	step_len = 0.01
 
 	metalog_leftbound,metalog_rightbound = None,None
 	for p,q in quantiles:
 		if p==0:
 			metalog_leftbound = q
+			quantiles.remove((p,q))
 		if p==1:
 			metalog_rightbound = q
+			quantiles.remove((p,q))
 
 	if metalog_leftbound is not None and metalog_rightbound is not None:
 		boundedness = 'b'
@@ -100,6 +99,8 @@ if family == 'metalog':
 	else:
 		boundedness = 'u'
 		bounds = []
+
+	term = len(quantiles)
 
 	# import R's utility package
 	utils = rpackages.importr('utils')
@@ -331,5 +332,3 @@ if family != 'metalog':
 
 	print("samples:")
 	print([i for i in rvs(nsamples)])
-
-
