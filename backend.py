@@ -3,7 +3,8 @@ from scipy import stats
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import time
+import pymetalog_adamzcewski_fork as pymetalog
+
 
 # try:
 #    google_colab
