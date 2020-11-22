@@ -1,0 +1,50 @@
+{% macro render_field(field) %}
+  <dt>{{ field.label }}
+  <dd>{{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for field_w_error in field.errors %}
+        {% for error in field.errors[field_w_error] %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
+{% macro render_field_nolabel(field) %}
+  <dd>{{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for field_w_error in field.errors %}
+        {% for error in field.errors[field_w_error] %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
+{% macro render_checkbox(field) %}
+  {{ field(**kwargs)|safe }} {{ field.label }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for field_w_error in field.errors %}
+        {% for error in field.errors[field_w_error] %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
+{% macro render_errors(errors) %}
+    <ul class=errors>
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endmacro %}

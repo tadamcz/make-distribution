@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from .support import MLprobs
 from .a_vector import a_vector_OLS_and_LP
-
+from numbers import Number
 
 class metalog():
     """
@@ -289,8 +289,8 @@ class metalog():
     def bounds(self, bs):
         if type(bs) != list:
             raise TypeError('bounds parameter must be of type list')
-        if not all(isinstance(x, (int)) for x in bs):
-            raise TypeError('bounds parameter must be list of integers')
+        if not all(isinstance(x, Number) for x in bs):
+            raise TypeError('bounds parameter must be of type numbers.Number')
         if (self.boundedness == 'sl' or self.boundedness == 'su') and len(bs) != 1:
             raise IndexError('Must supply only one bound for semi-lower or semi-upper boundedness')
         if self.boundedness == 'b' and len(bs) != 2:

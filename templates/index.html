@@ -3,23 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <title>Elicit probability distributions from quantiles</title>
+    <link rel="stylesheet" href= {{url_for('static', filename='/styles.css') }}>
 </head>
 <body>
+{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox, render_errors %}
 <form method="POST">
-    <div>{{form.family.label}}{{form.family}}</div>
-    <div>{{form.nb_pairs.label}}{{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+    <div style="margin-bottom: 1em">
+        <div>{{form.family.label}} {{form.family(onchange="display_metalog_options()")}}</div>
+        <div>{{form.nb_pairs.label}} {{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+    </div>
 
-    <!--    could clean this up into a jinja loop later-->
-    <div id="pair1">{{form.pair1.label}}{{form.pair1}}</div>
-    <div id="pair2">{{form.pair2.label}}{{form.pair2}}</div>
-    <div id="pair3">{{form.pair3.label}}{{form.pair3}}</div>
-    <div id="pair4">{{form.pair4.label}}{{form.pair4}}</div>
-    <div id="pair5">{{form.pair5.label}}{{form.pair5}}</div>
-    <div id="pair6">{{form.pair6.label}}{{form.pair6}}</div>
-    <div id="pair7">{{form.pair7.label}}{{form.pair7}}</div>
-    <div id="pair8">{{form.pair8.label}}{{form.pair8}}</div>
-    <div id="pair9">{{form.pair9.label}}{{form.pair9}}</div>
-    <div id="pair10">{{form.pair10.label}}{{form.pair10}}</div>
+    {% for pair in form.pairs %}
+    <div id = {{'pair' ~ loop.index}}>
+        Pair {{loop.index}} {{render_field_nolabel(pair)}}
+    </div>
+    {% endfor %}
+
+    <div id = 'metalog-options'>
+        <div>{{form.boundedness(onchange="display_bounds()")}} {{form.boundedness.label}}
+            {% if form.boundedness.errors %}
+                {{render_errors(form.boundedness.errors)}}
+            {% endif %}
+        </div>
+        <div id="bounds" style="display:none">
+            You may specify both bounds, or just one bound for a semi-bounded distribution.
+            {{render_field(form.lower_bound)}}{{render_field(form.upper_bound)}}
+        </div>
+
+
+        <div>
+        {{render_checkbox(form.allow_lp)}}
+            <div class = 'tooltip'>
+                More info.
+                <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
+                that minimizes the absolute differences between the metalog cdf and your inputs. This is much slower, and can occasionally return garbage.</div>
+            </div>
+        </div>
+    </div>
+
 
     <div><input type="submit"> </div>
 </form>
@@ -37,15 +58,56 @@ function display_nb_pairs() {
         }
     }
 }
+
+function display_bounds() {
+    const boundedness = document.getElementById('boundedness').checked
+    console.log(boundedness)
+    if (boundedness) {
+        document.getElementById('bounds').style.display = 'block'
+    }
+    else {
+        document.getElementById('bounds').style.display = 'none'
+    }
+}
+display_bounds()
+
+function display_metalog_options() {
+    const family = document.getElementById("family").value;
+    if (family == 'metalog') {
+        document.getElementById('metalog-options').style.display = 'block'
+        const nb_pairs = document.getElementById("nb_pairs").value
+        if (nb_pairs < 3) {
+            document.getElementById('nb_pairs').value = 3
+            display_nb_pairs()
+        }
+
+    }
+    else {
+        document.getElementById('metalog-options').style.display = 'none'
+    }
+}
+
 display_nb_pairs()
+display_metalog_options()
 </script>
 
-<div>
-    <div>{{graph|safe}}</div>
-    {%for i in text%}
+{%for i in text%}
     <div>{{i}}</div>
-    {%endfor%}
+{%endfor%}
+
+{% if plot %}
+<div>
+    <div>{{plot|safe}}</div>
 </div>
+{% endif %}
+
+{% if samples %}
+<div>
+    Random samples:
+    <pre>{{samples}}</pre>
+</div>
+{% endif %}
+
 
 <br><div>
     By <a href='https://tmkadamcz.github.io/'>Tom Adamczewski</a>.
