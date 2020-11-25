@@ -19,7 +19,7 @@ class QuantilePairForm(FlaskForm):
 
 
 class MyForm(FlaskForm):
-    family = SelectField(choices=['normal', 'lognormal', 'beta','metalog'])
+    family = SelectField(choices=['metalog','normal', 'lognormal', 'beta'])
     nb_pairs = SelectField('Number of P,Q pairs',choices=[i for i in range(2, 11)])
 
     pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
