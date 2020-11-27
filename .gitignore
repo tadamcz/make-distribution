@@ -1,2 +1,5 @@
 /venv/
 /.idea/
+secrets.py
+/__pycache__/
+.env
