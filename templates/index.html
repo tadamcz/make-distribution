@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Elicit probability distributions from quantiles</title>
+    <link rel="stylesheet" href= {{url_for('static', filename='/styles.css') }}>
+</head>
+<body>
+{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox, render_errors %}
+<form method="POST">
+    <div style="margin-bottom: 1em">
+        <div>{{form.family.label}} {{form.family(onchange="display_metalog_options()")}}</div>
+        <div>{{form.nb_pairs.label}} {{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+    </div>
+
+    {% for pair in form.pairs %}
+    <div id = {{'pair' ~ loop.index}}>
+        Pair {{loop.index}} {{render_field_nolabel(pair)}}
+    </div>
+    {% endfor %}
+
+    <div id = 'metalog-options'>
+        <div>{{form.boundedness(onchange="display_bounds()")}} {{form.boundedness.label}}
+            {% if form.boundedness.errors %}
+                {{render_errors(form.boundedness.errors)}}
+            {% endif %}
+        </div>
+        <div id="bounds" style="display:none">
+            You may specify both bounds, or just one bound for a semi-bounded distribution.
+            {{render_field(form.lower_bound)}}{{render_field(form.upper_bound)}}
+        </div>
+
+
+        <div>
+        {{render_checkbox(form.allow_lp)}}
+            <div class = 'tooltip'>
+                More info.
+                <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
+                that minimizes the absolute differences between the metalog cdf and your inputs. This is much slower, and can occasionally return garbage.</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div><input type="submit"> </div>
+</form>
+
+<script>
+function display_nb_pairs() {
+    const nb_pairs = document.getElementById("nb_pairs").value;
+    const max_pairs = 10;
+    let i;
+    for (i = 1; i <= max_pairs; i++) {
+        if (i <= nb_pairs) {
+            document.getElementById("pair" + i).style.display = "block"
+        } else {
+            document.getElementById("pair" + i).style.display = "none"
+        }
+    }
+}
+
+function display_bounds() {
+    const boundedness = document.getElementById('boundedness').checked
+    console.log(boundedness)
+    if (boundedness) {
+        document.getElementById('bounds').style.display = 'block'
+    }
+    else {
+        document.getElementById('bounds').style.display = 'none'
+    }
+}
+display_bounds()
+
+function display_metalog_options() {
+    const family = document.getElementById("family").value;
+    if (family == 'metalog') {
+        document.getElementById('metalog-options').style.display = 'block'
+        const nb_pairs = document.getElementById("nb_pairs").value
+        if (nb_pairs < 3) {
+            document.getElementById('nb_pairs').value = 3
+            display_nb_pairs()
+        }
+
+    }
+    else {
+        document.getElementById('metalog-options').style.display = 'none'
+    }
+}
+
+display_nb_pairs()
+display_metalog_options()
+</script>
+
+{%for i in text%}
+    <div>{{i}}</div>
+{%endfor%}
+
+{% if plot %}
+<div>
+    <div>{{plot|safe}}</div>
+</div>
+{% endif %}
+
+{% if samples %}
+<div>
+    Random samples:
+    <pre>{{samples}}</pre>
+</div>
+{% endif %}
+
+
+<br><div>
+    By <a href='https://tmkadamcz.github.io/'>Tom Adamczewski</a>.
+    Code <a href='https://github.com/tmkadamcz/elicitor'>on GitHub</a>.
+    Got feedback? I'd love to hear it: <a href="mailto:tmkadamcz@gmail.com">tmkadamcz@gmail.com</a></div>
+</div>
+
+</body>
+</html>
