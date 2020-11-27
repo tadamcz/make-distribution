@@ -3,7 +3,7 @@ from scipy import stats
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import pymetalogadamczewski as pymetalog
+import pymetalogtmk as pymetalog
 import scipy.stats
 
 class DistributionObject:
