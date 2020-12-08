@@ -5,7 +5,7 @@ from scipy import stats
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import pymetalogtmk as pymetalog
+import pymetalogtadamcz.pymetalog as pymetalog
 import scipy.stats
 
 class DistributionObject:
