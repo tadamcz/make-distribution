@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Elicit probability distributions from quantiles</title>
-    <link rel="stylesheet" href= {{url_for('static', filename='/styles.css') }}>
+    <link rel="stylesheet" href= {{url_for('static', filename='styles.css') }}>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
 {% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox, render_errors %}
-<form method="POST">
+<form method="POST" id="dataInputForm">
     <div style="margin-bottom: 1em">
         <div>{{form.family.label}} {{form.family(onchange="display_metalog_options()")}}</div>
         <div>{{form.nb_pairs.label}} {{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
@@ -100,6 +101,9 @@ display_metalog_options()
     <div>{{plot|safe}}</div>
 </div>
 {% endif %}
+<!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->
+<script src={{url_for('static', filename="plot.js")}}></script>
+
 
 {% if samples %}
 <div>

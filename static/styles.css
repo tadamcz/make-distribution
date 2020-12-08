@@ -26,3 +26,23 @@
 }
 
 .errors {color: red}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.quantile_line {
+  stroke: lightgray;
+  stroke-width: 3;
+  cursor: grab;
+  opacity: .5;
+}
+
+.dataPointCross {
+  stroke: black;
+  stroke-width: .5;
+}

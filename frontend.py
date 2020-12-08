@@ -1,13 +1,11 @@
 from flask import Flask, render_template
-from wtforms import SelectField, StringField, FloatField, FormField, validators, BooleanField, FieldList, DecimalField
-from wtforms.validators import  Optional, number_range
-import secrets
-import backend
+from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, DecimalField
+from wtforms.validators import Optional, number_range
+from flask_wtf import FlaskForm
 import mpld3
-import os
 import decimal
 
-from flask_wtf import FlaskForm, CSRFProtect  # Flask-WTF provides your Flask application integration with WTForms.
+import backend
 
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
@@ -49,6 +47,26 @@ class MyForm(FlaskForm):
                 validity = False
         return validity
 
+    def parse_user_input(self):
+        dictionary = dict(self.data)
+        dictionary = self.recursively_convert_decimal_to_float(dictionary)
+        nb_pairs = int(dictionary['nb_pairs'])
+        dictionary['ps'] = []
+        dictionary['qs'] = []
+        for i in range(nb_pairs):
+            p, q = dictionary["pairs"][i]['P'], dictionary["pairs"][i]['Q']
+            dictionary['ps'].append(p)
+            dictionary['qs'].append(q)
+        return dictionary
+
+    def recursively_convert_decimal_to_float(self,dictionary):
+        for key, value in dictionary.items():
+            if type(value) == decimal.Decimal:
+                dictionary[key] = float(value)
+            if type(value) is dict:
+                self.recursively_convert_decimal_to_float(value)
+        return dictionary
+
 
 @app.route('/', methods=['GET'])
 def show_form():
@@ -60,39 +78,21 @@ def show_form():
 def show_result():
     form = MyForm()
     if form.validate():
-        data = form.data
-        parsed_data = parse_user_input(data)
-        o = backend.DistributionObject(parsed_data)
+        parsed_data = form.parse_user_input()
+        distribution = backend.DistributionObject(parsed_data)
         try:
-            plot = mpld3.fig_to_html(o.plot)
-            samples = o.samples
+            plot = distribution.plot
+            samples = distribution.samples
         except AttributeError:
             plot = None
             samples = None
-        return render_template('index.html', form=form, plot=plot, text=o.description,samples=samples)
+        return render_template('index.html', form=form, plot=plot, text=distribution.description,samples=samples)
     else:
         return render_template('index.html', form=form)
 
 
-def parse_user_input(immutable_multi_dict):
-    dictionary = dict(immutable_multi_dict)
-    dictionary = recursively_convert_decimal_to_float(dictionary)
-    nb_pairs = int(dictionary['nb_pairs'])
-    dictionary['ps'] = []
-    dictionary['qs'] = []
-    for i in range(nb_pairs):
-        p,q = dictionary["pairs"][i]['P'],  dictionary["pairs"][i]['Q']
-        dictionary['ps'].append(p)
-        dictionary['qs'].append(q)
-    return dictionary
 
-def recursively_convert_decimal_to_float(dictionary):
-    for key, value in dictionary.items():
-        if type(value) == decimal.Decimal:
-            dictionary[key] = float(value)
-        if type(value) is dict:
-            recursively_convert_decimal_to_float(value)
-    return dictionary
+
 
 if __name__ == "__main__":
     app.run(debug=True)

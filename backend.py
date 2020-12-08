@@ -1,3 +1,5 @@
+import json
+
 from scipy import optimize
 from scipy import stats
 import math
@@ -8,162 +10,163 @@ import scipy.stats
 
 class DistributionObject:
 	def __init__(self,dictionary):
-		def pretty(n):
-			return np.format_float_scientific(n, precision=4)
-
+		self.dictionary = dictionary
+		self.samples = None
 		self.family = dictionary['family']
 		self.ps = dictionary['ps']
 		self.qs = dictionary['qs']
 		self.description = []
-		n_samples = 5000
 
-		if dictionary['allow_lp']:
+		if self.family == 'metalog':
+			self.initMetalog()
+
+		else:
+			self.initSciPy()
+
+	def initSciPy(self):
+
+		if self.family == 'normal':
+			self.description.append('Normal distribution')
+			if len(self.ps) == 2:
+				self.description.append('Two quantiles provided, using exact fit.')
+				mu, sigma = self.normal_parameters(self.qs[0], self.ps[0], self.qs[1], self.ps[1])
+
+				self.description.append('mu: ' + self.pretty(mu))
+				self.description.append('sigma: ' + self.pretty(sigma))
+
+			if len(self.ps) > 2:
+				self.description.append('More than two quantiles provided, using least squares fit.')
+
+				mu_init, sigma_init = self.initial_guess_params()
+
+				fit = optimize.curve_fit(
+					lambda x, mu, sigma: stats.norm(mu, sigma).cdf(x),
+					xdata=self.qs,
+					ydata=self.ps,
+					p0=[mu_init, sigma_init]
+				)
+
+				(mu, sigma), covariances = fit
+				mu_sd, sigma_sd = np.sqrt(np.diag(covariances))
+
+				self.description.append('mu: ' + self.pretty(mu) + ' (Estimated standard deviation:' + self.pretty(mu_sd) + ')')
+				self.description.append('sigma: ' + self.pretty(sigma) + ' (Estimated standard deviation:' + self.pretty(sigma_sd) + ')')
+
+			self.scipy_distribution = scipy.stats.norm(loc=mu, scale=sigma)
+
+		if self.family == 'lognormal':
+			self.description.append('Log-normal distribution')
+			qs_log_transformed = [math.log(x) for x in self.qs]
+			if len(self.ps) == 2:
+				self.description.append('Two quantiles provided, using exact fit.')
+				mu, sigma = self.normal_parameters(qs_log_transformed[0], self.ps[0], qs_log_transformed[1], self.ps[1])
+
+				self.description.append('mu: ' + self.pretty(mu))
+				self.description.append('sigma: ' + self.pretty(sigma))
+
+			if len(self.ps) > 2:
+				self.description.append('More than two quantiles provided, using least squares fit.')
+				mu_init, sigma_init = self.initial_guess_params(self.ps, qs_log_transformed)
+
+				fit = optimize.curve_fit(
+					lambda x, mu, sigma: stats.lognorm(s=sigma, scale=math.exp(mu)).cdf(x),
+					xdata=self.qs,
+					ydata=self.ps,
+					p0=[mu_init, sigma_init]
+				)
+
+				(mu, sigma), covariances = fit
+				mu_sd, sigma_sd = np.sqrt(np.diag(covariances))
+				self.description.append('mu: ' + self.pretty(mu) + ' (Estimated standard deviation:' + self.pretty(mu_sd) + ')')
+				self.description.append('sigma: ' + self.pretty(sigma) + ' (Estimated standard deviation:' + self.pretty(sigma_sd) + ')')
+
+			self.scipy_distribution = scipy.stats.lognorm(s=sigma, scale=math.exp(mu))
+
+		if self.family == 'beta':
+			for q in self.qs:
+				if not 0 <= q <= 1:
+					self.description.append("Quantiles out of bounds. Beta distribution defined on [0,1]")
+					return
+
+			alpha_init, beta_init = 1, 1
+
+			fit = optimize.curve_fit(
+				lambda x, alpha, beta: stats.beta(alpha, beta).cdf(x),
+				xdata=self.qs,
+				ydata=self.ps,
+				p0=[alpha_init, beta_init]
+			)
+
+			(alpha, beta), covariances = fit
+			alpha_sd, beta_sd = np.sqrt(np.diag(covariances))
+
+			self.description.append('Beta distribution, using least squares fit.')
+			self.description.append('alpha: ' + self.pretty(alpha) + ' (Estimated standard deviation:' + self.pretty(alpha_sd) + ')')
+			self.description.append('beta: ' + self.pretty(beta) + ' (Estimated standard deviation:' + self.pretty(beta_sd) + ')')
+
+			self.scipy_distribution = scipy.stats.beta(alpha, beta)
+
+		self.generatePlotDataSciPy()
+		self.createPlot()
+
+	def initMetalog(self):
+		n_samples = 5000
+		if self.dictionary['allow_lp']:
 			self.fit_method_constraint = 'any'
 		else:
 			self.fit_method_constraint = 'OLS'
+		self.description.append('Meta-logistic distribution.')
+		term = len(self.ps)
 
-		if self.family == 'metalog':
-			self.description.append('Meta-logistic distribution.')
-			term = len(self.ps)
+		self.boundedness = self.dictionary['boundedness']
 
-			self.boundedness = dictionary['boundedness']
+		# This if-else is necessary because of the way pymetalog handles the bounds arguments. Could be something to improve.
+		if self.boundedness:  # bounded
 
-			# This if-else is necessary because of the way pymetalog handles the bounds arguments. Could be something to improve.
-			if self.boundedness: # bounded
+			self.lower_bound, self.upper_bound = self.dictionary['lower_bound'], self.dictionary['upper_bound']
+			if self.lower_bound is not None and self.upper_bound is not None:
+				pymetalog_boundedness = 'b'
+				pymetalog_bounds = [self.lower_bound, self.upper_bound]
+			elif self.lower_bound is not None:
+				pymetalog_boundedness = 'sl'
+				pymetalog_bounds = [self.lower_bound]
+			elif self.upper_bound is not None:
+				pymetalog_boundedness = 'su'
+				pymetalog_bounds = [self.upper_bound]
 
-				self.lower_bound,self.upper_bound = dictionary['lower_bound'],dictionary['upper_bound']
-				if self.lower_bound is not None and self.upper_bound is not None:
-					pymetalog_boundedness = 'b'
-					pymetalog_bounds = [self.lower_bound,self.upper_bound]
-				elif self.lower_bound is not None:
-					pymetalog_boundedness = 'sl'
-					pymetalog_bounds = [self.lower_bound]
-				elif self.upper_bound is not None:
-					pymetalog_boundedness = 'su'
-					pymetalog_bounds = [self.upper_bound]
+			self.pymetalog_object = pymetalog.metalog(
+				self.qs,
+				probs=self.ps,
+				term_lower_bound=term,
+				term_limit=term,
+				fit_method=self.fit_method_constraint,
+				boundedness=pymetalog_boundedness,
+				bounds=pymetalog_bounds
+			)
+		else:  # unbounded
+			self.pymetalog_object = pymetalog.metalog(
+				self.qs,
+				probs=self.ps,
+				term_lower_bound=term,
+				term_limit=term,
+				fit_method=self.fit_method_constraint
+			)
 
-				self.pymetalog_object = pymetalog.metalog(
-					self.qs,
-					probs=self.ps,
-					term_lower_bound=term,
-					term_limit=term,
-					fit_method=self.fit_method_constraint,
-					boundedness=pymetalog_boundedness,
-					bounds=pymetalog_bounds
-				)
-			else: # unbounded
-				self.pymetalog_object = pymetalog.metalog(
-					self.qs,
-					probs=self.ps,
-					term_lower_bound=term,
-					term_limit=term,
-					fit_method=self.fit_method_constraint
-				)
+		if self.pymetalog_object.output_dict['Validation'].valid[0] == 'no':  # Good heavens!
+			self.description.append('There is no valid metalog for these parameters. Try changing the '
+									'parameters or allowing linear program.')
+			return
+		actual_fit_method = self.pymetalog_object.output_dict['Validation'].method.values[0]
+		if actual_fit_method == 'LP':
+			actual_fit_method == 'Linear program'
+		self.description.append('Fit method: ' + actual_fit_method)
+		self.generatePlotDataMetalog()
+		self.createPlot()
+		self.samples = np.array2string(pymetalog.rmetalog(self.pymetalog_object, n=n_samples, term=term).flatten(),
+									   separator=', ',
+									   threshold=n_samples + 1,
+									   max_line_width=float('inf'))
 
-			if self.pymetalog_object.output_dict['Validation'].valid[0] == 'no': #  Good heavens!
-				self.description.append('There is no valid metalog for these parameters. Try changing the '
-										'parameters or allowing linear program.')
-				return
-			actual_fit_method = self.pymetalog_object.output_dict['Validation'].method.values[0]
-			if actual_fit_method == 'LP':
-				actual_fit_method == 'Linear program'
-			self.description.append('Fit method: '+actual_fit_method)
-			self.generatePlotDataMetalog()
-			self.createPlot()
-			self.samples = np.array2string(pymetalog.rmetalog(self.pymetalog_object,n=n_samples,term=term).flatten(),
-										   separator=', ',
-										   threshold=n_samples+1,
-										   max_line_width=float('inf'))
-
-		else: #  if not metalog, we deal with a SciPy distribution object
-			self.samples = None
-
-			if self.family == 'normal':
-				self.description.append('Normal distribution')
-				if len(self.ps) == 2:
-					self.description.append('Two quantiles provided, using exact fit.')
-					mu, sigma = self.normal_parameters(self.qs[0], self.ps[0], self.qs[1], self.ps[1])
-
-					self.description.append('mu: ' + pretty(mu))
-					self.description.append('sigma: ' + pretty(sigma))
-
-
-				if len(self.ps) > 2:
-					self.description.append('More than two quantiles provided, using least squares fit.')
-
-					mu_init, sigma_init = self.initial_guess_params()
-
-					fit = optimize.curve_fit(
-						lambda x, mu, sigma: stats.norm(mu, sigma).cdf(x),
-						xdata=self.qs,
-						ydata=self.ps,
-						p0=[mu_init, sigma_init]
-					)
-
-					(mu, sigma), covariances = fit
-					mu_sd , sigma_sd = np.sqrt(np.diag(covariances))
-
-					self.description.append('mu: ' + pretty(mu) + ' (Estimated standard deviation:'+ pretty(mu_sd)+')')
-					self.description.append('sigma: ' + pretty(sigma) + ' (Estimated standard deviation:'+ pretty(sigma_sd)+')')
-
-				self.scipy_distribution = scipy.stats.norm(loc=mu,scale=sigma)
-
-			if self.family == 'lognormal':
-				self.description.append('Log-normal distribution')
-				qs_log_transformed = [math.log(x) for x in self.qs]
-				if len(self.ps) == 2:
-					self.description.append('Two quantiles provided, using exact fit.')
-					mu, sigma = self.normal_parameters(qs_log_transformed[0], self.ps[0], qs_log_transformed[1], self.ps[1])
-
-					self.description.append('mu: ' + pretty(mu))
-					self.description.append('sigma: ' + pretty(sigma))
-
-				if len(self.ps) > 2:
-					self.description.append('More than two quantiles provided, using least squares fit.')
-					mu_init, sigma_init = self.initial_guess_params(self.ps,qs_log_transformed)
-
-					fit = optimize.curve_fit(
-						lambda x, mu, sigma: stats.lognorm(s=sigma, scale = math.exp(mu)).cdf(x),
-						xdata=self.qs,
-						ydata=self.ps,
-						p0=[mu_init, sigma_init]
-					)
-
-					(mu, sigma), covariances = fit
-					mu_sd , sigma_sd = np.sqrt(np.diag(covariances))
-					self.description.append('mu: ' + pretty(mu) + ' (Estimated standard deviation:' + pretty(mu_sd) + ')')
-					self.description.append('sigma: ' + pretty(sigma) + ' (Estimated standard deviation:' + pretty(sigma_sd) + ')')
-
-
-
-				self.scipy_distribution = scipy.stats.lognorm(s=sigma,scale=math.exp(mu))
-
-			if self.family == 'beta':
-				for q in self.qs:
-					if not 0 <= q <= 1:
-						self.description.append("Quantiles out of bounds. Beta distribution defined on [0,1]")
-						return
-
-				alpha_init, beta_init = 1, 1
-
-				fit = optimize.curve_fit(
-					lambda x, alpha, beta: stats.beta(alpha, beta).cdf(x),
-					xdata=self.qs,
-					ydata=self.ps,
-					p0=[alpha_init, beta_init]
-				)
-
-				(alpha, beta), covariances = fit
-				alpha_sd, beta_sd = np.sqrt(np.diag(covariances))
-
-				self.description.append('Beta distribution, using least squares fit.')
-				self.description.append('alpha: ' + pretty(alpha) + ' (Estimated standard deviation:' + pretty(alpha_sd) + ')')
-				self.description.append('beta: ' + pretty(beta) + ' (Estimated standard deviation:' + pretty(beta_sd) + ')')
-
-				self.scipy_distribution = scipy.stats.beta(alpha,beta)
-
-			self.generatePlotDataSciPy()
-			self.createPlot()
 
 	def generatePlotDataSciPy(self):
 		number_points = 100
@@ -191,15 +194,25 @@ class DistributionObject:
 		self.y_axis_pdf = self.pymetalog_object.output_dict['M'][small_m_name]
 
 	def createPlot(self):
-		fig, (cdf_subplot, pdf_subplot) = plt.subplots(2, 1)
 
-		cdf_subplot.set_title('CDF')
-		cdf_subplot.plot(self.x_axis,self.y_axis_cdf)
-		cdf_subplot.plot(self.qs, self.ps, 'b+')
+		cdf_jsonlike = [{'x': self.x_axis[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis))]
+		quantiles_jsonlike = [{'x': self.qs[i], 'y': self.ps[i]} for i in range(len(self.qs))]
 
-		pdf_subplot.set_title('PDF')
-		pdf_subplot.plot(self.x_axis, self.y_axis_pdf)
-		self.plot = fig
+		cdf_metadata_jsonlike = dict(xmin=min(self.x_axis), ymin=min(self.y_axis_cdf), xmax=max(self.x_axis), ymax=max(self.y_axis_cdf))
+
+		js = '''
+		<script>
+		const data =''' + json.dumps(cdf_jsonlike) + '''
+		const metadata =''' + json.dumps(cdf_metadata_jsonlike) + '''
+		const quantiles =''' + json.dumps(quantiles_jsonlike) + '''
+		</script>
+		'''
+
+		div = '''
+		<div id="graph"></div>
+		'''
+
+		self.plot = div+js
 
 	def normal_parameters(self, x1, p1, x2, p2):
 		"Find parameters for a normal random variable X so that P(X < x1) = p1 and P(X < x2) = p2."
@@ -235,3 +248,7 @@ class DistributionObject:
 		mean = np.mean(lis)
 		stdev = np.std(lis)
 		return mean,stdev
+
+	@staticmethod
+	def pretty(n):
+		return np.format_float_scientific(n, precision=4)
