@@ -162,7 +162,7 @@ for (line of quantile_vertical_lines) {
     line.call(
         d3.drag()
             .on("drag", dragged_horizontally)
-            .on("end",submitForm)
+            .on("end",dragEnd)
     )
 }
 
@@ -176,12 +176,16 @@ for (line of quantile_horizontal_lines) {
     line.call(
         d3.drag()
             .on("drag", dragged_vertically)
-            .on("end",submitForm)
+            .on("end",dragEnd)
 
     )
 }
 d3.selectAll('.quantile_line').lower()
 
-function submitForm(){
-   document.getElementById('dataInputForm').submit()
+function dragEnd(){
+    document.getElementById('plot_custom_domain_bool').checked = true
+    document.getElementById('plot_custom_domain_left').value = metadata.xmin
+    document.getElementById('plot_custom_domain_right').value = metadata.xmax
+    document.getElementById('dataInputForm').submit()
+
 }

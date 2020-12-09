@@ -22,9 +22,12 @@ class MyForm(FlaskForm):
 
     pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
 
-    boundedness = BooleanField("Specify bounds for metalog?")
-    lower_bound = DecimalField('Lower bound',validators=[Optional()])
-    upper_bound = DecimalField('Upper bound',validators=[Optional()])
+    plot_custom_domain_bool = BooleanField("Specify custom domain for plot?")
+    plot_custom_domain_left = DecimalField("From",validators=[Optional()])
+    plot_custom_domain_right = DecimalField("To",validators=[Optional()])
+    metalog_boundedness = BooleanField("Specify bounds for metalog?")
+    metalog_lower_bound = DecimalField('Lower bound',validators=[Optional()])
+    metalog_upper_bound = DecimalField('Upper bound',validators=[Optional()])
     allow_lp = BooleanField("Allow linear program if no exact metalog fit?")
 
     def validate(self):
@@ -41,10 +44,17 @@ class MyForm(FlaskForm):
             if p_or_q_missing:
                 validity = False
 
-        if self.boundedness.data:
-            if self.lower_bound.data is None and self.upper_bound.data is None:
-                self.boundedness.errors.append('At least one bound is required')
+        if self.metalog_boundedness.data:
+            if self.metalog_lower_bound.data is None and self.metalog_upper_bound.data is None:
+                self.metalog_boundedness.errors.append('At least one bound is required')
                 validity = False
+
+        if self.family.data == 'lognormal':
+            for i in range(int(self.nb_pairs.data)):
+                if self.pairs[i]['Q'].data is not None:
+                    if self.pairs[i]['Q'].data <=0:
+                        self.pairs[i]['Q'].errors.append("Lognormal is not defined for non-positive numbers")
+                        validity = False
         return validity
 
     def parse_user_input(self):

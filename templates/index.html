@@ -7,11 +7,11 @@
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
-{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox, render_errors %}
+{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
 <form method="POST" id="dataInputForm">
     <div style="margin-bottom: 1em">
-        <div>{{form.family.label}} {{form.family(onchange="display_metalog_options()")}}</div>
-        <div>{{form.nb_pairs.label}} {{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+        {{render_field(form.family,onchange="display_metalog_options()") }}
+        {{render_field(form.nb_pairs,onchange="display_nb_pairs()")}}
     </div>
 
     {% for pair in form.pairs %}
@@ -20,15 +20,18 @@
     </div>
     {% endfor %}
 
-    <div id = 'metalog-options'>
-        <div>{{form.boundedness(onchange="display_bounds()")}} {{form.boundedness.label}}
-            {% if form.boundedness.errors %}
-                {{render_errors(form.boundedness.errors)}}
-            {% endif %}
-        </div>
-        <div id="bounds" style="display:none">
+    {{ render_checkbox(form.plot_custom_domain_bool, onchange="display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_l_r')")}}
+    <div id="plot_custom_domain_l_r">
+        {{ render_field(form.plot_custom_domain_left)}}
+        {{ render_field(form.plot_custom_domain_right)}}
+    </div>
+
+    <div id = 'metalog_options'>
+        {{render_checkbox(form.metalog_boundedness, onchange="display_conditional_fields('metalog_boundedness','metalog_bounds')")}}
+        <div id="metalog_bounds">
             You may specify both bounds, or just one bound for a semi-bounded distribution.
-            {{render_field(form.lower_bound)}}{{render_field(form.upper_bound)}}
+            {{render_field(form.metalog_lower_bound)}}
+            {{render_field(form.metalog_upper_bound)}}
         </div>
 
 
@@ -59,23 +62,30 @@ function display_nb_pairs() {
         }
     }
 }
+display_nb_pairs()
 
-function display_bounds() {
-    const boundedness = document.getElementById('boundedness').checked
-    console.log(boundedness)
-    if (boundedness) {
-        document.getElementById('bounds').style.display = 'block'
+function display_conditional_fields(checkboxdiv,fielddiv) {
+    const checked = document.getElementById(checkboxdiv).checked
+    if (checked) {
+        document.getElementById(fielddiv).style.display = 'block'
     }
     else {
-        document.getElementById('bounds').style.display = 'none'
+        document.getElementById(fielddiv).style.display = 'none'
     }
 }
-display_bounds()
+
+const conditionalFields = [
+    {'checkbox':'metalog_boundedness','field':'metalog_bounds'},
+    {'checkbox':'plot_custom_domain_bool','field':'plot_custom_domain_l_r'}
+]
+for (const conditionalField of conditionalFields) {
+    display_conditional_fields(conditionalField.checkbox,conditionalField.field)
+}
 
 function display_metalog_options() {
     const family = document.getElementById("family").value;
     if (family == 'metalog') {
-        document.getElementById('metalog-options').style.display = 'block'
+        document.getElementById('metalog_options').style.display = 'block'
         const nb_pairs = document.getElementById("nb_pairs").value
         if (nb_pairs < 3) {
             document.getElementById('nb_pairs').value = 3
@@ -84,11 +94,9 @@ function display_metalog_options() {
 
     }
     else {
-        document.getElementById('metalog-options').style.display = 'none'
+        document.getElementById('metalog_options').style.display = 'none'
     }
 }
-
-display_nb_pairs()
 display_metalog_options()
 </script>
 
@@ -116,7 +124,7 @@ display_metalog_options()
 <br><div>
     By <a href='https://tmkadamcz.github.io/'>Tom Adamczewski</a>.
     Code <a href='https://github.com/tmkadamcz/elicitor'>on GitHub</a>.
-    Got feedback? I'd love to hear it: <a href="mailto:tmkadamcz@gmail.com">tmkadamcz@gmail.com</a></div>
+    Got feedback? I'd love to hear it: <a href="mailto:tmkadamcz@gmail.com">tmkadamcz@gmail.com</a>
 </div>
 
 </body>

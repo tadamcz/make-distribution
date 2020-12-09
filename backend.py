@@ -1,5 +1,4 @@
 import json
-
 from scipy import optimize
 from scipy import stats
 import math
@@ -10,12 +9,18 @@ import scipy.stats
 
 class DistributionObject:
 	def __init__(self,dictionary):
-		self.dictionary = dictionary
 		self.samples = None
+		self.description = []
+
+		self.dictionary = dictionary
 		self.family = dictionary['family']
 		self.ps = dictionary['ps']
 		self.qs = dictionary['qs']
-		self.description = []
+
+		self.plot_custom_domain = False
+		if dictionary['plot_custom_domain_bool']:
+			self.plot_custom_domain = (dictionary['plot_custom_domain_left'],dictionary['plot_custom_domain_right'])
+
 
 		if self.family == 'metalog':
 			self.initMetalog()
@@ -118,21 +123,21 @@ class DistributionObject:
 		self.description.append('Meta-logistic distribution.')
 		term = len(self.ps)
 
-		self.boundedness = self.dictionary['boundedness']
+		self.metalog_boundedness = self.dictionary['metalog_boundedness']
 
 		# This if-else is necessary because of the way pymetalog handles the bounds arguments. Could be something to improve.
-		if self.boundedness:  # bounded
+		if self.metalog_boundedness:  # bounded
 
-			self.lower_bound, self.upper_bound = self.dictionary['lower_bound'], self.dictionary['upper_bound']
-			if self.lower_bound is not None and self.upper_bound is not None:
+			self.metalog_lower_bound, self.metalog_upper_bound = self.dictionary['metalog_lower_bound'], self.dictionary['metalog_upper_bound']
+			if self.metalog_lower_bound is not None and self.metalog_upper_bound is not None:
 				pymetalog_boundedness = 'b'
-				pymetalog_bounds = [self.lower_bound, self.upper_bound]
-			elif self.lower_bound is not None:
+				pymetalog_bounds = [self.metalog_lower_bound, self.metalog_upper_bound]
+			elif self.metalog_lower_bound is not None:
 				pymetalog_boundedness = 'sl'
-				pymetalog_bounds = [self.lower_bound]
-			elif self.upper_bound is not None:
+				pymetalog_bounds = [self.metalog_lower_bound]
+			elif self.metalog_upper_bound is not None:
 				pymetalog_boundedness = 'su'
-				pymetalog_bounds = [self.upper_bound]
+				pymetalog_bounds = [self.metalog_upper_bound]
 
 			self.pymetalog_object = pymetalog.metalog(
 				self.qs,
@@ -170,14 +175,18 @@ class DistributionObject:
 
 	def generatePlotDataSciPy(self):
 		number_points = 100
-		y_bound = 0.001
-		left = self.scipy_distribution.ppf(y_bound)
-		right = self.scipy_distribution.ppf(1-y_bound)
+		if self.plot_custom_domain:
+			left, right = self.plot_custom_domain
 
-		if min(self.qs)<left:
-			left = min(self.qs)
-		if max(self.qs)>right:
-			right = max(self.qs)
+		else:
+			y_bound = 0.001
+			left = self.scipy_distribution.ppf(y_bound)
+			right = self.scipy_distribution.ppf(1-y_bound)
+
+			if min(self.qs)<left:
+				left = min(self.qs)
+			if max(self.qs)>right:
+				right = max(self.qs)
 
 		self.x_axis = np.linspace(left,right,number_points)
 
@@ -186,12 +195,24 @@ class DistributionObject:
 
 
 	def generatePlotDataMetalog(self):
-		term = str(len(self.ps))
+		term = len(self.ps)
 		big_M_name = "M" + str(term)
 		small_m_name = "m" + str(term)
 		self.x_axis = self.pymetalog_object.output_dict['M'][big_M_name]
 		self.y_axis_cdf = self.pymetalog_object.output_dict['M']['y']
 		self.y_axis_pdf = self.pymetalog_object.output_dict['M'][small_m_name]
+
+		# This is a hacky approach. It would be nicer to allow setting a custom domain for
+		# the output_dict of the pymetalog call. But since calling qmetalog() is computationally cheap,
+		# it's an OK hack for now.
+		if self.plot_custom_domain:
+			left, right = self.plot_custom_domain
+			y_cdf_bottom, y_cdf_top = pymetalog.pmetalog(self.pymetalog_object,q=[left,right],term=term)
+			if isinstance(y_cdf_top,StopIteration) or isinstance(y_cdf_bottom,StopIteration):
+				return
+			y = np.linspace(y_cdf_bottom,y_cdf_top,100)
+			self.y_axis_cdf = y
+			self.x_axis = pymetalog.qmetalog(self.pymetalog_object, y=y,term=term)
 
 	def createPlot(self):
 
