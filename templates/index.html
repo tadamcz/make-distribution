@@ -47,9 +47,32 @@
 
 
     <div><input type="submit"> </div>
+    <div id="example"><a href="javascript:display_example()">Click here to see an example</a></div>
 </form>
 
 <script>
+function display_example(){
+    document.getElementById("nb_pairs").value = 3
+    document.getElementById("family").value = 'metalog'
+
+    document.getElementById("plot_custom_domain_bool").checked = false
+    display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_l_r')
+
+    document.getElementById("metalog_boundedness").checked = false
+    display_conditional_fields('metalog_boundedness','metalog_bounds')
+
+    document.getElementById("pairs-0-P").value = 0.15
+    document.getElementById("pairs-0-Q").value = -20
+
+    document.getElementById("pairs-1-P").value = .5
+    document.getElementById("pairs-1-Q").value = -1
+
+    document.getElementById("pairs-2-P").value = .85
+    document.getElementById("pairs-2-Q").value = 50
+
+    document.getElementById("dataInputForm").submit()
+
+}
 function display_nb_pairs() {
     const nb_pairs = document.getElementById("nb_pairs").value;
     const max_pairs = 10;
