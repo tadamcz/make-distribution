@@ -171,8 +171,11 @@ function dragged_vertically(event,d) {
         d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
         y = yScale.invert(event.y)
-        redrawQuantileLines(i,y,'vertically')
-        document.getElementById('pairs-'+i+'-P').value = y
+        if (0<=y && y<=1) {
+            redrawQuantileLines(i,y,'vertically')
+            document.getElementById('pairs-'+i+'-P').value = y
+        }
+
     }
 for (line of quantile_horizontal_lines) {
     line.call(
