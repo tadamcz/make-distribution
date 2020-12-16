@@ -153,6 +153,7 @@ function redrawQuantileLines(i,coord,dragDirection) {
 drawQuantileLines()
 
 function dragged_horizontally(event,d) {
+        d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
         x = xScale.invert(event.x)
         redrawQuantileLines(i,x,'horizontally')
@@ -167,6 +168,7 @@ for (line of quantile_vertical_lines) {
 }
 
 function dragged_vertically(event,d) {
+        d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
         y = yScale.invert(event.y)
         redrawQuantileLines(i,y,'vertically')
