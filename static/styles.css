@@ -52,3 +52,11 @@
   stroke: black;
   stroke-width: .5;
 }
+
+.flexbox {
+  display: flex;
+}
+
+#results {
+  margin-left: 2em;
+}

@@ -4,6 +4,7 @@ from wtforms.validators import Optional, number_range
 from flask_wtf import FlaskForm
 import mpld3
 import decimal
+from sigfig import round
 
 import backend
 
@@ -96,7 +97,7 @@ def show_result():
         except AttributeError:
             plot = None
             samples = None
-        return render_template('index.html', form=form, plot=plot, text=distribution.description,samples=samples)
+        return render_template('index.html', form=form, plot=plot,samples=samples, distribution=distribution)
     else:
         return render_template('index.html', form=form)
 

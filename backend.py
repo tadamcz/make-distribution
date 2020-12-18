@@ -11,6 +11,7 @@ class DistributionObject:
 	def __init__(self,dictionary):
 		self.samples = None
 		self.description = []
+		self.errors = []
 
 		self.dictionary = dictionary
 		self.family = dictionary['family']
@@ -158,7 +159,7 @@ class DistributionObject:
 			)
 
 		if self.pymetalog_object.output_dict['Validation'].valid[0] == 'no':  # Good heavens!
-			self.description.append('There is no valid metalog for these parameters. Try changing the '
+			self.errors.append('There is no valid metalog for these parameters. Try changing the '
 									'parameters or allowing linear program.')
 			return
 		actual_fit_method = self.pymetalog_object.output_dict['Validation'].method.values[0]

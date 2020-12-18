@@ -242,7 +242,7 @@ function dragged_horizontally(event,d) {
         d3.select(pdf_quantile_vertical_lines[i].node()).style('stroke','black')
         x = xScale.invert(event.x)
         redrawQuantileLines(i,x,'horizontally')
-        document.getElementById('pairs-'+i+'-Q').value = x
+        document.getElementById('pairs-'+i+'-Q').value = x.toPrecision(3)
     }
 for (line of quantile_vertical_lines) {
     line.call(
@@ -258,7 +258,7 @@ function dragged_vertically(event,d) {
         y = cdf_yScale.invert(event.y)
         if (0<=y && y<=1) {
             redrawQuantileLines(i,y,'vertically')
-            document.getElementById('pairs-'+i+'-P').value = y
+            document.getElementById('pairs-'+i+'-P').value = y.toPrecision(3)
         }
 
     }
@@ -274,8 +274,8 @@ d3.selectAll('.quantile_line').lower()
 
 function dragEnd(){
     document.getElementById('plot_custom_domain_bool').checked = true
-    document.getElementById('plot_custom_domain_left').value = cdf_metadata.xmin
-    document.getElementById('plot_custom_domain_right').value = cdf_metadata.xmax
+    document.getElementById('plot_custom_domain_left').value = cdf_metadata.xmin.toPrecision(3)
+    document.getElementById('plot_custom_domain_right').value = cdf_metadata.xmax.toPrecision(3)
     document.getElementById('dataInputForm').submit()
 
 }

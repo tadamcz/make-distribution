@@ -8,6 +8,8 @@
 </head>
 <body>
 {% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+
+<div class="flexbox">
 <form method="POST" id="dataInputForm">
     <div style="margin-bottom: 1em">
         {{render_field(form.family,onchange="display_metalog_options()") }}
@@ -123,25 +125,33 @@ function display_metalog_options() {
 display_metalog_options()
 </script>
 
-{%for i in text%}
-    <div>{{i}}</div>
-{%endfor%}
+<div id="results">
+    {% if distribution %}
+        {%for i in distribution.description%}
+            <div>{{i}}</div>
+        {%endfor%}
 
-{% if plot %}
-<div>
-    <div>{{plot|safe}}</div>
+        {%for i in distribution.errors%}
+            <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
+        {%endfor%}
+    {% endif %}
+
+    {% if plot %}
+        <div>{{plot|safe}}</div>
+    {% endif %}
+    <!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->
+    <script src={{url_for('static', filename="plot.js")}}></script>
 </div>
-{% endif %}
-<!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->
-<script src={{url_for('static', filename="plot.js")}}></script>
-
 
 {% if samples %}
-<div>
+<div style="max-width: 8em">
     Random samples:
     <pre>{{samples}}</pre>
 </div>
 {% endif %}
+</div>
+
+
 
 
 <br><div>
