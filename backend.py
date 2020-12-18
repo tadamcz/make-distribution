@@ -217,20 +217,27 @@ class DistributionObject:
 	def createPlot(self):
 
 		cdf_jsonlike = [{'x': self.x_axis[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis))]
+		pdf_jsonlike = [{'x': self.x_axis[i], 'y': self.y_axis_pdf[i]} for i in range(len(self.x_axis))]
+
 		quantiles_jsonlike = [{'x': self.qs[i], 'y': self.ps[i]} for i in range(len(self.qs))]
 
 		cdf_metadata_jsonlike = dict(xmin=min(self.x_axis), ymin=min(self.y_axis_cdf), xmax=max(self.x_axis), ymax=max(self.y_axis_cdf))
+		pdf_metadata_jsonlike = dict(xmin=min(self.x_axis), ymin=min(self.y_axis_pdf), xmax=max(self.x_axis), ymax=max(self.y_axis_pdf))
 
 		js = '''
 		<script>
-		const data =''' + json.dumps(cdf_jsonlike) + '''
-		const metadata =''' + json.dumps(cdf_metadata_jsonlike) + '''
+		const cdf_data =''' + json.dumps(cdf_jsonlike) + '''
+		const cdf_metadata =''' + json.dumps(cdf_metadata_jsonlike) + '''
+		const pdf_data =''' + json.dumps(pdf_jsonlike) + '''
+		const pdf_metadata =''' + json.dumps(pdf_metadata_jsonlike) + '''
 		const quantiles =''' + json.dumps(quantiles_jsonlike) + '''
 		</script>
 		'''
 
 		div = '''
-		<div id="graph"></div>
+		<div id="cdf_plot"></div>
+		<div id="pdf_plot"></div>
+
 		'''
 
 		self.plot = div+js
