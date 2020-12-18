@@ -42,6 +42,12 @@
   opacity: .5;
 }
 
+.pdf_quantile_line {
+  stroke: lightgray;
+  stroke-width: 3;
+  opacity: .5;
+}
+
 .dataPointCross {
   stroke: black;
   stroke-width: .5;

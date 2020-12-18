@@ -17,7 +17,7 @@ var xScale = d3.scaleLinear()
     .range([0, width]); // output
 
 var cdf_yScale = d3.scaleLinear()
-    .domain([cdf_metadata.ymin, cdf_metadata.ymax]) // input
+    .domain([0,1]) // input
     .range([height, 0]); // output
 
 var pdf_yScale = d3.scaleLinear()
@@ -120,6 +120,7 @@ plane_pdf.append("path")
 
 quantile_vertical_lines = new Array()
 quantile_horizontal_lines = new Array()
+pdf_quantile_vertical_lines = new Array()
 
 var cross = {
   draw: function draw(context, size) {
@@ -143,6 +144,7 @@ for (const quantile of quantiles) {
 function drawQuantileLines() {
     console.log("running drawQuantileLines")
     for (let i = 0; i < quantiles.length; i++) {
+        // Draw on the CDF
         quantile = quantiles[i]
         quantile_vertical_line_0 = {'x': quantile.x, 'y': cdf_metadata.ymin}
         quantile_vertical_line_1 = {'x': quantile.x, 'y': quantile.y}
@@ -163,12 +165,24 @@ function drawQuantileLines() {
                 .attr('d', cdf_line_generator)
                 .attr('class', 'line quantile_line')
                 .attr('quantile_index',i).attr('quantile_line_direction','horizontal'))
+
+        // Draw on the PDF
+        pdf_quantile_vertical_line_0 = {'x': quantile.x, 'y': pdf_metadata.ymin}
+        pdf_quantile_vertical_line_1 = {'x': quantile.x, 'y': pdf_metadata.ymax}
+
+        pdf_quantile_vertical_lines.push(
+            plane_pdf.append("path")
+                .datum([pdf_quantile_vertical_line_0, pdf_quantile_vertical_line_1])
+                .attr('d', pdf_line_generator)
+                .attr('class', 'line pdf_quantile_line')
+                .attr('quantile_index',i).attr('quantile_line_direction','vertical'))
     }
 }
 function redrawQuantileLines(i,coord,dragDirection) {
     existing_horizontal = quantile_horizontal_lines[i].data()[0]
     existing_vertical = quantile_vertical_lines[i].data()[0]
     if (dragDirection == 'horizontally'){
+        // Redraw on the CDF
         quantile_vertical_line_0 = {'x': coord, 'y': cdf_metadata.ymin}
         quantile_vertical_line_1 = {'x': coord, 'y': existing_vertical[1].y}
 
@@ -186,6 +200,16 @@ function redrawQuantileLines(i,coord,dragDirection) {
                 .datum([quantile_horizontal_line_0, quantile_horizontal_line_1])
                 .attr('d', cdf_line_generator)
                 .attr('class', 'line quantile_line')
+
+        // Redraw on the PDF
+        pdf_quantile_vertical_line_0 = {'x': coord, 'y': pdf_metadata.ymin}
+        pdf_quantile_vertical_line_1 = {'x': coord, 'y': pdf_metadata.ymax}
+
+        pdf_quantile_vertical_lines[i] =
+            d3.select(pdf_quantile_vertical_lines[i].node())
+                .datum([pdf_quantile_vertical_line_0, pdf_quantile_vertical_line_1])
+                .attr('d', pdf_line_generator)
+                .attr('class', 'line pdf_quantile_line')
     }
 
     if (dragDirection == 'vertically'){
@@ -213,8 +237,9 @@ function redrawQuantileLines(i,coord,dragDirection) {
 drawQuantileLines()
 
 function dragged_horizontally(event,d) {
-        d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
+        d3.select(quantile_vertical_lines[i].node()).style('stroke','black')
+        d3.select(pdf_quantile_vertical_lines[i].node()).style('stroke','black')
         x = xScale.invert(event.x)
         redrawQuantileLines(i,x,'horizontally')
         document.getElementById('pairs-'+i+'-Q').value = x
