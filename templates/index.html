@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Elicit probability distributions from quantiles</title>
-    <link rel="stylesheet" href= {{url_for('static', filename='/styles.css') }}>
+    <link rel="stylesheet" href= {{url_for('static', filename='styles.css') }}>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
-{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox, render_errors %}
-<form method="POST">
+{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+
+<div class="flexbox">
+<form method="POST" id="dataInputForm">
     <div style="margin-bottom: 1em">
-        <div>{{form.family.label}} {{form.family(onchange="display_metalog_options()")}}</div>
-        <div>{{form.nb_pairs.label}} {{form.nb_pairs(onchange="display_nb_pairs()")}}</div>
+        {{render_field(form.family,onchange="display_metalog_options()") }}
+        {{render_field(form.nb_pairs,onchange="display_nb_pairs()")}}
     </div>
 
     {% for pair in form.pairs %}
@@ -19,99 +22,71 @@
     </div>
     {% endfor %}
 
-    <div id = 'metalog-options'>
-        <div>{{form.boundedness(onchange="display_bounds()")}} {{form.boundedness.label}}
-            {% if form.boundedness.errors %}
-                {{render_errors(form.boundedness.errors)}}
-            {% endif %}
-        </div>
-        <div id="bounds" style="display:none">
+    {{ render_checkbox(form.plot_custom_domain_bool, onchange="display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')")}}
+    {{ render_field_nolabel(form.plot_custom_domain_FromTo)}}
+
+    <div id = 'metalog_options'>
+        {{render_checkbox(form.metalog_boundedness, onchange="display_conditional_fields('metalog_boundedness','metalog_bounds')")}}
+        <div id="metalog_bounds">
             You may specify both bounds, or just one bound for a semi-bounded distribution.
-            {{render_field(form.lower_bound)}}{{render_field(form.upper_bound)}}
+            <b>{{render_field(form.metalog_lower_bound)}}
+               {{render_field(form.metalog_upper_bound)}}</b>
         </div>
 
 
         <div>
-        {{render_checkbox(form.allow_lp)}}
+        {{render_checkbox(form.metalog_allow_numerical)}}
             <div class = 'tooltip'>
                 More info.
                 <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
-                that minimizes the absolute differences between the metalog cdf and your inputs. This is much slower, and can occasionally return garbage.</div>
+                that minimizes the sum of square differences between the metalog CDF and your inputs. This is slower. </div>
             </div>
         </div>
     </div>
 
 
     <div><input type="submit"> </div>
+    <div id="example"><a href="javascript:display_example()">Click here to see an example</a></div>
 </form>
 
-<script>
-function display_nb_pairs() {
-    const nb_pairs = document.getElementById("nb_pairs").value;
-    const max_pairs = 10;
-    let i;
-    for (i = 1; i <= max_pairs; i++) {
-        if (i <= nb_pairs) {
-            document.getElementById("pair" + i).style.display = "block"
-        } else {
-            document.getElementById("pair" + i).style.display = "none"
-        }
-    }
-}
+<script src={{url_for('static', filename='index.js') }}></script>
 
-function display_bounds() {
-    const boundedness = document.getElementById('boundedness').checked
-    console.log(boundedness)
-    if (boundedness) {
-        document.getElementById('bounds').style.display = 'block'
-    }
-    else {
-        document.getElementById('bounds').style.display = 'none'
-    }
-}
-display_bounds()
+<div id="results">
+    {% if distribution %}
+        {%for i in distribution.description%}
+            <div>{{i}}</div>
+        {%endfor%}
 
-function display_metalog_options() {
-    const family = document.getElementById("family").value;
-    if (family == 'metalog') {
-        document.getElementById('metalog-options').style.display = 'block'
-        const nb_pairs = document.getElementById("nb_pairs").value
-        if (nb_pairs < 3) {
-            document.getElementById('nb_pairs').value = 3
-            display_nb_pairs()
-        }
+        {%for i in distribution.errors%}
+            <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
+        {%endfor%}
+    {% endif %}
 
-    }
-    else {
-        document.getElementById('metalog-options').style.display = 'none'
-    }
-}
-
-display_nb_pairs()
-display_metalog_options()
-</script>
-
-{%for i in text%}
-    <div>{{i}}</div>
-{%endfor%}
-
-{% if plot %}
-<div>
-    <div>{{plot|safe}}</div>
+    {% if plot %}
+        <div>{{plot|safe}}</div>
+    {% endif %}
+    <!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->
+    <script src={{url_for('static', filename="plot.js")}}></script>
 </div>
-{% endif %}
 
 {% if samples %}
-<div>
-    Random samples:
-    <pre>{{samples}}</pre>
+<div id="samples_container">
+    {{ distribution.n_samples }} random samples:
+    <pre id="samples">{{samples}}</pre>
+    <div class="flexbox">
+        <button onclick="copySamplesClipboard()">Copy to clipboard</button>
+        <div style="padding-left: 1em" id="copySamplesResult"></div>
+    </div>
 </div>
 {% endif %}
+</div>
+
+
 
 
 <br><div>
-    By <a href='https://tmkadamcz.github.io/'>Tom Adamczewski</a>.
-    Code <a href='https://github.com/tmkadamcz/elicitor'>on GitHub</a>.
+    By <a href='https://tadamcz.github.io/'>Tom Adamczewski</a>.
+    Code <a href='https://github.com/tadamcz/elicitor'>on GitHub</a>.
     <div style="max-width: 40em">
         {% include "_feedback-form.html" %}
     </div>

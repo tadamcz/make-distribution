@@ -1,0 +1,3 @@
+[submodule "pymetalogtadamcz"]
+	path = pymetalogtadamcz
+	url = https://github.com/tadamcz/pymetalog-tadamcz-fork
