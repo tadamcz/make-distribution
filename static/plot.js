@@ -279,3 +279,40 @@ function dragEnd(){
     document.getElementById('dataInputForm').submit()
 
 }
+
+
+// Mouseover tooltip
+const mouseOverRect = cdf_svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height)
+        .on("mouseover", function() { mouseOverFocus.style("display", null); })
+        .on("mouseout", function() { mouseOverFocus.style("display", "none"); })
+        .on("mousemove", mousemove);
+
+var mouseOverFocus = cdf_svg.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
+
+mouseOverFocus.append("circle")
+    .attr("r", 6)
+    .attr("class",'hover_circle')
+
+mouseOverFocus.append("text")
+    .attr("x", 15)
+    .attr("dy", ".31em");
+
+const cdf_bisector = d3.bisector(d => d.x).left
+
+function mousemove(event,datum) {
+      var x0 = xScale.invert(event.layerX - margin.left),
+          i = cdf_bisector(cdf_data, x0, 1),
+          d0 = cdf_data[i - 1],
+          d1 = cdf_data[i],
+          d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+      mouseOverFocus.attr("transform", "translate(" + xScale(d.x) + "," + cdf_yScale(d.y) + ")");
+      mouseOverFocus.select("text").text(function() {
+          return d.x.toPrecision(3).toString()+"; "+d.y.toPrecision(3).toString();
+      });
+    }
+d3.select(mouseOverRect).node().lower() // move below the rest, otherwise we lose interactivity with the plot

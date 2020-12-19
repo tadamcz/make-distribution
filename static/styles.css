@@ -78,3 +78,15 @@
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.hover_circle {
+  fill: none;
+  stroke: black;
+  stroke-width: 1;
+
+}
