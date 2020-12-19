@@ -20,7 +20,7 @@ class DistributionObject:
 
 		self.plot_custom_domain = False
 		if dictionary['plot_custom_domain_bool']:
-			self.plot_custom_domain = (dictionary['plot_custom_domain_left'],dictionary['plot_custom_domain_right'])
+			self.plot_custom_domain = (dictionary['plot_custom_domain_FromTo']['From'],dictionary['plot_custom_domain_FromTo']['To'])
 
 
 		if self.family == 'metalog':

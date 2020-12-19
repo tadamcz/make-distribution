@@ -16,6 +16,9 @@ class QuantilePairForm(FlaskForm):
     P = FloatField('P',validators=[Optional(),probability_validator])
     Q = FloatField('Q',validators=[Optional()])
 
+class FromToForm(FlaskForm):
+    From = FloatField('From',validators=[Optional()])
+    To = FloatField('To',validators=[Optional()])
 
 class MyForm(FlaskForm):
     family = SelectField(choices=['metalog','normal', 'lognormal', 'beta'])
@@ -24,8 +27,7 @@ class MyForm(FlaskForm):
     pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
 
     plot_custom_domain_bool = BooleanField("Specify custom domain for plot?")
-    plot_custom_domain_left = DecimalField("From",validators=[Optional()])
-    plot_custom_domain_right = DecimalField("To",validators=[Optional()])
+    plot_custom_domain_FromTo = FormField(FromToForm)
     metalog_boundedness = BooleanField("Specify bounds for metalog?")
     metalog_lower_bound = DecimalField('Lower bound',validators=[Optional()])
     metalog_upper_bound = DecimalField('Upper bound',validators=[Optional()])

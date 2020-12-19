@@ -274,8 +274,8 @@ d3.selectAll('.quantile_line').lower()
 
 function dragEnd(){
     document.getElementById('plot_custom_domain_bool').checked = true
-    document.getElementById('plot_custom_domain_left').value = cdf_metadata.xmin.toPrecision(3)
-    document.getElementById('plot_custom_domain_right').value = cdf_metadata.xmax.toPrecision(3)
+    document.getElementById('plot_custom_domain_FromTo-From').value = cdf_metadata.xmin.toPrecision(3)
+    document.getElementById('plot_custom_domain_FromTo-To').value = cdf_metadata.xmax.toPrecision(3)
     document.getElementById('dataInputForm').submit()
 
 }

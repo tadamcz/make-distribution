@@ -3,10 +3,10 @@ function display_example(){
     document.getElementById("family").value = 'metalog'
 
     document.getElementById("plot_custom_domain_bool").checked = true
-    display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_l_r')
+    display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')
 
-    document.getElementById("plot_custom_domain_left").value = -100
-    document.getElementById("plot_custom_domain_right").value = 100
+    document.getElementById("plot_custom_domain_FromTo-From").value = -100
+    document.getElementById("plot_custom_domain_FromTo-To").value = 100
 
 
     document.getElementById("metalog_boundedness").checked = false
@@ -52,7 +52,7 @@ function display_conditional_fields(checkboxdiv,fielddiv) {
 
 const conditionalFields = [
     {'checkbox':'metalog_boundedness','field':'metalog_bounds'},
-    {'checkbox':'plot_custom_domain_bool','field':'plot_custom_domain_l_r'}
+    {'checkbox':'plot_custom_domain_bool','field':'plot_custom_domain_FromTo'}
 ]
 for (const conditionalField of conditionalFields) {
     display_conditional_fields(conditionalField.checkbox,conditionalField.field)
