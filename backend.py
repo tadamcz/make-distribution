@@ -116,7 +116,7 @@ class DistributionObject:
 		self.createPlot()
 
 	def initMetalog(self):
-		n_samples = 5000
+		self.n_samples = 5000
 		if self.dictionary['metalog_allow_numerical']:
 			self.fit_method_constraint = 'any'
 		else:
@@ -167,9 +167,9 @@ class DistributionObject:
 		self.description.append('Fit method: ' + actual_fit_method)
 		self.generatePlotDataMetalog()
 		self.createPlot()
-		self.samples = np.array2string(pymetalog.rmetalog(self.pymetalog_object, n=n_samples, term=term).flatten(),
+		self.samples = np.array2string(pymetalog.rmetalog(self.pymetalog_object, n=self.n_samples, term=term).flatten(),
 									   separator=', ',
-									   threshold=n_samples + 1,
+									   threshold=self.n_samples + 1,
 									   max_line_width=float('inf'))
 
 

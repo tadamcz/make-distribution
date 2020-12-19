@@ -55,8 +55,26 @@
 
 .flexbox {
   display: flex;
+  flex-wrap: wrap;
+}
+
+#dataInputForm{
+  max-width: 20em;
+  margin-bottom: 1em;
 }
 
 #results {
-  margin-left: 2em;
+  margin-left: 1em;
+}
+
+#samples_container{
+  max-width: 20em;
+}
+#samples {
+  overflow-x: scroll;
+  padding: 1em;
+  display: block;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }

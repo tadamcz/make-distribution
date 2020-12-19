@@ -73,9 +73,13 @@
 </div>
 
 {% if samples %}
-<div style="max-width: 8em">
-    Random samples:
-    <pre>{{samples}}</pre>
+<div id="samples_container">
+    {{ distribution.n_samples }} random samples:
+    <pre id="samples">{{samples}}</pre>
+    <div class="flexbox">
+        <button onclick="copySamplesClipboard()">Copy to clipboard</button>
+        <div style="padding-left: 1em" id="copySamplesResult"></div>
+    </div>
 </div>
 {% endif %}
 </div>
