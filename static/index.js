@@ -2,8 +2,12 @@ function display_example(){
     document.getElementById("nb_pairs").value = 3
     document.getElementById("family").value = 'metalog'
 
-    document.getElementById("plot_custom_domain_bool").checked = false
+    document.getElementById("plot_custom_domain_bool").checked = true
     display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_l_r')
+
+    document.getElementById("plot_custom_domain_left").value = -100
+    document.getElementById("plot_custom_domain_right").value = 100
+
 
     document.getElementById("metalog_boundedness").checked = false
     display_conditional_fields('metalog_boundedness','metalog_bounds')
