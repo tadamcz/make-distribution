@@ -117,7 +117,7 @@ class DistributionObject:
 
 	def initMetalog(self):
 		n_samples = 5000
-		if self.dictionary['allow_lp']:
+		if self.dictionary['metalog_allow_numerical']:
 			self.fit_method_constraint = 'any'
 		else:
 			self.fit_method_constraint = 'OLS'
@@ -159,8 +159,7 @@ class DistributionObject:
 			)
 
 		if self.pymetalog_object.output_dict['Validation'].valid[0] == 'no':  # Good heavens!
-			self.errors.append('There is no valid metalog for these parameters. Try changing the '
-									'parameters or allowing linear program.')
+			self.errors.append('There is no valid metalog for these parameters. Things that may help: (i) allow numerical methods using the checkbox, (ii) add more input pairs, (iii) choose less extreme inputs.')
 			return
 		actual_fit_method = self.pymetalog_object.output_dict['Validation'].method.values[0]
 		if actual_fit_method == 'LP':

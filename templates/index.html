@@ -38,11 +38,11 @@
 
 
         <div>
-        {{render_checkbox(form.allow_lp)}}
+        {{render_checkbox(form.metalog_allow_numerical)}}
             <div class = 'tooltip'>
                 More info.
                 <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
-                that minimizes the absolute differences between the metalog cdf and your inputs. This is slower, and the fit may be poor.</div>
+                that minimizes the sum of square differences between the metalog CDF and your inputs. This is slower. </div>
             </div>
         </div>
     </div>

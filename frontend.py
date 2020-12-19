@@ -29,7 +29,7 @@ class MyForm(FlaskForm):
     metalog_boundedness = BooleanField("Specify bounds for metalog?")
     metalog_lower_bound = DecimalField('Lower bound',validators=[Optional()])
     metalog_upper_bound = DecimalField('Upper bound',validators=[Optional()])
-    allow_lp = BooleanField("Allow linear program if no exact metalog fit?")
+    metalog_allow_numerical = BooleanField("Allow numerical approximation if no exact metalog fit?")
 
     def validate(self):
         validity = True
