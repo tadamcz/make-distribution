@@ -146,7 +146,7 @@ function drawQuantileLines() {
     for (let i = 0; i < quantiles.length; i++) {
         // Draw on the CDF
         quantile = quantiles[i]
-        quantile_vertical_line_0 = {'x': quantile.x, 'y': cdf_metadata.ymin}
+        quantile_vertical_line_0 = {'x': quantile.x, 'y': 0}
         quantile_vertical_line_1 = {'x': quantile.x, 'y': quantile.y}
 
         quantile_horizontal_line_0 = {'x': cdf_metadata.xmin, 'y': quantile.y}
@@ -183,7 +183,7 @@ function redrawQuantileLines(i,coord,dragDirection) {
     existing_vertical = quantile_vertical_lines[i].data()[0]
     if (dragDirection == 'horizontally'){
         // Redraw on the CDF
-        quantile_vertical_line_0 = {'x': coord, 'y': cdf_metadata.ymin}
+        quantile_vertical_line_0 = {'x': coord, 'y': 0}
         quantile_vertical_line_1 = {'x': coord, 'y': existing_vertical[1].y}
 
         quantile_vertical_lines[i] =
