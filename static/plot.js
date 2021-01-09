@@ -241,8 +241,33 @@ function dragged_horizontally(event,d) {
         d3.select(quantile_vertical_lines[i].node()).style('stroke','black')
         d3.select(pdf_quantile_vertical_lines[i].node()).style('stroke','black')
         x = xScale.invert(event.x)
-        redrawQuantileLines(i,x,'horizontally')
-        document.getElementById('pairs-'+i+'-Q').value = x.toPrecision(3)
+        if (i<quantiles.length-1) {
+            maxdrag = quantile_vertical_lines[i + 1].data()[0][0].x
+        }
+        else {
+            maxdrag = Infinity
+        }
+        if (i>0) {
+            mindrag = quantile_vertical_lines[i - 1].data()[0][0].x
+        }
+        else {
+            mindrag = -Infinity
+        }
+        if (mindrag<x && x<maxdrag) {
+            if (event.sourceEvent.shiftKey) {
+                start_x_dragged = quantile_vertical_lines[i].data()[0][0].x
+                 for (let j = 0; j < quantiles.length; j++) {
+                     current_x = quantile_vertical_lines[j].data()[0][0].x
+                     new_x = current_x+(x-start_x_dragged)
+                     redrawQuantileLines(j, new_x, 'horizontally')
+                    document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+                 }
+             }
+             else {
+                redrawQuantileLines(i, x, 'horizontally')
+                document.getElementById('pairs-' + i + '-Q').value = x.toPrecision(3)
+            }
+        }
     }
 for (line of quantile_vertical_lines) {
     line.call(
@@ -256,9 +281,40 @@ function dragged_vertically(event,d) {
         d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
         y = cdf_yScale.invert(event.y)
-        if (0<=y && y<=1) {
-            redrawQuantileLines(i,y,'vertically')
-            document.getElementById('pairs-'+i+'-P').value = y.toPrecision(3)
+        if (i<quantiles.length-1) {
+            maxdrag = quantile_horizontal_lines[i + 1].data()[0][0].y
+        }
+        else {
+            maxdrag = 1
+        }
+        if (i>0) {
+            mindrag = quantile_horizontal_lines[i - 1].data()[0][0].y
+        }
+        else {
+            mindrag = 0
+        }
+        if (mindrag<y && y<maxdrag) {
+            if (event.sourceEvent.shiftKey) {
+
+                start_y_dragged = quantile_horizontal_lines[i].data()[0][0].y
+                 for (let j = 0; j < quantiles.length; j++) {
+                     current_y = quantile_horizontal_lines[j].data()[0][0].y
+                     if (current_y<.5) {
+                         ratio = y/start_y_dragged
+                         new_y = current_y*ratio
+                     }
+                     else {
+                         ratio = (1-y)/(1-start_y_dragged)
+                         new_y = 1- (1-current_y)*ratio
+                     }
+                     redrawQuantileLines(j, new_y, 'vertically')
+                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+                 }
+             }
+            else {
+                redrawQuantileLines(i,y,'vertically')
+                document.getElementById('pairs-'+i+'-P').value = y.toPrecision(3)
+            }
         }
 
     }
