@@ -82,28 +82,39 @@ class MyForm(FlaskForm):
 
 
 @app.route('/', methods=['GET'])
-def show_form():
+def getRequest():
     form = MyForm()
-    return render_template('index.html', form=form)
+
+    # Default data
+    form.family.data = 'metalog'
+    form.nb_pairs.data = 2
+    form.metalog_allow_numerical.data = True
+    form.pairs[0]['P'].data = .1
+    form.pairs[0]['Q'].data = -100
+    form.pairs[1]['P'].data = .9
+    form.pairs[1]['Q'].data = 100
+
+    return showResult(form)
 
 
 @app.route('/', methods=['POST'])
-def show_result():
+def postRequest():
     form = MyForm()
     if form.validate():
-        parsed_data = form.parse_user_input()
-        distribution = backend.DistributionObject(parsed_data)
-        try:
-            plot = distribution.plot
-            samples = distribution.samples
-        except AttributeError:
-            plot = None
-            samples = None
-        return render_template('index.html', form=form, plot=plot,samples=samples, distribution=distribution)
+        return showResult(form)
     else:
         return render_template('index.html', form=form)
 
-
+def showResult(form):
+    parsed_data = form.parse_user_input()
+    distribution = backend.DistributionObject(parsed_data)
+    try:
+        plot = distribution.plot
+        samples = distribution.samples
+    except AttributeError:
+        plot = None
+        samples = None
+    return render_template('index.html', form=form, plot=plot, samples=samples, distribution=distribution)
 
 
 
