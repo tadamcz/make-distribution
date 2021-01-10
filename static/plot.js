@@ -286,6 +286,14 @@ for (line of quantile_vertical_lines) {
     )
 }
 
+for (line of pdf_quantile_vertical_lines) {
+    line.call(
+        d3.drag()
+            .on("drag", dragged_horizontally)
+            .on("end",dragEnd)
+    )
+}
+
 function dragged_vertically(event,d) {
         d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
