@@ -68,7 +68,7 @@
 
     {% if plot %}
         <i>Plot instructions: You can drag horizontal and vertical lines. Shift-drag any line to move all lines at the same
-            time.</i>
+            time. Hover over a point to display a draggable circle representing that point.</i>
         <div>{{plot|safe}}</div>
     {% endif %}
     <!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->

@@ -145,7 +145,7 @@ function drawDataPoints(x, y, index) {
 
     DataPointCircles.push(
         plane_cdf.append("path")
-            .attr('d', d3.symbol().type(d3.symbolCircle).size(2500))
+            .attr('d', d3.symbol().type(d3.symbolCircle).size(4000))
             .attr('transform', 'translate(' + xScale(x) + ',' + cdf_yScale(y) + ')')
             .attr('class', 'dataPointCircle')
             .attr('quantile_index', index)
