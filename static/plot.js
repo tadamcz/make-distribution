@@ -247,14 +247,18 @@ drawQuantileLines()
 function dragged_horizontally(event,d) {
         i = parseInt(d3.select(this).attr('quantile_index'))
         x_drag = xScale.invert(event.x)
-        if (i<quantiles.length-1) {
-            maxdrag = parseFloat(quantile_vertical_lines[i + 1].attr('x_data'))
+
+        quantile_vertical_lines_sorted = quantile_vertical_lines.concat().sort((a, b) => parseFloat(a.attr('x_data')) - parseFloat(b.attr('x_data')))
+        i_sorted = quantile_vertical_lines_sorted.findIndex(element => element.attr('x_data') === d3.select(this).attr('x_data'))
+
+        if (i_sorted<quantiles.length-1) {
+            maxdrag = parseFloat(quantile_vertical_lines_sorted[i_sorted + 1].attr('x_data'))
         }
         else {
             maxdrag = Infinity
         }
-        if (i>0) {
-            mindrag = parseFloat(quantile_vertical_lines[i - 1].attr('x_data'))
+        if (i_sorted>0) {
+            mindrag = parseFloat(quantile_vertical_lines_sorted[i_sorted - 1].attr('x_data'))
         }
         else {
             mindrag = -Infinity
@@ -298,14 +302,17 @@ function dragged_vertically(event,d) {
         d3.select(this).style('stroke','black')
         i = parseInt(d3.select(this).attr('quantile_index'))
         y_drag = cdf_yScale.invert(event.y)
-        if (i<quantiles.length-1) {
-            maxdrag = parseFloat(quantile_horizontal_lines[i + 1].attr('y_data'))
+
+        quantile_horizontal_lines_sorted = quantile_horizontal_lines.concat().sort((a, b) => parseFloat(a.attr('y_data')) - parseFloat(b.attr('y_data')))
+        i_sorted = quantile_horizontal_lines_sorted.findIndex(element => element.attr('y_data') === d3.select(this).attr('y_data'))
+        if (i_sorted<quantiles.length-1) {
+            maxdrag = parseFloat(quantile_horizontal_lines_sorted[i_sorted + 1].attr('y_data'))
         }
         else {
             maxdrag = 1
         }
-        if (i>0) {
-            mindrag = parseFloat(quantile_horizontal_lines[i - 1].attr('y_data'))
+        if (i_sorted>0) {
+            mindrag = parseFloat(quantile_horizontal_lines_sorted[i_sorted - 1].attr('y_data'))
         }
         else {
             mindrag = 0
