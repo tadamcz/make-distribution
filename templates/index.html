@@ -10,7 +10,8 @@
 {% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
 
 <div class="flexbox">
-<form method="POST" id="dataInputForm">
+<div id="left_pane">
+    <form method="POST" id="dataInputForm">
     <div style="margin-bottom: 1em">
         {{render_field(form.family,onchange="display_metalog_options()") }}
         {{render_field(form.nb_pairs,onchange="display_nb_pairs()")}}
@@ -53,10 +54,7 @@
     <div id="example"><a href="javascript:display_example()">Click here to see an example</a></div>
 </form>
 
-<script src={{url_for('static', filename='index.js') }}></script>
-
-<div id="results">
-    {% if distribution %}
+{% if distribution %}
         {%for i in distribution.description%}
             <div>{{i}}</div>
         {%endfor%}
@@ -67,13 +65,21 @@
     {% endif %}
 
     {% if plot %}
-        <i>Plot instructions: You can drag horizontal and vertical lines. Shift-drag any line to move all lines at the same
-            time. Hover over a point to display a draggable circle representing that point. Click on an empty area to add a point.</i>
+        <p><i>Plot instructions: You can drag horizontal and vertical lines.
+            Shift-drag any line to move all lines at the same time.
+            Hover over a point to display a draggable circle representing that point.
+            Shift-click on an empty area to add a point.</i></p>
+    {% endif %}
+</div>
+
+<script src={{url_for('static', filename='index.js') }}></script>
+
+<div id="results_pane">
+    {% if plot %}
         <div>{{plot|safe}}</div>
     {% endif %}
     <!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->
     <script src={{url_for('static', filename="plot.js")}}></script>
-</div>
 
 {% if samples %}
 <div id="samples_container">
@@ -87,8 +93,7 @@
 {% endif %}
 </div>
 
-
-
+</div> {# Close the flexbox#}
 
 <br><div>
     By <a href='https://tadamcz.github.io/'>Tom Adamczewski</a>.

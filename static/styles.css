@@ -86,8 +86,13 @@
   margin-bottom: 1em;
 }
 
-#results {
+#results_pane {
   margin-left: 1em;
+  max-width: 50em;
+}
+
+#left_pane {
+  max-width: 20em;
 }
 
 #samples_container{
