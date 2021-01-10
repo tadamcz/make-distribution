@@ -389,3 +389,21 @@ function mousemove(event,datum) {
       });
     }
 d3.select(mouseOverRect).node().lower() // move below the rest, otherwise we lose interactivity with the plot
+
+d3.select('.overlay').on("click", addPointByClick)
+
+function addPointByClick(event,d){
+    x_click = xScale.invert(event.layerX - margin.left)
+    y_click = cdf_yScale.invert(event.layerY - margin.top)
+    console.log(x_click,y_click)
+    drawDataPoints(x_click,y_click, null)
+
+    npairs = document.getElementById("nb_pairs").value
+    console.log(npairs)
+    document.getElementById("pairs-"+(npairs)+"-P").value = y_click.toPrecision(3)
+    document.getElementById("pairs-"+(npairs)+"-Q").value = x_click.toPrecision(3)
+
+    document.getElementById("nb_pairs").value = parseInt(document.getElementById("nb_pairs").value) + 1
+    display_nb_pairs()
+    document.getElementById("dataInputForm").submit()
+}
