@@ -95,4 +95,18 @@ function copySamplesClipboard(){
     document.getElementById('copySamplesResult').innerText = 'Done!'
 }
 
+function removePair(i){
+    npairs = document.getElementById("nb_pairs").value
 
+    for (let j = i+1; j < npairs; j++) {
+        document.getElementById("pairs-"+(j-1)+"-P").value = document.getElementById("pairs-"+j+"-P").value
+        document.getElementById("pairs-"+(j-1)+"-Q").value = document.getElementById("pairs-"+j+"-Q").value
+    }
+
+    document.getElementById("pairs-"+(npairs-1)+"-P").value = ''
+    document.getElementById("pairs-"+(npairs-1)+"-Q").value = ''
+
+    document.getElementById("nb_pairs").value = document.getElementById("nb_pairs").value-1
+    display_nb_pairs()
+    document.getElementById("dataInputForm").submit()
+}

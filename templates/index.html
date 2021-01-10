@@ -18,7 +18,11 @@
 
     {% for pair in form.pairs %}
     <div id = {{'pair' ~ loop.index}}>
-        Pair {{loop.index}} {{render_field_nolabel(pair)}}
+        Pair {{loop.index}}
+        {% if form.nb_pairs.data|int > 2%}
+        <a href="javascript:removePair({{loop.index}}-1)">Remove</a>
+        {%  endif %}
+        {{render_field_nolabel(pair)}}
     </div>
     {% endfor %}
 
