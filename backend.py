@@ -4,7 +4,7 @@ from scipy import stats
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-import pymetalogtadamcz.pymetalog as pymetalog
+from metalogistic.metalogistic import MetaLogistic
 import scipy.stats
 
 class DistributionObject:
@@ -30,7 +30,6 @@ class DistributionObject:
 			self.initSciPy()
 
 	def initSciPy(self):
-
 		if self.family == 'normal':
 			self.description.append('Normal distribution')
 			if len(self.ps) == 2:
@@ -117,57 +116,42 @@ class DistributionObject:
 
 	def initMetalog(self):
 		self.n_samples = 5000
-		if self.dictionary['metalog_allow_numerical']:
-			self.fit_method_constraint = 'any'
-		else:
-			self.fit_method_constraint = 'OLS'
 		self.description.append('Meta-logistic distribution.')
 		term = len(self.ps)
 
 		self.metalog_boundedness = self.dictionary['metalog_boundedness']
 
-		# This if-else is necessary because of the way pymetalog handles the bounds arguments. Could be something to improve.
-		if self.metalog_boundedness:  # bounded
-
+		if self.metalog_boundedness:
 			self.metalog_lower_bound, self.metalog_upper_bound = self.dictionary['metalog_lower_bound'], self.dictionary['metalog_upper_bound']
-			if self.metalog_lower_bound is not None and self.metalog_upper_bound is not None:
-				pymetalog_boundedness = 'b'
-				pymetalog_bounds = [self.metalog_lower_bound, self.metalog_upper_bound]
-			elif self.metalog_lower_bound is not None:
-				pymetalog_boundedness = 'sl'
-				pymetalog_bounds = [self.metalog_lower_bound]
-			elif self.metalog_upper_bound is not None:
-				pymetalog_boundedness = 'su'
-				pymetalog_bounds = [self.metalog_upper_bound]
+		else:
+			self.metalog_lower_bound, self.metalog_upper_bound = None, None
 
-			self.pymetalog_object = pymetalog.metalog(
-				self.qs,
-				probs=self.ps,
-				term_lower_bound=term,
-				term_limit=term,
-				fit_method=self.fit_method_constraint,
-				boundedness=pymetalog_boundedness,
-				bounds=pymetalog_bounds
-			)
-		else:  # unbounded
-			self.pymetalog_object = pymetalog.metalog(
-				self.qs,
-				probs=self.ps,
-				term_lower_bound=term,
-				term_limit=term,
-				fit_method=self.fit_method_constraint
-			)
+		if self.dictionary['metalog_allow_numerical']:
+			self.metalog_fit_method = None
+		else:
+			self.metalog_fit_method = 'Linear least squares'
 
-		if self.pymetalog_object.output_dict['Validation'].valid[0] == 'no':  # Good heavens!
-			self.errors.append('There is no valid metalog for these parameters. Things that may help: (i) allow numerical methods using the checkbox, (ii) add more input pairs, (iii) choose less extreme inputs.')
+		try:
+			self.metalog_object = MetaLogistic(self.ps,self.qs,
+											   lbound=self.metalog_lower_bound,
+											   ubound=self.metalog_upper_bound,
+											   fit_method=self.metalog_fit_method)
+		except TimeoutError:
+			self.errors.append("Timed out while attempting to fit distribution.")
 			return
-		actual_fit_method = self.pymetalog_object.output_dict['Validation'].method.values[0]
-		if actual_fit_method == 'LP':
-			actual_fit_method == 'Linear program'
-		self.description.append('Fit method: ' + actual_fit_method)
+		except Exception as mlog_exception:
+			self.errors.append(mlog_exception)
+			return
+
+		if not self.metalog_object.valid_distribution:
+			if self.dictionary['metalog_allow_numerical']:
+				self.errors.append('The program was not able to fit a valid metalog distribution for your data. Things that may help: (i) add more input_tuple pairs, (ii) choose less extreme inputs.')
+			else:
+				self.errors.append('Linear least squares did not yield a valid metalog distribution for your data. Things that may help: (i) allow numerical methods using the checkbox, (ii) add more input_tuple pairs, (iii) choose less extreme inputs.')
+		self.description.append('Fit method: ' + self.metalog_object.fit_method_used)
 		self.generatePlotDataMetalog()
 		self.createPlot()
-		self.samples = np.array2string(pymetalog.rmetalog(self.pymetalog_object, n=self.n_samples, term=term).flatten(),
+		self.samples = np.array2string(self.metalog_object.rvs(size=self.n_samples).flatten(),
 									   separator=', ',
 									   threshold=self.n_samples + 1,
 									   max_line_width=float('inf'))
@@ -193,31 +177,31 @@ class DistributionObject:
 		self.y_axis_cdf = self.scipy_distribution.cdf(self.x_axis)
 		self.y_axis_pdf = self.scipy_distribution.pdf(self.x_axis)
 
+		self.x_axis_pdf = self.x_axis
+		self.x_axis_cdf = self.x_axis
 
 	def generatePlotDataMetalog(self):
-		term = len(self.ps)
-		big_M_name = "M" + str(term)
-		small_m_name = "m" + str(term)
-		self.x_axis = self.pymetalog_object.output_dict['M'][big_M_name]
-		self.y_axis_cdf = self.pymetalog_object.output_dict['M']['y']
-		self.y_axis_pdf = self.pymetalog_object.output_dict['M'][small_m_name]
-
-		# This is a hacky approach. It would be nicer to allow setting a custom domain for
-		# the output_dict of the pymetalog call. But since calling qmetalog() is computationally cheap,
-		# it's an OK hack for now.
+		number_points = 300
 		if self.plot_custom_domain:
 			left, right = self.plot_custom_domain
-			y_cdf_bottom, y_cdf_top = pymetalog.pmetalog(self.pymetalog_object,q=[left,right],term=term)
-			if isinstance(y_cdf_top,StopIteration) or isinstance(y_cdf_bottom,StopIteration):
-				return
-			y = np.linspace(y_cdf_bottom,y_cdf_top,100)
-			self.y_axis_cdf = y
-			self.x_axis = pymetalog.qmetalog(self.pymetalog_object, y=y,term=term)
+			left, right = self.intersect_intervals([(left,right),(self.metalog_object.a, self.metalog_object.b)])
+
+			cdf_data = self.metalog_object.createCDFPlotData(x_from_to=(left, right), n=number_points)
+			pdf_data = self.metalog_object.createPDFPlotData(x_from_to=(left, right), n=number_points)
+		else:
+			cdf_data = self.metalog_object.createCDFPlotData(n=number_points)
+			pdf_data = self.metalog_object.createPDFPlotData(n=number_points)
+
+		self.x_axis_cdf = cdf_data['X-values']
+		self.y_axis_cdf = cdf_data['Probabilities']
+
+		self.x_axis_pdf = pdf_data['X-values']
+		self.y_axis_pdf = pdf_data['Densities']
+
 
 	def createPlot(self):
-
-		cdf_jsonlike = [{'x': self.x_axis[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis))]
-		pdf_jsonlike = [{'x': self.x_axis[i], 'y': self.y_axis_pdf[i]} for i in range(len(self.x_axis))]
+		cdf_jsonlike = [{'x': self.x_axis_cdf[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis_cdf))]
+		pdf_jsonlike = [{'x': self.x_axis_pdf[i], 'y': self.y_axis_pdf[i]} for i in range(len(self.x_axis_pdf))]
 
 		quantiles_jsonlike = [{'x': self.qs[i], 'y': self.ps[i]} for i in range(len(self.qs))]
 
@@ -286,3 +270,17 @@ class DistributionObject:
 	@staticmethod
 	def pretty(n):
 		return np.format_float_scientific(n, precision=4)
+
+	@staticmethod
+	def intersect_intervals(two_tuples):
+		interval1, interval2 = two_tuples
+
+		interval1_left, interval1_right = interval1
+		interval2_left, interval2_right = interval2
+
+		if interval1_right < interval2_left or interval2_right < interval2_left:
+			raise ValueError("the distributions have no overlap")
+
+		intersect_left, intersect_right = max(interval1_left, interval2_left), min(interval1_right, interval2_right)
+
+		return intersect_left, intersect_right
