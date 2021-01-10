@@ -221,8 +221,13 @@ class DistributionObject:
 
 		quantiles_jsonlike = [{'x': self.qs[i], 'y': self.ps[i]} for i in range(len(self.qs))]
 
-		cdf_metadata_jsonlike = dict(xmin=min(self.x_axis), ymin=min(self.y_axis_cdf), xmax=max(self.x_axis), ymax=max(self.y_axis_cdf))
-		pdf_metadata_jsonlike = dict(xmin=min(self.x_axis), ymin=min(self.y_axis_pdf), xmax=max(self.x_axis), ymax=max(self.y_axis_pdf))
+		cdf_metadata_jsonlike = dict(xmin=min(self.x_axis_cdf), ymin=min(self.y_axis_cdf), xmax=max(self.x_axis_cdf), ymax=max(self.y_axis_cdf))
+		pdf_metadata_jsonlike = dict(xmin=min(self.x_axis_pdf), ymin=min(self.y_axis_pdf), xmax=max(self.x_axis_pdf), ymax=max(self.y_axis_pdf))
+
+		maximum_density_to_display = min(np.median(self.y_axis_pdf)*50,max(self.y_axis_pdf))
+
+
+
 
 		js = '''
 		<script>
@@ -231,6 +236,7 @@ class DistributionObject:
 		const pdf_data =''' + json.dumps(pdf_jsonlike) + '''
 		const pdf_metadata =''' + json.dumps(pdf_metadata_jsonlike) + '''
 		const quantiles =''' + json.dumps(quantiles_jsonlike) + '''
+		const maximum_density_to_display=''' +str(maximum_density_to_display) + '''
 		</script>
 		'''
 

@@ -21,7 +21,7 @@ var cdf_yScale = d3.scaleLinear()
     .range([height, 0]); // output
 
 var pdf_yScale = d3.scaleLinear()
-    .domain([pdf_metadata.ymin, pdf_metadata.ymax]) // input
+    .domain([pdf_metadata.ymin, maximum_density_to_display]) // input
     .range([height, 0]); // output
 
 // d3's line generator
@@ -215,7 +215,7 @@ function drawQuantileLines() {
         pdf_quantile_vertical_lines.push(
             plane_pdf.append("rect")
                 .attr('x',xScale(quantile.x) - 3/2)
-                .attr('y',pdf_yScale(pdf_metadata.ymax))
+                .attr('y',pdf_yScale(maximum_density_to_display))
                 .attr('width', 3)
                 .attr('height',height)
                 .attr('class', 'quantile_rect')
