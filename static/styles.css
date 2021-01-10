@@ -42,6 +42,19 @@
   opacity: .5;
 }
 
+.quantile_rect {
+  cursor: grab;
+  opacity: .1;
+
+  stroke: lightgray;
+  stroke-width: 25;
+  stroke-opacity: 0;
+}
+
+.quantile_rect:hover {
+  opacity: .5;
+}
+
 .pdf_quantile_line {
   stroke: lightgray;
   stroke-width: 3;
