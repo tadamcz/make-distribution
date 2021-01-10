@@ -130,16 +130,58 @@ var cross = {
     context.lineTo(0,size)
   }
 }
-function drawGreekCross(x,y){
-    plane_cdf.append("path")
-        .attr('d',d3.symbol().type(cross).size(10))
-        .attr('transform','translate('+xScale(x)+','+cdf_yScale(y)+')')
-        .attr('class','dataPointCross')
+
+DataPointCrosses = new Array()
+DataPointCircles = new Array()
+
+function drawDataPoints(x, y, index) {
+    DataPointCrosses.push(
+        plane_cdf.append("path")
+            .attr('d', d3.symbol().type(cross).size(10))
+            .attr('transform', 'translate(' + xScale(x) + ',' + cdf_yScale(y) + ')')
+            .attr('class', 'dataPointCross')
+            .attr('quantile_index', index)
+    )
+
+    DataPointCircles.push(
+        plane_cdf.append("path")
+            .attr('d', d3.symbol().type(d3.symbolCircle).size(2500))
+            .attr('transform', 'translate(' + xScale(x) + ',' + cdf_yScale(y) + ')')
+            .attr('class', 'dataPointCircle')
+            .attr('quantile_index', index)
+    )
 }
 
-for (const quantile of quantiles) {
-    drawGreekCross(quantile.x,quantile.y)
+for (let i = 0; i < quantiles.length; i++) {
+    drawDataPoints(quantiles[i].x,quantiles[i].y, i)
 }
+
+for (let i = 0; i < quantiles.length; i++) {
+    DataPointCircles[i].call(
+        d3.drag()
+            .on("drag", draggedDataPoint)
+            .on("end", endDragDataPoint)
+    )
+}
+function draggedDataPoint(event,d) {
+    i = parseInt(d3.select(this).attr('quantile_index'))
+    console.log(i)
+    y_drag = cdf_yScale.invert(event.y)
+    x_drag = xScale.invert(event.x)
+    console.log(x_drag,y_drag)
+
+    DataPointCircles[i].attr('transform','translate(' + event.x + ',' + event.y + ')')
+    DataPointCrosses[i].attr('transform','translate(' + event.x + ',' + event.y + ')')
+
+    document.getElementById('pairs-' + i + '-Q').value = x_drag.toPrecision(3)
+    document.getElementById('pairs-' + i + '-P').value = y_drag.toPrecision(3)
+
+}
+
+function endDragDataPoint(event,d){
+    document.getElementById('dataInputForm').submit()
+}
+
 
 function drawQuantileLines() {
     for (let i = 0; i < quantiles.length; i++) {

@@ -66,6 +66,16 @@
   stroke-width: .5;
 }
 
+.dataPointCircle{
+  cursor: grab;
+  fill-opacity: 0;
+  stroke-width: 1px;
+  stroke-opacity: 1;
+}
+.dataPointCircle:hover {
+  stroke: black;
+}
+
 .flexbox {
   display: flex;
   flex-wrap: wrap;
