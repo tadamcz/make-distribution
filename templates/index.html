@@ -15,14 +15,13 @@
     <div style="margin-bottom: 1em">
         {{render_field(form.family,onchange="display_metalog_options()") }}
         {{render_field(form.nb_pairs,onchange="display_nb_pairs()")}}
+        <a id="add_pair_button" href="javascript:addPair()">Add</a>
     </div>
 
     {% for pair in form.pairs %}
     <div id = {{'pair' ~ loop.index}}>
         Pair {{loop.index}}
-        {% if form.nb_pairs.data|int > 2%}
-        <a href="javascript:removePair({{loop.index}}-1)">Remove</a>
-        {%  endif %}
+        <a class="remove_pair_button" href="javascript:removePair({{loop.index}}-1)">Remove</a>
         {{render_field_nolabel(pair)}}
     </div>
     {% endfor %}

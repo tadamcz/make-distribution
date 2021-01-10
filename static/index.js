@@ -37,6 +37,8 @@ function display_nb_pairs() {
             document.getElementById("pair" + i).style.display = "none"
         }
     }
+    displayAddPairsButton()
+    displayRemovePairButtons()
 }
 display_nb_pairs()
 
@@ -110,3 +112,33 @@ function removePair(i){
     display_nb_pairs()
     document.getElementById("dataInputForm").submit()
 }
+
+function addPair(){
+    document.getElementById('nb_pairs').value = parseInt(document.getElementById('nb_pairs').value) + 1
+    display_nb_pairs()
+    displayAddPairsButton()
+}
+
+function displayAddPairsButton() {
+    if (parseInt(document.getElementById('nb_pairs').value)<10){
+        document.getElementById('add_pair_button').style.display = 'block'
+    }
+    else {
+        document.getElementById('add_pair_button').style.display = 'none'
+    }
+}
+displayAddPairsButton()
+
+function displayRemovePairButtons() {
+    if (parseInt(document.getElementById('nb_pairs').value)>2){
+        for (const button of document.getElementsByClassName('remove_pair_button')) {
+            button.style.display = 'inline'
+        }
+    }
+    else {
+        for (const button of document.getElementsByClassName('remove_pair_button')) {
+            button.style.display = 'none'
+        }
+    }
+}
+displayRemovePairButtons()
