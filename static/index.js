@@ -63,10 +63,10 @@ function display_metalog_options() {
     if (family == 'metalog') {
         document.getElementById('metalog_options').style.display = 'block'
         const nb_pairs = document.getElementById("nb_pairs").value
-        if (nb_pairs < 3) {
-            document.getElementById('nb_pairs').value = 3
-            display_nb_pairs()
-        }
+        // if (nb_pairs < 3) {
+        //     document.getElementById('nb_pairs').value = 3
+        //     display_nb_pairs()
+        // }
 
     }
     else {
