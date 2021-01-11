@@ -169,11 +169,8 @@ for (let i = 0; i < quantiles.length; i++) {
 
 function draggedDataPoint(event,d) {
     i = parseInt(d3.select(this).attr('quantile_index'))
-    console.log(i)
     y_drag = cdf_yScale.invert(event.y)
     x_drag = xScale.invert(event.x)
-    console.log(x_drag,y_drag)
-
     DataPointCircles[i].attr('transform','translate(' + event.x + ',' + event.y + ')')
     DataPointCrosses[i].attr('transform','translate(' + event.x + ',' + event.y + ')')
 
@@ -335,8 +332,10 @@ function dragged_vertically(event,d) {
                      ratio = (1-y_drag)/(1-start_y_dragged)
                      new_y = 1- (1-current_y)*ratio
                  }
-                 moveQuantileLines(j, new_y, 'vertically')
-                 document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+                 if (0<new_y && new_y<1) {
+                     moveQuantileLines(j, new_y, 'vertically')
+                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+                 }
              }
         }
         else {
@@ -382,41 +381,23 @@ mouseOverFocus.append("circle")
     .attr("r", 6)
     .attr("class",'hover_circle')
 
-mouseOverFocus.append("text")
-    .attr("x", 15)
-    .attr("dy", ".31em");
-
-const cdf_bisector = d3.bisector(d => d.x).left
-
-function mousemove(event,datum) {
-      var x0 = xScale.invert(event.layerX - margin.left),
-          i = cdf_bisector(cdf_data, x0, 1),
-          d0 = cdf_data[i - 1],
-          d1 = cdf_data[i],
-          d = x0 - d0.x > d1.x - x0 ? d1 : d0;
-      mouseOverFocus.attr("transform", "translate(" + xScale(d.x) + "," + cdf_yScale(d.y) + ")");
-      mouseOverFocus.select("text").text(function() {
-          return d.x.toPrecision(3).toString()+"; "+d.y.toPrecision(3).toString();
-      });
-    }
-d3.select(mouseOverRect).node().lower() // move below the rest, otherwise we lose interactivity with the plot
-
-d3.select('.overlay').on("click", addPointByClick)
-
+d3.select("#cdf_plot").on("click", addPointByClick)
 function addPointByClick(event,d){
-    x_click = xScale.invert(event.layerX - margin.left)
-    y_click = cdf_yScale.invert(event.layerY - margin.top)
-    console.log(x_click,y_click)
-    drawDataPoints(x_click,y_click, null)
+    if (event.shiftKey) {
+        x_click = xScale.invert(event.layerX - margin.left)
+        y_click = cdf_yScale.invert(event.layerY - margin.top)
+        console.log(x_click, y_click)
+        drawDataPoints(x_click, y_click, null)
 
-    npairs = document.getElementById("nb_pairs").value
-    console.log(npairs)
-    document.getElementById("pairs-"+(npairs)+"-P").value = y_click.toPrecision(3)
-    document.getElementById("pairs-"+(npairs)+"-Q").value = x_click.toPrecision(3)
+        npairs = document.getElementById("nb_pairs").value
+        console.log(npairs)
+        document.getElementById("pairs-" + (npairs) + "-P").value = y_click.toPrecision(3)
+        document.getElementById("pairs-" + (npairs) + "-Q").value = x_click.toPrecision(3)
 
-    document.getElementById("nb_pairs").value = parseInt(document.getElementById("nb_pairs").value) + 1
-    display_nb_pairs()
-    document.getElementById("dataInputForm").submit()
+        document.getElementById("nb_pairs").value = parseInt(document.getElementById("nb_pairs").value) + 1
+        display_nb_pairs()
+        document.getElementById("dataInputForm").submit()
+    }
 }
 
 function removePointByClick(event,d){
