@@ -7,6 +7,13 @@ import matplotlib.pyplot as plt
 from metalogistic.metalogistic import MetaLogistic
 import scipy.stats
 
+mlog_lls_error_message = 'Linear least squares did not yield a valid metalog distribution for your data.' \
+						 'Things that may help: (i) allow numerical methods using the checkbox,' \
+						 '(ii) add more input pairs, (iii) choose slightly different or less extreme inputs.'
+
+mlog_any_fit_method_error_message = 'The program was not able to fit a valid metalog distribution for your data.' \
+									'Things that may help: (i) add more input pairs, (ii) choose slightly different or less extreme inputs.'
+
 class DistributionObject:
 	def __init__(self,dictionary):
 		self.samples = None
@@ -145,9 +152,9 @@ class DistributionObject:
 
 		if not self.metalog_object.valid_distribution:
 			if self.dictionary['metalog_allow_numerical']:
-				self.errors.append('The program was not able to fit a valid metalog distribution for your data. Things that may help: (i) add more input pairs, (ii) choose less extreme inputs.')
+				self.errors.append(mlog_any_fit_method_error_message)
 			else:
-				self.errors.append('Linear least squares did not yield a valid metalog distribution for your data. Things that may help: (i) allow numerical methods using the checkbox, (ii) add more input pairs, (iii) choose less extreme inputs.')
+				self.errors.append(mlog_lls_error_message)
 		self.description.append('Fit method: ' + self.metalog_object.fit_method_used)
 		self.generatePlotDataMetalog()
 		self.createPlot()
@@ -198,6 +205,11 @@ class DistributionObject:
 		self.x_axis_pdf = pdf_data['X-values']
 		self.y_axis_pdf = pdf_data['Densities']
 
+		if min(self.y_axis_pdf<0):
+			if self.dictionary['metalog_allow_numerical']:
+				self.errors.append(mlog_any_fit_method_error_message)
+			else:
+				self.errors.append(mlog_lls_error_message)
 
 	def createPlot(self):
 		cdf_jsonlike = [{'x': self.x_axis_cdf[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis_cdf))]
