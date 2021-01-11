@@ -50,10 +50,14 @@
 
 
     <div><input type="submit"> </div>
-    <div id="example"><a href="javascript:display_example()">Click here to see an example</a></div>
 </form>
 
+<div id="example"><a href="javascript:display_example()">Click here to see an example</a></div>
+
+<p>Pro tip: use the browser's forward and back buttons to navigate your result history.</p>
+
 {% if distribution %}
+<div id="output_text">
         {%for i in distribution.description%}
             <div>{{i}}</div>
         {%endfor%}
@@ -61,16 +65,23 @@
         {%for i in distribution.errors%}
             <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
         {%endfor%}
-    {% endif %}
+</div>
+{% endif %}
 
+
+<div>
     {% if plot %}
-        <p><i>Plot instructions: You can drag horizontal and vertical lines.
-            Shift-drag any line to move all lines at the same time.
-            Hover over a point to display a draggable circle representing that point.
-            Alt-click a point to remove it.
-            Shift-click on an empty area to add a point.
+        <p><i>Plot instructions:
+            <ul>
+            <li> You can drag horizontal and vertical lines.
+            <li> Shift-drag any line to move all lines at the same time.
+            <li> Hover over a point to display a draggable circle representing that point.
+            <li> Alt-click a point to remove it.
+            <li> Shift-click on an empty area to add a point.
+            </ul>
         </i></p>
     {% endif %}
+</div>
 </div>
 
 <script src={{url_for('static', filename='index.js') }}></script>

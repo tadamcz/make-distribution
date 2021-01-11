@@ -116,5 +116,9 @@
   fill: none;
   stroke: black;
   stroke-width: 1;
+}
 
+#output_text{
+   border: #cccccc 1px solid;
+   padding: 20px
 }

@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 from metalogistic.metalogistic import MetaLogistic
 import scipy.stats
 
-mlog_lls_error_message = 'Linear least squares did not yield a valid metalog distribution for your data.' \
+mlog_lls_error_message = 'Linear least squares did not yield a valid metalog distribution for your data. ' \
 						 'Things that may help: (i) allow numerical methods using the checkbox,' \
 						 '(ii) add more input pairs, (iii) choose slightly different or less extreme inputs.'
 
-mlog_any_fit_method_error_message = 'The program was not able to fit a valid metalog distribution for your data.' \
+mlog_any_fit_method_error_message = 'The program was not able to fit a valid metalog distribution for your data. ' \
 									'Things that may help: (i) add more input pairs, (ii) choose slightly different or less extreme inputs.'
 
 class DistributionObject:
@@ -47,7 +47,7 @@ class DistributionObject:
 				self.description.append('sigma: ' + self.pretty(sigma))
 
 			if len(self.ps) > 2:
-				self.description.append('More than two quantiles provided, using least squares fit.')
+				self.description.append('More than two quantiles provided: least squares fit.')
 
 				mu_init, sigma_init = self.initial_guess_params()
 
@@ -61,8 +61,8 @@ class DistributionObject:
 				(mu, sigma), covariances = fit
 				mu_sd, sigma_sd = np.sqrt(np.diag(covariances))
 
-				self.description.append('mu: ' + self.pretty(mu) + ' (Estimated standard deviation:' + self.pretty(mu_sd) + ')')
-				self.description.append('sigma: ' + self.pretty(sigma) + ' (Estimated standard deviation:' + self.pretty(sigma_sd) + ')')
+				self.description.append('mu: ' + self.pretty(mu))
+				self.description.append('sigma: ' + self.pretty(sigma))
 
 			self.scipy_distribution = scipy.stats.norm(loc=mu, scale=sigma)
 
@@ -77,7 +77,7 @@ class DistributionObject:
 				self.description.append('sigma: ' + self.pretty(sigma))
 
 			if len(self.ps) > 2:
-				self.description.append('More than two quantiles provided, using least squares fit.')
+				self.description.append('More than two quantiles provided: least squares fit.')
 				mu_init, sigma_init = self.initial_guess_params(self.ps, qs_log_transformed)
 
 				fit = optimize.curve_fit(
@@ -89,15 +89,15 @@ class DistributionObject:
 
 				(mu, sigma), covariances = fit
 				mu_sd, sigma_sd = np.sqrt(np.diag(covariances))
-				self.description.append('mu: ' + self.pretty(mu) + ' (Estimated standard deviation:' + self.pretty(mu_sd) + ')')
-				self.description.append('sigma: ' + self.pretty(sigma) + ' (Estimated standard deviation:' + self.pretty(sigma_sd) + ')')
+				self.description.append('mu: ' + self.pretty(mu))
+				self.description.append('sigma: ' + self.pretty(sigma))
 
 			self.scipy_distribution = scipy.stats.lognorm(s=sigma, scale=math.exp(mu))
 
 		if self.family == 'beta':
 			for q in self.qs:
 				if not 0 <= q <= 1:
-					self.description.append("Quantiles out of bounds. Beta distribution defined on [0,1]")
+					self.errors.append("Quantiles out of bounds. Beta distribution defined on [0,1]")
 					return
 
 			alpha_init, beta_init = 1, 1
@@ -112,9 +112,9 @@ class DistributionObject:
 			(alpha, beta), covariances = fit
 			alpha_sd, beta_sd = np.sqrt(np.diag(covariances))
 
-			self.description.append('Beta distribution, using least squares fit.')
-			self.description.append('alpha: ' + self.pretty(alpha) + ' (Estimated standard deviation:' + self.pretty(alpha_sd) + ')')
-			self.description.append('beta: ' + self.pretty(beta) + ' (Estimated standard deviation:' + self.pretty(beta_sd) + ')')
+			self.description.append('Beta distribution: least squares fit.')
+			self.description.append('alpha: ' + self.pretty(alpha))
+			self.description.append('beta: ' + self.pretty(beta))
 
 			self.scipy_distribution = scipy.stats.beta(alpha, beta)
 
@@ -124,7 +124,6 @@ class DistributionObject:
 	def initMetalog(self):
 		self.n_samples = 5000
 		self.description.append('Meta-logistic distribution.')
-		term = len(self.ps)
 
 		self.metalog_boundedness = self.dictionary['metalog_boundedness']
 
