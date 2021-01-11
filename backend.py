@@ -145,9 +145,9 @@ class DistributionObject:
 
 		if not self.metalog_object.valid_distribution:
 			if self.dictionary['metalog_allow_numerical']:
-				self.errors.append('The program was not able to fit a valid metalog distribution for your data. Things that may help: (i) add more input_tuple pairs, (ii) choose less extreme inputs.')
+				self.errors.append('The program was not able to fit a valid metalog distribution for your data. Things that may help: (i) add more input pairs, (ii) choose less extreme inputs.')
 			else:
-				self.errors.append('Linear least squares did not yield a valid metalog distribution for your data. Things that may help: (i) allow numerical methods using the checkbox, (ii) add more input_tuple pairs, (iii) choose less extreme inputs.')
+				self.errors.append('Linear least squares did not yield a valid metalog distribution for your data. Things that may help: (i) allow numerical methods using the checkbox, (ii) add more input pairs, (iii) choose less extreme inputs.')
 		self.description.append('Fit method: ' + self.metalog_object.fit_method_used)
 		self.generatePlotDataMetalog()
 		self.createPlot()
