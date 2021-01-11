@@ -220,7 +220,7 @@ class DistributionObject:
 		cdf_metadata_jsonlike = dict(xmin=min(self.x_axis_cdf), ymin=min(self.y_axis_cdf), xmax=max(self.x_axis_cdf), ymax=max(self.y_axis_cdf))
 		pdf_metadata_jsonlike = dict(xmin=min(self.x_axis_pdf), ymin=min(self.y_axis_pdf), xmax=max(self.x_axis_pdf), ymax=max(self.y_axis_pdf))
 
-		maximum_density_to_display = min(np.median(self.y_axis_pdf)*50,max(self.y_axis_pdf))
+		maximum_density_to_display = min(np.percentile(self.y_axis_pdf, 80)*5,max(self.y_axis_pdf))
 
 
 
