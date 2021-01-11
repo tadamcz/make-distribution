@@ -163,6 +163,10 @@ for (let i = 0; i < quantiles.length; i++) {
             .on("end", endDragDataPoint)
     )
 }
+for (let i = 0; i < quantiles.length; i++) {
+    DataPointCircles[i].on("click", removePointByClick)
+}
+
 function draggedDataPoint(event,d) {
     i = parseInt(d3.select(this).attr('quantile_index'))
     console.log(i)
@@ -413,4 +417,15 @@ function addPointByClick(event,d){
     document.getElementById("nb_pairs").value = parseInt(document.getElementById("nb_pairs").value) + 1
     display_nb_pairs()
     document.getElementById("dataInputForm").submit()
+}
+
+function removePointByClick(event,d){
+    if (parseInt(document.getElementById("nb_pairs").value)>2) {
+        if (event.altKey) {
+            i = parseInt(d3.select(this).attr('quantile_index'))
+            d3.selectAll("path[quantile_index=  '"+i+"' ].dataPointCross").remove() // remove via JS for immediate visual feedback
+            d3.selectAll("path[quantile_index=  '"+i+"' ].dataPointCircle").remove()
+            removePair(i)
+        }
+    }
 }
