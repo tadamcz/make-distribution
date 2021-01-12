@@ -157,7 +157,7 @@ class DistributionObject:
 		self.metalog_boundedness = self.dictionary['metalog_boundedness']
 
 		if self.metalog_boundedness:
-			self.metalog_lower_bound, self.metalog_upper_bound = self.dictionary['metalog_lower_bound'], self.dictionary['metalog_upper_bound']
+			self.metalog_lower_bound, self.metalog_upper_bound = self.dictionary['metalog_bounds']['From'],self.dictionary['metalog_bounds']['To']
 		else:
 			self.metalog_lower_bound, self.metalog_upper_bound = None, None
 

@@ -47,8 +47,7 @@
         {{render_checkbox(form.metalog_boundedness, onchange="display_conditional_fields('metalog_boundedness','metalog_bounds')")}}
         <div id="metalog_bounds">
             You may specify both bounds, or just one bound for a semi-bounded distribution.
-            <b>{{render_field(form.metalog_lower_bound)}}
-               {{render_field(form.metalog_upper_bound)}}</b>
+            {{render_field_nolabel(form.metalog_bounds)}}
         </div>
         <div>
         {{render_checkbox(form.metalog_allow_numerical)}}

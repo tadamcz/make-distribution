@@ -21,6 +21,14 @@ class FromToForm(FlaskForm):
     To = FloatField('To',validators=[Optional()])
 
 class MyForm(FlaskForm):
+    def __init__(self, *args, **kwargs):
+        super(MyForm, self).__init__(*args, **kwargs)
+        self.metalog_bounds.From.label = 'Lower bound'
+        self.metalog_bounds.To.label = 'Upper bound'
+
+        self.generalized_beta_bounds.From.label = 'Lower bound'
+        self.generalized_beta_bounds.To.label = 'Upper bound'
+
     family = SelectField(choices=[('metalog','Metalog'),('normal','Normal'), ('lognormal','Lognormal'), ('beta','Beta'),('generalized_beta','Generalized Beta')])
     nb_pairs_to_display_hidden_field = IntegerField()
 
@@ -29,8 +37,7 @@ class MyForm(FlaskForm):
     plot_custom_domain_bool = BooleanField("Specify custom domain for plot?")
     plot_custom_domain_FromTo = FormField(FromToForm)
     metalog_boundedness = BooleanField("Specify bounds for metalog?")
-    metalog_lower_bound = DecimalField('Lower bound',validators=[Optional()])
-    metalog_upper_bound = DecimalField('Upper bound',validators=[Optional()])
+    metalog_bounds = FormField(FromToForm)
     metalog_allow_numerical = BooleanField("Allow numerical approximation if no exact metalog fit?")
 
     generalized_beta_bounds = FormField(FromToForm)
@@ -62,7 +69,7 @@ class MyForm(FlaskForm):
 
 
         if self.metalog_boundedness.data:
-            if self.metalog_lower_bound.data is None and self.metalog_upper_bound.data is None:
+            if self.metalog_bounds.From.data is None and self.metalog_bounds.To.data is None:
                 self.metalog_boundedness.errors.append('At least one bound is required')
                 validity = False
 
