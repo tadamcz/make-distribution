@@ -122,3 +122,16 @@
    border: #cccccc 1px solid;
    padding: 20px
 }
+
+.hidden_field{
+  display: none;
+}
+
+#metalog_options, #custom_domain_fields{
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+#metalog_bounds{
+  margin-bottom: 1em;
+}

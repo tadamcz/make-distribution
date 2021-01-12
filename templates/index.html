@@ -34,18 +34,18 @@
     </div>
     {% endfor %}
 
-    {{ render_checkbox(form.plot_custom_domain_bool, onchange="display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')")}}
-    {{ render_field_nolabel(form.plot_custom_domain_FromTo)}}
+    <div id="custom_domain_fields">
+        {{ render_checkbox(form.plot_custom_domain_bool, onchange="display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')")}}
+        {{ render_field_nolabel(form.plot_custom_domain_FromTo)}}
+    </div>
 
-    <div id = 'metalog_options'>
+    <div id='metalog_options'>
         {{render_checkbox(form.metalog_boundedness, onchange="display_conditional_fields('metalog_boundedness','metalog_bounds')")}}
         <div id="metalog_bounds">
             You may specify both bounds, or just one bound for a semi-bounded distribution.
             <b>{{render_field(form.metalog_lower_bound)}}
                {{render_field(form.metalog_upper_bound)}}</b>
         </div>
-
-
         <div>
         {{render_checkbox(form.metalog_allow_numerical)}}
             <div class = 'tooltip'>
