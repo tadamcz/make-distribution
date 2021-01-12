@@ -266,13 +266,13 @@ function dragged_horizontally(event,d) {
             maxdrag = parseFloat(quantile_vertical_lines_sorted[i_sorted_of_dragged + 1].attr('x_data'))
         }
         else {
-            maxdrag = Infinity
+            maxdrag = ubound
         }
         if (i_sorted_of_dragged>0) {
             mindrag = parseFloat(quantile_vertical_lines_sorted[i_sorted_of_dragged - 1].attr('x_data'))
         }
         else {
-            mindrag = -Infinity
+            mindrag = lbound
         }
         start_x_dragged = parseFloat(quantile_vertical_lines[i_of_dragged].attr('x_data'))
         if (event.sourceEvent.shiftKey && !event.sourceEvent.altKey) {

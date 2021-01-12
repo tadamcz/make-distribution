@@ -65,7 +65,7 @@ class DistributionObject:
 				self.description.append('mu: ' + self.pretty(mu))
 				self.description.append('sigma: ' + self.pretty(sigma))
 
-			self.scipy_distribution = scipy.stats.norm(loc=mu, scale=sigma)
+			self.distribution_object = scipy.stats.norm(loc=mu, scale=sigma)
 
 		if self.family == 'lognormal':
 			self.description.append('Log-normal distribution')
@@ -93,7 +93,7 @@ class DistributionObject:
 				self.description.append('mu: ' + self.pretty(mu))
 				self.description.append('sigma: ' + self.pretty(sigma))
 
-			self.scipy_distribution = scipy.stats.lognorm(s=sigma, scale=math.exp(mu))
+			self.distribution_object = scipy.stats.lognorm(s=sigma, scale=math.exp(mu))
 
 		if self.family == 'beta':
 			for q in self.qs:
@@ -117,7 +117,7 @@ class DistributionObject:
 			self.description.append('alpha: ' + self.pretty(alpha))
 			self.description.append('beta: ' + self.pretty(beta))
 
-			self.scipy_distribution = scipy.stats.beta(alpha, beta)
+			self.distribution_object = scipy.stats.beta(alpha, beta)
 
 		self.generatePlotDataSciPy()
 		self.createPlot()
@@ -139,10 +139,10 @@ class DistributionObject:
 			self.metalog_fit_method = 'Linear least squares'
 
 		try:
-			self.metalog_object = MetaLogistic(self.ps,self.qs,
-											   lbound=self.metalog_lower_bound,
-											   ubound=self.metalog_upper_bound,
-											   fit_method=self.metalog_fit_method)
+			self.distribution_object = MetaLogistic(self.ps, self.qs,
+													lbound=self.metalog_lower_bound,
+													ubound=self.metalog_upper_bound,
+													fit_method=self.metalog_fit_method)
 		except TimeoutError:
 			self.errors.append("Timed out while attempting to fit distribution.")
 			return
@@ -150,15 +150,15 @@ class DistributionObject:
 			self.errors.append(mlog_exception)
 			return
 
-		if not self.metalog_object.valid_distribution:
+		if not self.distribution_object.valid_distribution:
 			if self.dictionary['metalog_allow_numerical']:
 				self.errors.append(mlog_any_fit_method_error_message)
 			else:
 				self.errors.append(mlog_lls_error_message)
-		self.description.append('Fit method: ' + self.metalog_object.fit_method_used)
+		self.description.append('Fit method: ' + self.distribution_object.fit_method_used)
 		self.generatePlotDataMetalog()
 		self.createPlot()
-		self.samples = np.array2string(self.metalog_object.rvs(size=self.n_samples).flatten(),
+		self.samples = np.array2string(self.distribution_object.rvs(size=self.n_samples).flatten(),
 									   separator=', ',
 									   threshold=self.n_samples + 1,
 									   max_line_width=float('inf'))
@@ -171,8 +171,8 @@ class DistributionObject:
 
 		else:
 			y_bound = 0.001
-			left = self.scipy_distribution.ppf(y_bound)
-			right = self.scipy_distribution.ppf(1-y_bound)
+			left = self.distribution_object.ppf(y_bound)
+			right = self.distribution_object.ppf(1 - y_bound)
 
 			if min(self.qs)<left:
 				left = min(self.qs)
@@ -181,8 +181,8 @@ class DistributionObject:
 
 		self.x_axis = np.linspace(left,right,number_points)
 
-		self.y_axis_cdf = self.scipy_distribution.cdf(self.x_axis)
-		self.y_axis_pdf = self.scipy_distribution.pdf(self.x_axis)
+		self.y_axis_cdf = self.distribution_object.cdf(self.x_axis)
+		self.y_axis_pdf = self.distribution_object.pdf(self.x_axis)
 
 		self.x_axis_pdf = self.x_axis
 		self.x_axis_cdf = self.x_axis
@@ -191,13 +191,13 @@ class DistributionObject:
 		number_points = 300
 		if self.plot_custom_domain:
 			left, right = self.plot_custom_domain
-			left, right = self.intersect_intervals([(left,right),(self.metalog_object.a, self.metalog_object.b)])
+			left, right = self.intersect_intervals([(left,right), (self.distribution_object.a, self.distribution_object.b)])
 
-			cdf_data = self.metalog_object.createCDFPlotData(x_from_to=(left, right), n=number_points)
-			pdf_data = self.metalog_object.createPDFPlotData(x_from_to=(left, right), n=number_points)
+			cdf_data = self.distribution_object.createCDFPlotData(x_from_to=(left, right), n=number_points)
+			pdf_data = self.distribution_object.createPDFPlotData(x_from_to=(left, right), n=number_points)
 		else:
-			cdf_data = self.metalog_object.createCDFPlotData(n=number_points)
-			pdf_data = self.metalog_object.createPDFPlotData(n=number_points)
+			cdf_data = self.distribution_object.createCDFPlotData(n=number_points)
+			pdf_data = self.distribution_object.createPDFPlotData(n=number_points)
 
 		self.x_axis_cdf = cdf_data['X-values']
 		self.y_axis_cdf = cdf_data['Probabilities']
@@ -234,6 +234,8 @@ class DistributionObject:
 		const quantiles =''' + json.dumps(quantiles_jsonlike) + '''
 		const maximum_density_to_display=''' +str(maximum_density_to_display) + '''
 		const pairs_form_indices=''' +json.dumps(self.pairs_form_indices) + '''
+		const lbound=''' +json.dumps(self.distribution_object.a) + '''
+		const ubound=''' +json.dumps(self.distribution_object.b) + '''
 		</script>
 		'''
 
