@@ -1,2 +1,14 @@
 add shifted scaled beta
+think about whether to display invalid plots
+better handling of empty pairs in the form (also fixes clicking to add new while empty in form)
+when hovering on a point, bold it in the left list
+submit form on family dropdown change
+adjust size of plot dynamically
+do not allow dragging beyond bounds for bounded distributions
+mixtures
 
+maybe:
+when adding point by clicking, where to add it in the form? in order?
+try to deal with overflow issues?
+add more examples for non-metalog
+submit form via ajax
