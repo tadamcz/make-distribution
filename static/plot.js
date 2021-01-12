@@ -31,7 +31,10 @@ var cdf_line_generator = d3.line()
 
 var pdf_line_generator = d3.line()
     .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
-    .y(function(d) { return pdf_yScale(d.y); }) // set the y values for the line generator
+    .y(function(d) {
+        if (isFinite(d.y)){return pdf_yScale(d.y)}
+        else {return -100*height}
+        }) // set the y values for the line generator
 
 // Add the SVG to the graph div and employ margin conventions
 var cdf_svg = d3.select("#cdf_plot").append("svg")
