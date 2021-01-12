@@ -244,41 +244,59 @@ function moveQuantileLines(i, coord, dragDirection) {
 }
 
 drawQuantileLines()
-
 function dragged_horizontally(event,d) {
-        i = parseInt(d3.select(this).attr('quantile_index'))
+        i_of_dragged = parseInt(d3.select(this).attr('quantile_index'))
         x_drag = xScale.invert(event.x)
 
         quantile_vertical_lines_sorted = quantile_vertical_lines.concat().sort((a, b) => parseFloat(a.attr('x_data')) - parseFloat(b.attr('x_data')))
-        i_sorted = quantile_vertical_lines_sorted.findIndex(element => element.attr('x_data') === d3.select(this).attr('x_data'))
+        i_sorted_of_dragged = quantile_vertical_lines_sorted.findIndex(element => element.attr('x_data') === d3.select(this).attr('x_data'))
 
-        if (i_sorted<quantiles.length-1) {
-            maxdrag = parseFloat(quantile_vertical_lines_sorted[i_sorted + 1].attr('x_data'))
+        sorted_indices = indicesSortedByAttribute(quantile_vertical_lines,'x_data')
+
+        if (i_sorted_of_dragged<quantiles.length-1) {
+            maxdrag = parseFloat(quantile_vertical_lines_sorted[i_sorted_of_dragged + 1].attr('x_data'))
         }
         else {
             maxdrag = Infinity
         }
-        if (i_sorted>0) {
-            mindrag = parseFloat(quantile_vertical_lines_sorted[i_sorted - 1].attr('x_data'))
+        if (i_sorted_of_dragged>0) {
+            mindrag = parseFloat(quantile_vertical_lines_sorted[i_sorted_of_dragged - 1].attr('x_data'))
         }
         else {
             mindrag = -Infinity
         }
-
-        if (event.sourceEvent.shiftKey) {
-            start_x_dragged = parseFloat(quantile_vertical_lines[i].attr('x_data'))
+        start_x_dragged = parseFloat(quantile_vertical_lines[i_of_dragged].attr('x_data'))
+        if (event.sourceEvent.shiftKey && !event.sourceEvent.altKey) {
              for (let j = 0; j < quantiles.length; j++) {
                  current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
                  new_x = current_x+(x_drag-start_x_dragged)
-                 console.log(new_x)
                  moveQuantileLines(j, new_x, 'horizontally')
-                document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+                 document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
              }
          }
+        else if (!event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
+            indices_to_drag = sorted_indices.slice(sorted_indices.findIndex(element => element === i_of_dragged))
+            for (const j of indices_to_drag) {
+                 current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
+                 new_x = current_x+(x_drag-start_x_dragged)
+                 moveQuantileLines(j, new_x, 'horizontally')
+                 document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+            }
+        }
+        else if (event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
+            indices_to_drag = sorted_indices.slice(0, sorted_indices.findIndex(element => element === i_of_dragged)+1)
+            for (const j of indices_to_drag) {
+                 current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
+                 new_x = current_x+(x_drag-start_x_dragged)
+                 moveQuantileLines(j, new_x, 'horizontally')
+                 document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+            }
+        }
+
          else {
              if (mindrag<x_drag && x_drag<maxdrag) {
-                 moveQuantileLines(i, x_drag, 'horizontally')
-                 document.getElementById('pairs-' + i + '-Q').value = x_drag.toPrecision(3)
+                 moveQuantileLines(i_of_dragged, x_drag, 'horizontally')
+                 document.getElementById('pairs-' + i_of_dragged + '-Q').value = x_drag.toPrecision(3)
              }
         }
 
@@ -301,27 +319,29 @@ for (line of pdf_quantile_vertical_lines) {
 
 function dragged_vertically(event,d) {
         d3.select(this).style('stroke','black')
-        i = parseInt(d3.select(this).attr('quantile_index'))
+        i_of_dragged = parseInt(d3.select(this).attr('quantile_index'))
         y_drag = cdf_yScale.invert(event.y)
 
         quantile_horizontal_lines_sorted = quantile_horizontal_lines.concat().sort((a, b) => parseFloat(a.attr('y_data')) - parseFloat(b.attr('y_data')))
-        i_sorted = quantile_horizontal_lines_sorted.findIndex(element => element.attr('y_data') === d3.select(this).attr('y_data'))
-        if (i_sorted<quantiles.length-1) {
-            maxdrag = parseFloat(quantile_horizontal_lines_sorted[i_sorted + 1].attr('y_data'))
+        i_sorted_of_dragged = quantile_horizontal_lines_sorted.findIndex(element => element.attr('y_data') === d3.select(this).attr('y_data'))
+
+        sorted_indices = indicesSortedByAttribute(quantile_horizontal_lines,'y_data')
+
+        if (i_sorted_of_dragged<quantiles.length-1) {
+            maxdrag = parseFloat(quantile_horizontal_lines_sorted[i_sorted_of_dragged + 1].attr('y_data'))
         }
         else {
             maxdrag = 1
         }
-        if (i_sorted>0) {
-            mindrag = parseFloat(quantile_horizontal_lines_sorted[i_sorted - 1].attr('y_data'))
+        if (i_sorted_of_dragged>0) {
+            mindrag = parseFloat(quantile_horizontal_lines_sorted[i_sorted_of_dragged - 1].attr('y_data'))
         }
         else {
             mindrag = 0
         }
 
-        if (event.sourceEvent.shiftKey) {
-
-            start_y_dragged = parseFloat(quantile_horizontal_lines[i].attr('y_data'))
+        start_y_dragged = parseFloat(quantile_horizontal_lines[i_of_dragged].attr('y_data'))
+        if (event.sourceEvent.shiftKey && !event.sourceEvent.altKey) {
              for (let j = 0; j < quantiles.length; j++) {
                  current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
                  if (current_y<.5) {
@@ -338,10 +358,47 @@ function dragged_vertically(event,d) {
                  }
              }
         }
+        else if (!event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
+            indices_to_drag = sorted_indices.slice(sorted_indices.findIndex(element => element === i_of_dragged))
+            console.log(indices_to_drag)
+            for (const j of indices_to_drag) {
+                 current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
+                 if (current_y<.5) {
+                     ratio = y_drag/start_y_dragged
+                     new_y = current_y*ratio
+                 }
+                 else {
+                     ratio = (1-y_drag)/(1-start_y_dragged)
+                     new_y = 1- (1-current_y)*ratio
+                 }
+                 if (0<new_y && new_y<1) {
+                     moveQuantileLines(j, new_y, 'vertically')
+                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+                 }
+            }
+        }
+        else if (event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
+            indices_to_drag = sorted_indices.slice(0, sorted_indices.findIndex(element => element === i_of_dragged)+1)
+            for (const j of indices_to_drag) {
+                 current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
+                 if (current_y<.5) {
+                     ratio = y_drag/start_y_dragged
+                     new_y = current_y*ratio
+                 }
+                 else {
+                     ratio = (1-y_drag)/(1-start_y_dragged)
+                     new_y = 1- (1-current_y)*ratio
+                 }
+                 if (0<new_y && new_y<1) {
+                     moveQuantileLines(j, new_y, 'vertically')
+                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+                 }
+            }
+        }
         else {
             if (mindrag<y_drag && y_drag<maxdrag) {
-                moveQuantileLines(i, y_drag, 'vertically')
-                document.getElementById('pairs-' + i + '-P').value = y_drag.toPrecision(3)
+                moveQuantileLines(i_of_dragged, y_drag, 'vertically')
+                document.getElementById('pairs-' + i_of_dragged + '-P').value = y_drag.toPrecision(3)
             }
         }
     }
@@ -429,4 +486,14 @@ function removePointByClick(event,d){
             removePair(i)
         }
     }
+}
+function indicesSortedByAttribute(array,attribute){
+    // make list with indices and values
+    indexedArray = array.map(function(e,i){return {ind: i, val: e}});
+    // sort index/value couples, based on values
+    indexedArray.sort(function(x, y){
+        return parseFloat(x.val.attr(attribute)) > parseFloat(y.val.attr(attribute)) ? 1 : parseFloat(x.val.attr(attribute)) === parseFloat(y.val.attr(attribute)) ? 0 : -1
+    });
+    // return list keeping only indices
+    return indexedArray.map(function(e){return e.ind});
 }

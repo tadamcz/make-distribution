@@ -71,13 +71,15 @@
 
 <div>
     {% if plot %}
-        <p><i>Plot instructions:
+        <p><i>How to use the plot:
             <ul>
-            <li> You can drag horizontal and vertical lines.
-            <li> Shift-drag any line to move all lines at the same time.
-            <li> Hover over a point to display a draggable circle representing that point.
-            <li> Alt-click a point to remove it.
-            <li> Shift-click on an empty area to add a point.
+            <li> You can <b>drag</b> horizontal and vertical lines.
+            <li> <b>Shift-drag</b> any line to move all lines at the same time.
+            <li> <b>Alt-drag</b> any line to move all <span style="font-style:normal">greater</span> lines at the same time.
+            <li> <b>Alt-Shift-drag</b> any line to move all <span style="font-style:normal">lesser</span> lines at the same time.
+            <li> <b>Hover</b> over a point to display a draggable circle representing that point.
+            <li> <b>Alt-click</b> a point to remove it.
+            <li> <b>Shift-click</b> on an empty area to add a point.
             </ul>
         </i></p>
     {% endif %}
