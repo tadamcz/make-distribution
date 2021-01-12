@@ -27,7 +27,7 @@
 
     <div style="margin-bottom: 1em"><a id="add_pair_button" href="javascript:addPair()">Add pair</a></div>
     {% for pair in form.pairs %}
-    <div id = {{'pair' ~ loop.index}}>
+    <div class="pair" id = {{'pair' ~ loop.index}}>
         Pair {{loop.index}}
         <a class="remove_pair_button" href="javascript:removePair({{loop.index}}-1)">Remove</a>
         {{render_field_nolabel(pair)}}

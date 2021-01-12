@@ -149,7 +149,19 @@ function drawDataPoints(x, y, index) {
             .attr('transform', 'translate(' + xScale(x) + ',' + cdf_yScale(y) + ')')
             .attr('class', 'dataPointCircle')
             .attr('quantile_index', index)
+            .on("mouseover",dataPointCircleHovered)
+            .on("mouseout",dataPointCircleHoveredEnd)
     )
+}
+function dataPointCircleHovered(){
+    i = d3.select(this).attr('quantile_index')
+    i = pairs_form_indices[i]
+    document.getElementById('pair'+(i+1)).style.background = 'lightgray'
+}
+function dataPointCircleHoveredEnd(){
+    i = d3.select(this).attr('quantile_index')
+    i = pairs_form_indices[i]
+    document.getElementById('pair'+(i+1)).style.background = 'none'
 }
 
 for (let i = 0; i < quantiles.length; i++) {

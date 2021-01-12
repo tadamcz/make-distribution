@@ -135,3 +135,8 @@
 #metalog_bounds{
   margin-bottom: 1em;
 }
+
+.pair{
+  border-radius: 3px;
+  padding-left: 5px;
+}
