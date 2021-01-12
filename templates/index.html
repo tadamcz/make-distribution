@@ -12,12 +12,20 @@
 <div class="flexbox">
 <div id="left_pane">
     <form method="POST" id="dataInputForm">
-    <div style="margin-bottom: 1em">
-        {{render_field(form.family,onchange="display_metalog_options()") }}
-        {{render_field(form.nb_pairs,onchange="display_nb_pairs()")}}
-        <a id="add_pair_button" href="javascript:addPair()">Add</a>
+    <div>
+        {{render_field(form.family,onchange="display_metalog_options(), submitForm()") }}
+
+        {% if form.nb_pairs_to_display_hidden_field.errors %}
+            <ul class=errors>
+                {% for error in form.nb_pairs_to_display_hidden_field.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <div class="hidden_field">{{form.nb_pairs_to_display_hidden_field(onchange="display_nb_pairs()")}}</div>
     </div>
 
+    <div style="margin-bottom: 1em"><a id="add_pair_button" href="javascript:addPair()">Add pair</a></div>
     {% for pair in form.pairs %}
     <div id = {{'pair' ~ loop.index}}>
         Pair {{loop.index}}

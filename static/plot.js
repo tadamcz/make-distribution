@@ -170,8 +170,8 @@ function draggedDataPoint(event,d) {
     DataPointCircles[i].attr('transform','translate(' + event.x + ',' + event.y + ')')
     DataPointCrosses[i].attr('transform','translate(' + event.x + ',' + event.y + ')')
 
-    document.getElementById('pairs-' + i + '-Q').value = x_drag.toPrecision(3)
-    document.getElementById('pairs-' + i + '-P').value = y_drag.toPrecision(3)
+    document.getElementById('pairs-' + pairs_form_indices[i] + '-Q').value = x_drag.toPrecision(3)
+    document.getElementById('pairs-' + pairs_form_indices[i] + '-P').value = y_drag.toPrecision(3)
 
 }
 
@@ -285,7 +285,7 @@ function dragged_horizontally(event,d) {
          else {
              if (mindrag<x_drag && x_drag<maxdrag) {
                  moveQuantileLines(i_of_dragged, x_drag, 'horizontally')
-                 document.getElementById('pairs-' + i_of_dragged + '-Q').value = x_drag.toPrecision(3)
+                 document.getElementById('pairs-' + pairs_form_indices[i_of_dragged] + '-Q').value = x_drag.toPrecision(3)
              }
         }
 
@@ -294,7 +294,7 @@ function dragMultipleHorizontally(j, x_drag,start_x_dragged){
     current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
     new_x = current_x+(x_drag-start_x_dragged)
     moveQuantileLines(j, new_x, 'horizontally')
-    document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+    document.getElementById('pairs-' + pairs_form_indices[j] + '-Q').value = new_x.toPrecision(3)
 }
 for (line of quantile_vertical_lines) {
     line.call(
@@ -356,7 +356,7 @@ function dragged_vertically(event,d) {
         else {
             if (mindrag<y_drag && y_drag<maxdrag) {
                 moveQuantileLines(i_of_dragged, y_drag, 'vertically')
-                document.getElementById('pairs-' + i_of_dragged + '-P').value = y_drag.toPrecision(3)
+                document.getElementById('pairs-' + pairs_form_indices[i_of_dragged] + '-P').value = y_drag.toPrecision(3)
             }
         }
     }
@@ -372,7 +372,7 @@ function dragMultipleVertically(j, y_drag,start_y_dragged){
      }
      if (0<new_y && new_y<1) {
          moveQuantileLines(j, new_y, 'vertically')
-         document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+         document.getElementById('pairs-' + pairs_form_indices[j] + '-P').value = new_y.toPrecision(3)
      }
 }
 for (line of quantile_horizontal_lines) {
@@ -446,19 +446,19 @@ function addPointByClick(event,d){
         document.getElementById("pairs-" + (npairs) + "-P").value = y_click.toPrecision(3)
         document.getElementById("pairs-" + (npairs) + "-Q").value = x_click.toPrecision(3)
 
-        document.getElementById("nb_pairs").value = parseInt(document.getElementById("nb_pairs").value) + 1
+        document.getElementById("nb_pairs_to_display_hidden_field").value = parseInt(document.getElementById("nb_pairs_to_display_hidden_field").value) + 1
         display_nb_pairs()
         document.getElementById("dataInputForm").submit()
     }
 }
 
 function removePointByClick(event,d){
-    if (parseInt(document.getElementById("nb_pairs").value)>2) {
+    if (parseInt(document.getElementById("nb_pairs_to_display_hidden_field").value)>2) {
         if (event.altKey) {
             i = parseInt(d3.select(this).attr('quantile_index'))
             d3.selectAll("path[quantile_index=  '"+i+"' ].dataPointCross").remove() // remove via JS for immediate visual feedback
             d3.selectAll("path[quantile_index=  '"+i+"' ].dataPointCircle").remove()
-            removePair(i)
+            removePair(pairs_form_indices[i])
         }
     }
 }

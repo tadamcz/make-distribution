@@ -24,6 +24,7 @@ class DistributionObject:
 		self.family = dictionary['family']
 		self.ps = dictionary['ps']
 		self.qs = dictionary['qs']
+		self.pairs_form_indices = dictionary['pairs_form_indices']
 
 		self.plot_custom_domain = False
 		if dictionary['plot_custom_domain_bool']:
@@ -232,6 +233,7 @@ class DistributionObject:
 		const pdf_metadata =''' + json.dumps(pdf_metadata_jsonlike) + '''
 		const quantiles =''' + json.dumps(quantiles_jsonlike) + '''
 		const maximum_density_to_display=''' +str(maximum_density_to_display) + '''
+		const pairs_form_indices=''' +json.dumps(self.pairs_form_indices) + '''
 		</script>
 		'''
 

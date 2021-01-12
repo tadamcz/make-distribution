@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, DecimalField
+from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, DecimalField, IntegerField
 from wtforms.validators import Optional, number_range
 from flask_wtf import FlaskForm
 import mpld3
@@ -22,7 +22,7 @@ class FromToForm(FlaskForm):
 
 class MyForm(FlaskForm):
     family = SelectField(choices=['metalog','normal', 'lognormal', 'beta'])
-    nb_pairs = SelectField('Number of P,Q pairs',choices=[i for i in range(2, 11)])
+    nb_pairs_to_display_hidden_field = IntegerField()
 
     pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
 
@@ -38,14 +38,26 @@ class MyForm(FlaskForm):
         if not super(MyForm, self).validate():
             validity = False
 
-        for i in range(int(self.nb_pairs.data)):
+        for pair in self.pairs:
             p_or_q_missing = False
-            for letter in ('P','Q'):
-                if self.pairs[i][letter].data is None:
-                    self.pairs[i][letter].errors.append(letter+' is required')
-                    p_or_q_missing = True
+            if pair['P'].data is not None and pair['Q'].data is None:
+                pair['Q'].errors.append('Q is required')
+                p_or_q_missing = True
+            if pair['P'].data is None and pair['Q'].data is not None:
+                pair['P'].errors.append('P is required')
+                p_or_q_missing = True
             if p_or_q_missing:
                 validity = False
+
+        non_empty_pairs = 0
+        for i in range(self.nb_pairs_to_display_hidden_field.data):
+            p, q = self.pairs[i].P.data, self.pairs[i].Q.data
+            if p is not None and q is not None:
+                non_empty_pairs += 1
+        if non_empty_pairs<2:
+            self.nb_pairs_to_display_hidden_field.errors.append("At least two pairs are required")
+            validity = False
+
 
         if self.metalog_boundedness.data:
             if self.metalog_lower_bound.data is None and self.metalog_upper_bound.data is None:
@@ -53,23 +65,25 @@ class MyForm(FlaskForm):
                 validity = False
 
         if self.family.data == 'lognormal':
-            for i in range(int(self.nb_pairs.data)):
-                if self.pairs[i]['Q'].data is not None:
-                    if self.pairs[i]['Q'].data <=0:
-                        self.pairs[i]['Q'].errors.append("Lognormal is not defined for non-positive numbers")
+            for pair in self.pairs:
+                if pair['Q'].data is not None:
+                    if pair['Q'].data <=0:
+                        pair['Q'].errors.append("Lognormal is not defined for non-positive numbers")
                         validity = False
         return validity
 
     def parse_user_input(self):
         dictionary = dict(self.data)
         dictionary = self.recursively_convert_decimal_to_float(dictionary)
-        nb_pairs = int(dictionary['nb_pairs'])
         dictionary['ps'] = []
         dictionary['qs'] = []
-        for i in range(nb_pairs):
+        dictionary['pairs_form_indices'] = []
+        for i in range(dictionary['nb_pairs_to_display_hidden_field']):
             p, q = dictionary["pairs"][i]['P'], dictionary["pairs"][i]['Q']
-            dictionary['ps'].append(p)
-            dictionary['qs'].append(q)
+            if p is not None:
+                dictionary['ps'].append(p)
+                dictionary['qs'].append(q)
+                dictionary['pairs_form_indices'].append(i)
         return dictionary
 
     def recursively_convert_decimal_to_float(self,dictionary):
@@ -87,7 +101,7 @@ def getRequest():
 
     # Default data
     form.family.data = 'metalog'
-    form.nb_pairs.data = 2
+    form.nb_pairs_to_display_hidden_field.data = 2
     form.metalog_allow_numerical.data = True
     form.pairs[0]['P'].data = .1
     form.pairs[0]['Q'].data = -100

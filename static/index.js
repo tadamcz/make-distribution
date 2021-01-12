@@ -1,5 +1,5 @@
 function display_example(){
-    document.getElementById("nb_pairs").value = 3
+    document.getElementById("nb_pairs_to_display_hidden_field").value = 3
     document.getElementById("family").value = 'metalog'
 
     document.getElementById("plot_custom_domain_bool").checked = true
@@ -23,11 +23,14 @@ function display_example(){
     document.getElementById("pairs-2-P").value = .9
     document.getElementById("pairs-2-Q").value = 50
 
-    document.getElementById("dataInputForm").submit()
+    submitForm()
 
 }
+function submitForm(){
+    document.getElementById("dataInputForm").submit()
+}
 function display_nb_pairs() {
-    const nb_pairs = document.getElementById("nb_pairs").value;
+    const nb_pairs = document.getElementById("nb_pairs_to_display_hidden_field").value;
     const max_pairs = 10;
     let i;
     for (i = 1; i <= max_pairs; i++) {
@@ -38,7 +41,7 @@ function display_nb_pairs() {
         }
     }
     displayAddPairsButton()
-    displayRemovePairButtons()
+    // displayRemovePairButtons()
 }
 display_nb_pairs()
 
@@ -64,9 +67,9 @@ function display_metalog_options() {
     const family = document.getElementById("family").value;
     if (family == 'metalog') {
         document.getElementById('metalog_options').style.display = 'block'
-        const nb_pairs = document.getElementById("nb_pairs").value
-        // if (nb_pairs < 3) {
-        //     document.getElementById('nb_pairs').value = 3
+        const nb_pairs = document.getElementById("nb_pairs_to_display_hidden_field").value
+        // if (nb_pairs_to_display_hidden_field < 3) {
+        //     document.getElementById('nb_pairs_to_display_hidden_field').value = 3
         //     display_nb_pairs()
         // }
 
@@ -98,7 +101,9 @@ function copySamplesClipboard(){
 }
 
 function removePair(i){
-    npairs = document.getElementById("nb_pairs").value
+    isEmptyPair = document.getElementById("pairs-" + i + "-P").value === '' && document.getElementById("pairs-" + i + "-Q").value === '';
+
+    npairs = document.getElementById("nb_pairs_to_display_hidden_field").value
 
     for (let j = i+1; j < npairs; j++) {
         document.getElementById("pairs-"+(j-1)+"-P").value = document.getElementById("pairs-"+j+"-P").value
@@ -108,37 +113,28 @@ function removePair(i){
     document.getElementById("pairs-"+(npairs-1)+"-P").value = ''
     document.getElementById("pairs-"+(npairs-1)+"-Q").value = ''
 
-    document.getElementById("nb_pairs").value = document.getElementById("nb_pairs").value-1
+    document.getElementById("nb_pairs_to_display_hidden_field").value = document.getElementById("nb_pairs_to_display_hidden_field").value-1
     display_nb_pairs()
-    document.getElementById("dataInputForm").submit()
+
+    if (!isEmptyPair) {
+        submitForm()
+    }
 }
 
 function addPair(){
-    document.getElementById('nb_pairs').value = parseInt(document.getElementById('nb_pairs').value) + 1
+    document.getElementById('nb_pairs_to_display_hidden_field').value = parseInt(document.getElementById('nb_pairs_to_display_hidden_field').value) + 1
     display_nb_pairs()
     displayAddPairsButton()
 }
 
 function displayAddPairsButton() {
-    if (parseInt(document.getElementById('nb_pairs').value)<10){
-        document.getElementById('add_pair_button').style.display = 'block'
+    if (parseInt(document.getElementById('nb_pairs_to_display_hidden_field').value)<10){
+        document.getElementById('add_pair_button').style.visibility = 'visible'
     }
     else {
-        document.getElementById('add_pair_button').style.display = 'none'
+        document.getElementById('add_pair_button').style.visibility = 'hidden'
     }
 }
 displayAddPairsButton()
 
-function displayRemovePairButtons() {
-    if (parseInt(document.getElementById('nb_pairs').value)>2){
-        for (const button of document.getElementsByClassName('remove_pair_button')) {
-            button.style.display = 'inline'
-        }
-    }
-    else {
-        for (const button of document.getElementsByClassName('remove_pair_button')) {
-            button.style.display = 'none'
-        }
-    }
-}
-displayRemovePairButtons()
+
