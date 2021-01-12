@@ -21,7 +21,7 @@ class FromToForm(FlaskForm):
     To = FloatField('To',validators=[Optional()])
 
 class MyForm(FlaskForm):
-    family = SelectField(choices=['metalog','normal', 'lognormal', 'beta'])
+    family = SelectField(choices=[('metalog','Metalog'),('normal','Normal'), ('lognormal','Lognormal'), ('beta','Beta'),('generalized_beta','Generalized Beta')])
     nb_pairs_to_display_hidden_field = IntegerField()
 
     pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
@@ -32,6 +32,8 @@ class MyForm(FlaskForm):
     metalog_lower_bound = DecimalField('Lower bound',validators=[Optional()])
     metalog_upper_bound = DecimalField('Upper bound',validators=[Optional()])
     metalog_allow_numerical = BooleanField("Allow numerical approximation if no exact metalog fit?")
+
+    generalized_beta_bounds = FormField(FromToForm)
 
     def validate(self):
         validity = True
@@ -70,6 +72,14 @@ class MyForm(FlaskForm):
                     if pair['Q'].data <=0:
                         pair['Q'].errors.append("Lognormal is not defined for non-positive numbers")
                         validity = False
+        if self.family.data == 'generalized_beta':
+            if self.generalized_beta_bounds.From.data is None or self.generalized_beta_bounds.To.data is None:
+                self.generalized_beta_bounds.To.errors.append("Bounds are required")
+                validity = False
+            else:
+                if self.generalized_beta_bounds.From.data > self.generalized_beta_bounds.To.data:
+                    self.generalized_beta_bounds.To.errors.append("Lower bound cannot exceed upper bound")
+                    validity = False
         return validity
 
     def parse_user_input(self):

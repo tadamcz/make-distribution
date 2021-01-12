@@ -27,21 +27,24 @@ function displayMetalogExample(){
 
 }
 
-function displayBetaExample(){
+function displayGenBetaExample(){
     document.getElementById("nb_pairs_to_display_hidden_field").value = 3
-    document.getElementById("family").value = 'beta'
+    document.getElementById("family").value = 'generalized_beta'
 
     document.getElementById("plot_custom_domain_bool").checked = false
     display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')
 
-    document.getElementById("pairs-0-P").value = .15
-    document.getElementById("pairs-0-Q").value = .06
+    document.getElementById("generalized_beta_bounds-From").value = -6
+    document.getElementById("generalized_beta_bounds-To").value = -1
+
+    document.getElementById("pairs-0-P").value = .2
+    document.getElementById("pairs-0-Q").value = -5.2
 
     document.getElementById("pairs-1-P").value = .5
-    document.getElementById("pairs-1-Q").value = .21
+    document.getElementById("pairs-1-Q").value = -4
 
-    document.getElementById("pairs-2-P").value = .85
-    document.getElementById("pairs-2-Q").value = .93
+    document.getElementById("pairs-2-P").value = .8
+    document.getElementById("pairs-2-Q").value = -1.3
 
     submitForm()
 
@@ -83,22 +86,25 @@ for (const conditionalField of conditionalFields) {
     display_conditional_fields(conditionalField.checkbox,conditionalField.field)
 }
 
-function display_metalog_options() {
+function displayDistributionSpecificOptions() {
     const family = document.getElementById("family").value;
-    if (family == 'metalog') {
+    if (family === 'metalog') {
         document.getElementById('metalog_options').style.display = 'block'
-        const nb_pairs = document.getElementById("nb_pairs_to_display_hidden_field").value
-        // if (nb_pairs_to_display_hidden_field < 3) {
-        //     document.getElementById('nb_pairs_to_display_hidden_field').value = 3
-        //     display_nb_pairs()
-        // }
-
     }
     else {
         document.getElementById('metalog_options').style.display = 'none'
     }
+
+    if (family === 'generalized_beta') {
+        document.getElementById('generalized_beta_options').style.display = 'block'
+    }
+    else {
+        document.getElementById('generalized_beta_options').style.display = 'none'
+    }
 }
-display_metalog_options()
+displayDistributionSpecificOptions()
+
+
 
 function copySamplesClipboard(){
     var selectContents = function(el) {

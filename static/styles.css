@@ -127,7 +127,7 @@
   display: none;
 }
 
-#metalog_options, #custom_domain_fields{
+#metalog_options, #custom_domain_fields, #generalized_beta_options{
   margin-top: 1em;
   margin-bottom: 1em;
 }

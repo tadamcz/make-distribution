@@ -26,6 +26,7 @@ class DistributionObject:
 		self.qs = dictionary['qs']
 		self.pairs_form_indices = dictionary['pairs_form_indices']
 
+
 		self.plot_custom_domain = False
 		if dictionary['plot_custom_domain_bool']:
 			self.plot_custom_domain = (dictionary['plot_custom_domain_FromTo']['From'],dictionary['plot_custom_domain_FromTo']['To'])
@@ -118,6 +119,33 @@ class DistributionObject:
 			self.description.append('beta: ' + self.pretty(beta))
 
 			self.distribution_object = scipy.stats.beta(alpha, beta)
+
+		if self.family == 'generalized_beta':
+			self.generalized_beta_lbound, self.generalized_beta_ubound = self.dictionary['generalized_beta_bounds']['From'], self.dictionary['generalized_beta_bounds']['To']
+
+			loc = self.generalized_beta_lbound
+			scale = self.generalized_beta_ubound - loc
+
+			alpha_init, beta_init = 1, 1
+
+			fit = optimize.curve_fit(
+				lambda x, alpha, beta: stats.beta(alpha, beta, loc=loc, scale=scale).cdf(x),
+				xdata=self.qs,
+				ydata=self.ps,
+				p0=[alpha_init, beta_init]
+			)
+
+			(alpha, beta), covariances = fit
+
+			self.description.append('Generalized beta distribution: least squares fit.')
+			self.description.append('alpha: ' + self.pretty(alpha))
+			self.description.append('beta: ' + self.pretty(beta))
+
+			self.distribution_object = scipy.stats.beta(alpha, beta, loc=loc, scale=scale)
+			self.distribution_object.a = self.generalized_beta_lbound
+			self.distribution_object.b = self.generalized_beta_ubound
+
+
 
 		self.generatePlotDataSciPy()
 		self.createPlot()

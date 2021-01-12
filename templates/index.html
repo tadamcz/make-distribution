@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="../static/styles.css"/>
     <meta charset="UTF-8">
     <title>Elicit probability distributions from quantiles</title>
     <link rel="stylesheet" href= {{url_for('static', filename='styles.css') }}>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 {% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
@@ -13,7 +15,9 @@
 <div id="left_pane">
     <form method="POST" id="dataInputForm">
     <div>
-        {{render_field(form.family,onchange="display_metalog_options(), submitForm()") }}
+        {{render_field(form.family,onchange="displayDistributionSpecificOptions(),
+                                            submitForm()
+                                            ") }}
 
         {% if form.nb_pairs_to_display_hidden_field.errors %}
             <ul class=errors>
@@ -55,13 +59,22 @@
             </div>
         </div>
     </div>
+    <div id='generalized_beta_options'>
+        {{render_field(form.generalized_beta_bounds)}}
+        <br> A four-parameter generalization of the Beta, with PDF:
+        $$ f(x) = \frac{\left(\frac{x-c}{d-c}\right)^{\alpha-1}  \left(1-\frac{x-c}{d-c}\right)^{\beta-1}}{(d-c)\mathrm{B}(\alpha,\beta)}$$
+        Where \(c\) is the lower bound and \(d\) is the upper bound.
+
+        See for example <a href="https://www.google.com/search?q=Nadarajah+and+Gupta+Handbook+of+Beta+Distribution">
+        Nadarajah and Gupta 2004</a>, Chapter 5, Section VII, p. 116.
+    </div>
 
 
     <div><input type="submit"> </div>
 </form>
 
 <div id="example"><a href="javascript:displayMetalogExample()">Click here to see a metalog example</a></div>
-<div id="example"><a href="javascript:displayBetaExample()">Click here to see a beta example</a></div>
+<div id="example"><a href="javascript:displayGenBetaExample()">Click here to see a generalized beta example</a></div>
 
 <p>Pro tip: use the browser's forward and back buttons to navigate your result history.</p>
 
