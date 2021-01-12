@@ -435,13 +435,13 @@ function dragEnd(){
 
 d3.select("#cdf_plot").on("click", addPointByClick)
 function addPointByClick(event,d){
-    if (event.shiftKey) {
+    npairs = document.getElementById("nb_pairs_to_display_hidden_field").value
+    if (event.shiftKey && npairs<10) {
         x_click = xScale.invert(event.layerX - margin.left)
         y_click = cdf_yScale.invert(event.layerY - margin.top)
         console.log(x_click, y_click)
         drawDataPoints(x_click, y_click, null)
 
-        npairs = document.getElementById("nb_pairs").value
         console.log(npairs)
         document.getElementById("pairs-" + (npairs) + "-P").value = y_click.toPrecision(3)
         document.getElementById("pairs-" + (npairs) + "-Q").value = x_click.toPrecision(3)
