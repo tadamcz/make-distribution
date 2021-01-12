@@ -154,17 +154,13 @@ function drawDataPoints(x, y, index) {
 
 for (let i = 0; i < quantiles.length; i++) {
     drawDataPoints(quantiles[i].x,quantiles[i].y, i)
-}
-
-for (let i = 0; i < quantiles.length; i++) {
     DataPointCircles[i].call(
         d3.drag()
             .on("drag", draggedDataPoint)
             .on("end", endDragDataPoint)
     )
-}
-for (let i = 0; i < quantiles.length; i++) {
     DataPointCircles[i].on("click", removePointByClick)
+
 }
 
 function draggedDataPoint(event,d) {
@@ -225,6 +221,8 @@ function drawQuantileLines() {
         )
     }
 }
+drawQuantileLines()
+
 function moveQuantileLines(i, coord, dragDirection) {
     if (dragDirection == 'horizontally'){
         // Redraw on the CDF
@@ -243,7 +241,6 @@ function moveQuantileLines(i, coord, dragDirection) {
     }
 }
 
-drawQuantileLines()
 function dragged_horizontally(event,d) {
         i_of_dragged = parseInt(d3.select(this).attr('quantile_index'))
         x_drag = xScale.invert(event.x)
@@ -268,31 +265,23 @@ function dragged_horizontally(event,d) {
         start_x_dragged = parseFloat(quantile_vertical_lines[i_of_dragged].attr('x_data'))
         if (event.sourceEvent.shiftKey && !event.sourceEvent.altKey) {
              for (let j = 0; j < quantiles.length; j++) {
-                 current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
-                 new_x = current_x+(x_drag-start_x_dragged)
-                 moveQuantileLines(j, new_x, 'horizontally')
-                 document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+                 dragMultipleHorizontally(j,x_drag,start_x_dragged)
              }
          }
         else if (!event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
             indices_to_drag = sorted_indices.slice(sorted_indices.findIndex(element => element === i_of_dragged))
             for (const j of indices_to_drag) {
-                 current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
-                 new_x = current_x+(x_drag-start_x_dragged)
-                 moveQuantileLines(j, new_x, 'horizontally')
-                 document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+                dragMultipleHorizontally(j,x_drag,start_x_dragged)
+
             }
         }
         else if (event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
             indices_to_drag = sorted_indices.slice(0, sorted_indices.findIndex(element => element === i_of_dragged)+1)
             for (const j of indices_to_drag) {
-                 current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
-                 new_x = current_x+(x_drag-start_x_dragged)
-                 moveQuantileLines(j, new_x, 'horizontally')
-                 document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+                dragMultipleHorizontally(j,x_drag,start_x_dragged)
+
             }
         }
-
          else {
              if (mindrag<x_drag && x_drag<maxdrag) {
                  moveQuantileLines(i_of_dragged, x_drag, 'horizontally')
@@ -301,6 +290,12 @@ function dragged_horizontally(event,d) {
         }
 
     }
+function dragMultipleHorizontally(j, x_drag,start_x_dragged){
+    current_x = parseFloat(quantile_vertical_lines[j].attr('x_data'))
+    new_x = current_x+(x_drag-start_x_dragged)
+    moveQuantileLines(j, new_x, 'horizontally')
+    document.getElementById('pairs-' + j + '-Q').value = new_x.toPrecision(3)
+}
 for (line of quantile_vertical_lines) {
     line.call(
         d3.drag()
@@ -308,7 +303,6 @@ for (line of quantile_vertical_lines) {
             .on("end",dragEnd)
     )
 }
-
 for (line of pdf_quantile_vertical_lines) {
     line.call(
         d3.drag()
@@ -343,56 +337,20 @@ function dragged_vertically(event,d) {
         start_y_dragged = parseFloat(quantile_horizontal_lines[i_of_dragged].attr('y_data'))
         if (event.sourceEvent.shiftKey && !event.sourceEvent.altKey) {
              for (let j = 0; j < quantiles.length; j++) {
-                 current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
-                 if (current_y<.5) {
-                     ratio = y_drag/start_y_dragged
-                     new_y = current_y*ratio
-                 }
-                 else {
-                     ratio = (1-y_drag)/(1-start_y_dragged)
-                     new_y = 1- (1-current_y)*ratio
-                 }
-                 if (0<new_y && new_y<1) {
-                     moveQuantileLines(j, new_y, 'vertically')
-                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
-                 }
+                 dragMultipleVertically(j, y_drag,start_y_dragged)
              }
         }
         else if (!event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
             indices_to_drag = sorted_indices.slice(sorted_indices.findIndex(element => element === i_of_dragged))
             console.log(indices_to_drag)
             for (const j of indices_to_drag) {
-                 current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
-                 if (current_y<.5) {
-                     ratio = y_drag/start_y_dragged
-                     new_y = current_y*ratio
-                 }
-                 else {
-                     ratio = (1-y_drag)/(1-start_y_dragged)
-                     new_y = 1- (1-current_y)*ratio
-                 }
-                 if (0<new_y && new_y<1) {
-                     moveQuantileLines(j, new_y, 'vertically')
-                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
-                 }
+                 dragMultipleVertically(j, y_drag,start_y_dragged)
             }
         }
         else if (event.sourceEvent.shiftKey && event.sourceEvent.altKey) {
             indices_to_drag = sorted_indices.slice(0, sorted_indices.findIndex(element => element === i_of_dragged)+1)
             for (const j of indices_to_drag) {
-                 current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
-                 if (current_y<.5) {
-                     ratio = y_drag/start_y_dragged
-                     new_y = current_y*ratio
-                 }
-                 else {
-                     ratio = (1-y_drag)/(1-start_y_dragged)
-                     new_y = 1- (1-current_y)*ratio
-                 }
-                 if (0<new_y && new_y<1) {
-                     moveQuantileLines(j, new_y, 'vertically')
-                     document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
-                 }
+                 dragMultipleVertically(j, y_drag,start_y_dragged)
             }
         }
         else {
@@ -402,6 +360,21 @@ function dragged_vertically(event,d) {
             }
         }
     }
+function dragMultipleVertically(j, y_drag,start_y_dragged){
+    current_y = parseFloat(quantile_horizontal_lines[j].attr('y_data'))
+     if (current_y<.5) {
+         ratio = y_drag/start_y_dragged
+         new_y = current_y*ratio
+     }
+     else {
+         ratio = (1-y_drag)/(1-start_y_dragged)
+         new_y = 1- (1-current_y)*ratio
+     }
+     if (0<new_y && new_y<1) {
+         moveQuantileLines(j, new_y, 'vertically')
+         document.getElementById('pairs-' + j + '-P').value = new_y.toPrecision(3)
+     }
+}
 for (line of quantile_horizontal_lines) {
     line.call(
         d3.drag()
@@ -410,6 +383,8 @@ for (line of quantile_horizontal_lines) {
 
     )
 }
+
+
 d3.selectAll('.quantile_line').lower()
 
 function dragEnd(){
@@ -487,6 +462,7 @@ function removePointByClick(event,d){
         }
     }
 }
+
 function indicesSortedByAttribute(array,attribute){
     // make list with indices and values
     indexedArray = array.map(function(e,i){return {ind: i, val: e}});
