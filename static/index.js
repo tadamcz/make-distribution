@@ -1,4 +1,4 @@
-function display_example(){
+function displayMetalogExample(){
     document.getElementById("nb_pairs_to_display_hidden_field").value = 3
     document.getElementById("family").value = 'metalog'
 
@@ -22,6 +22,26 @@ function display_example(){
 
     document.getElementById("pairs-2-P").value = .9
     document.getElementById("pairs-2-Q").value = 50
+
+    submitForm()
+
+}
+
+function displayBetaExample(){
+    document.getElementById("nb_pairs_to_display_hidden_field").value = 3
+    document.getElementById("family").value = 'beta'
+
+    document.getElementById("plot_custom_domain_bool").checked = false
+    display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')
+
+    document.getElementById("pairs-0-P").value = .15
+    document.getElementById("pairs-0-Q").value = .06
+
+    document.getElementById("pairs-1-P").value = .5
+    document.getElementById("pairs-1-Q").value = .21
+
+    document.getElementById("pairs-2-P").value = .85
+    document.getElementById("pairs-2-Q").value = .93
 
     submitForm()
 
