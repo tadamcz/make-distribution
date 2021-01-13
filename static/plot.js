@@ -171,13 +171,18 @@ for (let i = 0; i < quantiles.length; i++) {
     drawDataPoints(quantiles[i].x,quantiles[i].y, i)
     DataPointCircles[i].call(
         d3.drag()
+            .on("start", dragPointStart)
             .on("drag", draggedDataPoint)
             .on("end", endDragDataPoint)
     )
     DataPointCircles[i].on("click", removePointByClick)
 
 }
-
+function dragPointStart(){
+    i = parseInt(d3.select(this).attr('quantile_index'))
+    DataPointCrosses[i].raise()
+    DataPointCircles[i].raise()
+}
 function draggedDataPoint(event,d) {
     i = parseInt(d3.select(this).attr('quantile_index'))
     y_drag = cdf_yScale.invert(event.y)
@@ -209,6 +214,8 @@ function drawQuantileLines() {
                 .attr('class', 'quantile_rect')
                 .attr('quantile_index',i).attr('quantile_line_direction','vertical')
                 .attr('x_data',quantile.x)
+                .lower() // to make sure it is below the DataPointCircles
+
         )
 
 
@@ -221,6 +228,8 @@ function drawQuantileLines() {
                 .attr('class', 'quantile_rect')
                 .attr('quantile_index',i).attr('quantile_line_direction','horizontal')
                 .attr('y_data',quantile.y)
+                .lower() // to make sure it is below the DataPointCircles
+
         )
 
         // Draw on the PDF
