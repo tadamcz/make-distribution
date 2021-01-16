@@ -81,24 +81,25 @@
   flex-wrap: wrap;
 }
 
-#dataInputForm{
+.dataInputForm{
   max-width: 20em;
   margin-bottom: 1em;
 }
 
-#results_pane {
+.results_pane {
   margin-left: 1em;
   max-width: 50em;
 }
 
-#left_pane {
-  max-width: 20em;
+.left_pane {
+  width: 20em;
+  display: inline-block;
 }
 
-#samples_container{
+.samples_container{
   max-width: 20em;
 }
-#samples {
+.samples {
   overflow-x: scroll;
   padding: 1em;
   display: block;
@@ -118,7 +119,7 @@
   stroke-width: 1;
 }
 
-#output_text{
+.output_text{
    border: #cccccc 1px solid;
    padding: 20px
 }
@@ -127,16 +128,32 @@
   display: none;
 }
 
-#metalog_options, #custom_domain_fields, #generalized_beta_options{
+.metalog_options, .custom_domain_fields, .generalized_beta_options{
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
-#metalog_bounds{
+.metalog_bounds{
   margin-bottom: 1em;
 }
 
 .pair{
   border-radius: 3px;
   padding-left: 5px;
+}
+
+.distributionBox{
+  padding: 5px;
+}
+
+#inputsOutputs {
+  margin-bottom: 5em;
+}
+
+#examplesInstructions{
+  margin-bottom: 2em;
+}
+
+#distribution99{
+  padding: 0;
 }

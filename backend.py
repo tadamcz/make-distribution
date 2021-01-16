@@ -14,7 +14,7 @@ mlog_lls_error_message = 'Linear least squares did not yield a valid metalog dis
 mlog_any_fit_method_error_message = 'The program was not able to fit a valid metalog distribution for your data. ' \
 									'Things that may help: (i) add more input pairs, (ii) choose slightly different or less extreme inputs.'
 
-class DistributionObject:
+class Distribution:
 	def __init__(self,dictionary):
 		self.samples = None
 		self.description = []
@@ -25,6 +25,8 @@ class DistributionObject:
 		self.ps = dictionary['ps']
 		self.qs = dictionary['qs']
 		self.pairs_form_indices = dictionary['pairs_form_indices']
+
+		self.n_points_to_plot = 200
 
 
 		self.plot_custom_domain = False
@@ -147,8 +149,7 @@ class DistributionObject:
 
 
 
-		self.generatePlotDataSciPy()
-		self.createPlot()
+		# self.generatePlotDataSciPy()
 
 	def initMetalog(self):
 		self.n_samples = 5000
@@ -184,8 +185,7 @@ class DistributionObject:
 			else:
 				self.errors.append(mlog_lls_error_message)
 		self.description.append('Fit method: ' + self.distribution_object.fit_method_used)
-		self.generatePlotDataMetalog()
-		self.createPlot()
+		# self.generatePlotDataMetalog()
 		self.samples = np.array2string(self.distribution_object.rvs(size=self.n_samples).flatten(),
 									   separator=', ',
 									   threshold=self.n_samples + 1,
@@ -193,7 +193,6 @@ class DistributionObject:
 
 
 	def generatePlotDataSciPy(self):
-		number_points = 100
 		if self.plot_custom_domain:
 			left, right = self.plot_custom_domain
 
@@ -207,7 +206,7 @@ class DistributionObject:
 			if max(self.qs)>right:
 				right = max(self.qs)
 
-		self.x_axis = np.linspace(left,right,number_points)
+		self.x_axis = np.linspace(left,right,self.n_points_to_plot)
 
 		self.y_axis_cdf = self.distribution_object.cdf(self.x_axis)
 		self.y_axis_pdf = self.distribution_object.pdf(self.x_axis)
@@ -216,16 +215,15 @@ class DistributionObject:
 		self.x_axis_cdf = self.x_axis
 
 	def generatePlotDataMetalog(self):
-		number_points = 300
 		if self.plot_custom_domain:
 			left, right = self.plot_custom_domain
 			left, right = self.intersect_intervals([(left,right), (self.distribution_object.a, self.distribution_object.b)])
 
-			cdf_data = self.distribution_object.createCDFPlotData(x_from_to=(left, right), n=number_points)
-			pdf_data = self.distribution_object.createPDFPlotData(x_from_to=(left, right), n=number_points)
+			cdf_data = self.distribution_object.createCDFPlotData(x_from_to=(left, right), n=self.n_points_to_plot)
+			pdf_data = self.distribution_object.createPDFPlotData(x_from_to=(left, right), n=self.n_points_to_plot)
 		else:
-			cdf_data = self.distribution_object.createCDFPlotData(n=number_points)
-			pdf_data = self.distribution_object.createPDFPlotData(n=number_points)
+			cdf_data = self.distribution_object.createCDFPlotData(n=self.n_points_to_plot)
+			pdf_data = self.distribution_object.createPDFPlotData(n=self.n_points_to_plot)
 
 		self.x_axis_cdf = cdf_data['X-values']
 		self.y_axis_cdf = cdf_data['Probabilities']
@@ -239,7 +237,14 @@ class DistributionObject:
 			else:
 				self.errors.append(mlog_lls_error_message)
 
-	def createPlot(self):
+	def generatePlotData(self):
+		if self.family == 'metalog':
+			self.generatePlotDataMetalog()
+		else:
+			self.generatePlotDataSciPy()
+
+	def createPlot(self, plotIndex):
+		self.generatePlotData()
 		cdf_jsonlike = [{'x': self.x_axis_cdf[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis_cdf))]
 		pdf_jsonlike = [{'x': self.x_axis_pdf[i], 'y': self.y_axis_pdf[i]} for i in range(len(self.x_axis_pdf))]
 
@@ -251,29 +256,27 @@ class DistributionObject:
 		maximum_density_to_display = min(np.percentile(self.y_axis_pdf, 80)*5,max(self.y_axis_pdf))
 
 
+		plot_data_dict = {
+			'cdf_data': cdf_jsonlike,
+			'cdf_metadata': cdf_metadata_jsonlike,
+			'pdf_data': pdf_jsonlike,
+			'pdf_metadata': pdf_metadata_jsonlike,
+			'quantiles': quantiles_jsonlike,
+			'maximum_density_to_display': maximum_density_to_display,
+			'pairs_form_indices': self.pairs_form_indices,
+			'lbound': self.distribution_object.a,
+			'ubound': self.distribution_object.b,
+			}
 
 
-		js = '''
-		<script>
-		const cdf_data =''' + json.dumps(cdf_jsonlike) + '''
-		const cdf_metadata =''' + json.dumps(cdf_metadata_jsonlike) + '''
-		const pdf_data =''' + json.dumps(pdf_jsonlike) + '''
-		const pdf_metadata =''' + json.dumps(pdf_metadata_jsonlike) + '''
-		const quantiles =''' + json.dumps(quantiles_jsonlike) + '''
-		const maximum_density_to_display=''' +str(maximum_density_to_display) + '''
-		const pairs_form_indices=''' +json.dumps(self.pairs_form_indices) + '''
-		const lbound=''' +json.dumps(self.distribution_object.a) + '''
-		const ubound=''' +json.dumps(self.distribution_object.b) + '''
-		</script>
-		'''
+		js = '<script>plotData['+str(plotIndex)+'] = '+json.dumps(plot_data_dict)+'</script>'
 
-		div = '''
-		<div id="cdf_plot"></div>
-		<div id="pdf_plot"></div>
 
-		'''
+		divcdf = '<div id="cdf_plot'+str(plotIndex)+'"></div>'
+		divpdf = '<div id="pdf_plot'+str(plotIndex)+'"></div>'
 
-		self.plot = div+js
+
+		self.plot = divcdf+divpdf+js
 
 	def normal_parameters(self, x1, p1, x2, p2):
 		"Find parameters for a normal random variable X so that P(X < x1) = p1 and P(X < x2) = p2."
@@ -322,8 +325,83 @@ class DistributionObject:
 		interval2_left, interval2_right = interval2
 
 		if interval1_right < interval2_left or interval2_right < interval2_left:
-			raise ValueError("the distributions have no overlap")
+			raise ValueError("the distributions_output have no overlap")
 
 		intersect_left, intersect_right = max(interval1_left, interval2_left), min(interval1_right, interval2_right)
 
 		return intersect_left, intersect_right
+
+class MixtureDistribution(stats.rv_continuous):
+	def __init__(self, components,weights):
+		super().__init__()
+		self.components = components
+		self.weights = np.asarray(weights)
+		self.n_components = len(weights)
+
+		self.createPlot()
+
+	def _cdf(self, x):
+		component_cdfs = [c.distribution_object.cdf(x) for c in self.components]
+		return np.average(component_cdfs,weights=self.weights)
+
+	def _pdf(self, x):
+		component_pdfs = [c.distribution_object.cdf(x) for c in self.components]
+		return np.average(component_pdfs,weights=self.weights)
+
+	def _rvs(self, size=1, random_state=None):
+		samples = []
+		for c in self.components:
+			samples.append(c.distribution_object.rvs(size=size/self.n_components))
+		return samples
+
+	def generatePlotData(self):
+		n_points_to_plot = self.components[0].n_points_to_plot  # arbitrarily choose the first one
+		left, right = self.components[0].plot_custom_domain
+
+		self.x_axis_cdf, self.x_axis_pdf = (np.linspace(left,right,n_points_to_plot),)*2
+
+		cdf_matrix_to_average = np.empty(shape=(0,n_points_to_plot))
+		pdf_matrix_to_average = np.empty(shape=(0,n_points_to_plot))
+		for i,c in enumerate(self.components):
+
+			if c.family == 'metalog':
+				cdf_matrix_to_average = np.vstack((cdf_matrix_to_average,
+												   c.distribution_object.cdf(self.x_axis_cdf)))
+
+				pdf_matrix_to_average = np.vstack((pdf_matrix_to_average,
+												   c.distribution_object.pdf(self.x_axis_pdf)))
+			else:
+				cdf_matrix_to_average = np.vstack((cdf_matrix_to_average,
+												   c.y_axis_cdf))
+
+				pdf_matrix_to_average = np.vstack((pdf_matrix_to_average,
+												   c.y_axis_pdf))
+
+		self.y_axis_cdf = np.average(cdf_matrix_to_average,weights=self.weights,axis=0)
+		self.y_axis_pdf = np.average(pdf_matrix_to_average,weights=self.weights,axis=0)
+
+
+	def createPlot(self):
+		self.generatePlotData()
+		cdf_jsonlike = [{'x': self.x_axis_cdf[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis_cdf))]
+		pdf_jsonlike = [{'x': self.x_axis_pdf[i], 'y': self.y_axis_pdf[i]} for i in range(len(self.x_axis_pdf))]
+
+		cdf_metadata_jsonlike = dict(xmin=min(self.x_axis_cdf), ymin=min(self.y_axis_cdf), xmax=max(self.x_axis_cdf), ymax=max(self.y_axis_cdf))
+		pdf_metadata_jsonlike = dict(xmin=min(self.x_axis_pdf), ymin=min(self.y_axis_pdf), xmax=max(self.x_axis_pdf), ymax=max(self.y_axis_pdf))
+
+		maximum_density_to_display = min(np.percentile(self.y_axis_pdf, 80) * 5, max(self.y_axis_pdf))
+
+		plot_data_dict = {
+			'cdf_data': cdf_jsonlike,
+			'cdf_metadata': cdf_metadata_jsonlike,
+			'pdf_data': pdf_jsonlike,
+			'pdf_metadata': pdf_metadata_jsonlike,
+			'maximum_density_to_display': maximum_density_to_display,
+		}
+
+		js = '<script>mixturePlotData = ' + json.dumps(plot_data_dict) + '</script>'
+
+		divcdf = '<div id="mixture_cdf_plot"></div>'
+		divpdf = '<div id="mixture_pdf_plot"></div>'
+
+		self.plot = divcdf+divpdf+js

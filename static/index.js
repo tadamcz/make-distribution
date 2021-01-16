@@ -1,50 +1,98 @@
+function displayNbDistributions(n){
+    let i;
+    for (i = 1; i < nDistributionsMax; i++) {
+        if (i < n) {
+            document.getElementById("distribution"+i).style.display = "block"
+        } else {
+            document.getElementById("distribution"+i).style.display = "none"
+        }
+    }
+    $('#n_distributions_to_display').val(n)
+
+    if (n>1){
+        $('.samples_container').css('display','none') // todo make a permanent solution for this
+
+        $('.distributionBox').css('border','grey 1px solid').css('border-radius','5px')
+
+        $('.custom_domain_fields').css('display','none')
+
+        $('#distribution99').css('display','flex')
+    }
+    else {
+         $('.custom_domain_fields').css('display','auto')
+        $('#distribution99').css('display','none')
+    }
+}
+nDistributionsInitial = $('#n_distributions_to_display').val()
+nDistributionsMax = 3
+displayNbDistributions(nDistributionsInitial)
+displayAddDistrButton()
+displayRemoveDistrButton()
+
+$('.left_pane').css('max-height',maxHeightPerDistr+'px')
+        .css('overflow-y','auto').css('overflow-x','hidden')
+
 function displayMetalogExample(){
-    document.getElementById("nb_pairs_to_display_hidden_field").value = 3
-    document.getElementById("family").value = 'metalog'
+    distributionIndex = 0
+    displayNbDistributions(1)
 
-    document.getElementById("plot_custom_domain_bool").checked = true
-    display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')
+    distributionDiv = $('#distribution'+distributionIndex)
 
-    document.getElementById("plot_custom_domain_FromTo-From").value = -100
-    document.getElementById("plot_custom_domain_FromTo-To").value = 100
+    distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').css('display','none')
 
+    distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').attr('value', 3)
+    distributionDiv.find('[fieldtype=family]').val('metalog')
 
-    document.getElementById("metalog_boundedness").checked = false
-    display_conditional_fields('metalog_boundedness','metalog_bounds')
+    distributionDiv.find('[fieldtype=plot_custom_domain_bool]').attr('checked',true)
+    displayConditionalFieldsByFieldType('plot_custom_domain_bool','plot_custom_domain_FromTo',distributionIndex)
 
-    document.getElementById("metalog_allow_numerical").checked = true
+    distributionDiv.find('[fieldtype=plot_custom_domain_FromTo] [fieldtype=From]').attr('value', -100)
+    distributionDiv.find('[fieldtype=plot_custom_domain_FromTo] [fieldtype=To]').attr('value', 100)
 
-    document.getElementById("pairs-0-P").value = 0.1
-    document.getElementById("pairs-0-Q").value = -20
+    distributionDiv.find('[fieldtype=metalog_boundedness]').attr('checked',false)
+    displayConditionalFieldsByClass('metalog_boundedness','metalog_bounds',distributionIndex)
 
-    document.getElementById("pairs-1-P").value = .5
-    document.getElementById("pairs-1-Q").value = -1
+    distributionDiv.find('[fieldtype=metalog_allow_numerical]').attr('checked',true)
 
-    document.getElementById("pairs-2-P").value = .9
-    document.getElementById("pairs-2-Q").value = 50
+    distributionDiv.find('.pair0 [fieldtype=P]').val(0.1)
+    distributionDiv.find('.pair0 [fieldtype=Q]').val(-20)
+
+    distributionDiv.find('.pair1 [fieldtype=P]').val(.5)
+    distributionDiv.find('.pair1 [fieldtype=Q]').val(-1)
+
+    distributionDiv.find('.pair2 [fieldtype=P]').val(.9)
+    distributionDiv.find('.pair2 [fieldtype=Q]').val(50)
 
     submitForm()
 
 }
-
 function displayGenBetaExample(){
-    document.getElementById("nb_pairs_to_display_hidden_field").value = 3
-    document.getElementById("family").value = 'generalized_beta'
+    distributionIndex = 0
+    displayNbDistributions(1)
 
-    document.getElementById("plot_custom_domain_bool").checked = false
-    display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')
+    distributionDiv = $("#distribution"+distributionIndex)
 
-    document.getElementById("generalized_beta_bounds-From").value = -6
-    document.getElementById("generalized_beta_bounds-To").value = -1
+    distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val(3)
 
-    document.getElementById("pairs-0-P").value = .2
-    document.getElementById("pairs-0-Q").value = -5.2
+    distributionDiv.find('[fieldtype=family]').val('generalized_beta')
 
-    document.getElementById("pairs-1-P").value = .5
-    document.getElementById("pairs-1-Q").value = -4
 
-    document.getElementById("pairs-2-P").value = .8
-    document.getElementById("pairs-2-Q").value = -1.3
+    distributionDiv.find('[fieldtype=plot_custom_domain_bool]').attr('checked',false)
+    displayConditionalFieldsByFieldType('plot_custom_domain_bool','plot_custom_domain_FromTo',distributionIndex)
+
+    distributionDiv.find('[fieldtype=generalized_beta_bounds] [fieldtype=From]').val(-6)
+    distributionDiv.find('[fieldtype=generalized_beta_bounds] [fieldtype=To]').val(-1)
+
+
+
+    distributionDiv.find('.pair0 [fieldtype=P]').val( .2)
+    distributionDiv.find('.pair0 [fieldtype=Q]').val( -5.2)
+
+    distributionDiv.find('.pair1 [fieldtype=P]').val(.5)
+    distributionDiv.find('.pair1 [fieldtype=Q]').val(-4)
+
+    distributionDiv.find('.pair2 [fieldtype=P]').val(.8)
+    distributionDiv.find('.pair2 [fieldtype=Q]').val(-1.3)
 
     submitForm()
 
@@ -52,57 +100,75 @@ function displayGenBetaExample(){
 function submitForm(){
     document.getElementById("dataInputForm").submit()
 }
-function display_nb_pairs() {
-    const nb_pairs = document.getElementById("nb_pairs_to_display_hidden_field").value;
-    const max_pairs = 10;
+function displayNbPairs(distributionIndex) {
+    distributionDiv = $("#distribution"+distributionIndex)
+
+    nb_pairs = distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val()
+    max_pairs = 10;
     let i;
-    for (i = 1; i <= max_pairs; i++) {
-        if (i <= nb_pairs) {
-            document.getElementById("pair" + i).style.display = "block"
+    for (i = 0; i < max_pairs; i++) {
+        if (i < nb_pairs) {
+            distributionDiv.find(' .pair'+i).css("display","block")
         } else {
-            document.getElementById("pair" + i).style.display = "none"
+            distributionDiv.find(' .pair'+i).css("display","none")
         }
     }
-    displayAddPairsButton()
-    // displayRemovePairButtons()
+    displayAddPairsButton(distributionIndex)
 }
-display_nb_pairs()
+for (let i = 0; i < nDistributionsInitial; i++) {
+    displayNbPairs(i)
+}
 
-function display_conditional_fields(checkboxdiv,fielddiv) {
-    const checked = document.getElementById(checkboxdiv).checked
+
+function displayConditionalFieldsByFieldType(checkBoxFieldType, fieldType, distributionIndex) {
+    distributionDiv = $("#distribution"+distributionIndex)
+
+    const checked = distributionDiv.find("[fieldtype="+checkBoxFieldType+"]").prop('checked')
     if (checked) {
-        document.getElementById(fielddiv).style.display = 'block'
+        distributionDiv.find("[fieldtype="+fieldType+"]").css('display','block')
     }
     else {
-        document.getElementById(fielddiv).style.display = 'none'
+        distributionDiv.find("[fieldtype="+fieldType+"]").css('display','none')
+    }
+}
+function displayConditionalFieldsByClass(checkBoxFieldType, classStr, distributionIndex) {
+    distributionDiv = $("#distribution"+distributionIndex)
+    const checked = distributionDiv.find("[fieldtype="+checkBoxFieldType+"]").prop('checked')
+    if (checked) {
+        distributionDiv.find("."+classStr).css('display','block')
+    }
+    else {
+        distributionDiv.find("."+classStr).css('display','none')
     }
 }
 
-const conditionalFields = [
-    {'checkbox':'metalog_boundedness','field':'metalog_bounds'},
-    {'checkbox':'plot_custom_domain_bool','field':'plot_custom_domain_FromTo'}
-]
-for (const conditionalField of conditionalFields) {
-    display_conditional_fields(conditionalField.checkbox,conditionalField.field)
+for (let i = 0; i < nDistributionsInitial; i++) {
+    displayConditionalFieldsByClass('metalog_boundedness','metalog_bounds',i)
+    displayConditionalFieldsByFieldType('plot_custom_domain_bool','plot_custom_domain_FromTo',i)
 }
+displayConditionalFieldsByFieldType('mixture_domain_for_plot_bool','mixture_domain_for_plot_FromTo','99')
 
-function displayDistributionSpecificOptions() {
-    const family = document.getElementById("family").value;
+function displayDistributionSpecificOptions(distributionIndex) {
+    distributionDiv = $("#distribution"+distributionIndex)
+
+    const family = distributionDiv.find('[fieldtype=family]').val();
     if (family === 'metalog') {
-        document.getElementById('metalog_options').style.display = 'block'
+        distributionDiv.find('.metalog_options').css('display','block')
     }
     else {
-        document.getElementById('metalog_options').style.display = 'none'
+       distributionDiv.find('.metalog_options').css('display','none')
     }
 
     if (family === 'generalized_beta') {
-        document.getElementById('generalized_beta_options').style.display = 'block'
+       distributionDiv.find('.generalized_beta_options').css('display','block')
     }
     else {
-        document.getElementById('generalized_beta_options').style.display = 'none'
+       distributionDiv.find('.generalized_beta_options').css('display','none')
     }
 }
-displayDistributionSpecificOptions()
+for (let i = 0; i < nDistributionsInitial; i++) {
+    displayDistributionSpecificOptions(i)
+}
 
 
 
@@ -126,41 +192,84 @@ function copySamplesClipboard(){
     document.getElementById('copySamplesResult').innerText = 'Done!'
 }
 
-function removePair(i){
-    isEmptyPair = document.getElementById("pairs-" + i + "-P").value === '' && document.getElementById("pairs-" + i + "-Q").value === '';
+function removePair(pairIndex,distributionIndex){
+    distributionDiv = $("#distribution"+distributionIndex)
 
-    npairs = document.getElementById("nb_pairs_to_display_hidden_field").value
+    isEmptyPair = distributionDiv.find('.pair'+pairIndex+' [fieldtype=P]').val() === '' && distributionDiv.find('.pair'+pairIndex+' [fieldtype=Q]').val() === '';
 
-    for (let j = i+1; j < npairs; j++) {
-        document.getElementById("pairs-"+(j-1)+"-P").value = document.getElementById("pairs-"+j+"-P").value
-        document.getElementById("pairs-"+(j-1)+"-Q").value = document.getElementById("pairs-"+j+"-Q").value
+    npairs = parseInt(distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val())
+
+    for (let j = pairIndex; j < npairs+1; j++) {
+
+        distributionDiv.find('.pair'+(j-1)+' [fieldtype=P]').val( distributionDiv.find('.pair'+(j)+' [fieldtype=P]').val())
+        distributionDiv.find('.pair'+(j-1)+' [fieldtype=Q]').val( distributionDiv.find('.pair'+(j)+' [fieldtype=Q]').val())
     }
 
-    document.getElementById("pairs-"+(npairs-1)+"-P").value = ''
-    document.getElementById("pairs-"+(npairs-1)+"-Q").value = ''
+    distributionDiv.find('.pair'+npairs+' [fieldtype=P]').val('')
+    distributionDiv.find('.pair'+npairs+' [fieldtype=Q]').val('')
 
-    document.getElementById("nb_pairs_to_display_hidden_field").value = document.getElementById("nb_pairs_to_display_hidden_field").value-1
-    display_nb_pairs()
+    distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val(npairs-1)
+
+    displayNbPairs(distributionIndex)
 
     if (!isEmptyPair) {
         submitForm()
     }
 }
 
-function addPair(){
-    document.getElementById('nb_pairs_to_display_hidden_field').value = parseInt(document.getElementById('nb_pairs_to_display_hidden_field').value) + 1
-    display_nb_pairs()
-    displayAddPairsButton()
+function addPair(distributionIndex){
+    distributionDiv = $("#distribution"+distributionIndex)
+    distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val(
+        parseInt(distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val())+1)
+
+    displayNbPairs(distributionIndex)
+    displayAddPairsButton(distributionIndex)
 }
 
-function displayAddPairsButton() {
-    if (parseInt(document.getElementById('nb_pairs_to_display_hidden_field').value)<10){
-        document.getElementById('add_pair_button').style.visibility = 'visible'
+function displayAddPairsButton(distributionIndex) {
+    distributionDiv = $("#distribution"+distributionIndex)
+
+    if (distributionDiv.find('[fieldtype=nb_pairs_to_display_hidden_field]').val()<10){
+        distributionDiv.find('.add_pair_button').css('visibility','visible')
     }
     else {
-        document.getElementById('add_pair_button').style.visibility = 'hidden'
+        distributionDiv.find('.add_pair_button').css('visibility','hidden')
     }
 }
-displayAddPairsButton()
+for (let i = 0; i < nDistributionsInitial; i++) {
+    displayAddPairsButton(i)
+}
 
+function addDistr(){
+    n = parseInt($('#n_distributions_to_display').val())+1
+    $('#n_distributions_to_display').val(n)
 
+    displayNbDistributions(n)
+    displayAddDistrButton()
+    displayRemoveDistrButton()
+
+    new_index = n-1
+    displayNbPairs(new_index)
+    displayConditionalFieldsByClass('metalog_boundedness','metalog_bounds',new_index)
+    displayConditionalFieldsByFieldType('plot_custom_domain_bool','plot_custom_domain_FromTo',new_index)
+    displayDistributionSpecificOptions(new_index)
+    // submitForm()
+}
+
+function displayAddDistrButton() {
+    if (parseInt($('#n_distributions_to_display').val())<3){
+        $('.addDistrButton').css('visibility','visible')
+    }
+    else {
+        $('.addDistrButton').css('visibility','hidden')
+    }
+}
+
+function displayRemoveDistrButton(){
+    if (parseInt($('#n_distributions_to_display').val())===1){
+        $('.removeDistrButton').css('display','none')
+    }
+    else {
+        $('.removeDistrButton').css('display','block')
+    }
+}

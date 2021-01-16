@@ -1,0 +1,114 @@
+{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+
+
+
+{% macro display_distribution_input_output(distribution_fields,distribution_ouputs, distribution_index, nToDisp) %}
+{% set distribution_index = distribution_index|string %}
+{% set nToDisp = nToDisp|string %}
+
+<div id="distribution{{distribution_index}}" class="distributionBox" distributionindex={{distribution_index}}>
+<div class="flexbox">
+<div class="left_pane">
+    <div>
+        <a href="javascript:removeDistr()" class="removeDistrButton">Remove last mixture</a>
+        {{render_field(
+                        distribution_fields.family,onchange="displayDistributionSpecificOptions("+distribution_index+"),
+                                                submitForm()"
+                        )
+          }}
+
+        {% if distribution_fields.nb_pairs_to_display_hidden_field.errors %}
+            <ul class=errors>
+                {% for error in distribution_fields.nb_pairs_to_display_hidden_field.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <div class="hidden_field">{{ distribution_fields.nb_pairs_to_display_hidden_field(onchange="display_nb_pairs("+distribution_index+")")}}</div>
+    </div>
+
+    <div style="margin-bottom: 1em">
+        <a class="add_pair_button" href="javascript:addPair({{distribution_index}})">Add pair</a>
+    </div>
+    {% for pair in distribution_fields.pairs %}
+    <div class="pair {{'pair' ~ loop.index0}}">
+        Pair {{loop.index}}
+        <a class="remove_pair_button" href="javascript:removePair({{loop.index0}}, {{distribution_index}})">Remove</a>
+        {{render_field_nolabel(pair)}}
+    </div>
+    {% endfor %}
+
+    <div class="custom_domain_fields">
+        {{ render_checkbox(distribution_fields.plot_custom_domain_bool,
+            onchange="displayConditionalFieldsByFieldType('plot_custom_domain_bool','plot_custom_domain_FromTo',"+distribution_index+")")}}
+        {{ render_field_nolabel(distribution_fields.plot_custom_domain_FromTo)}}
+    </div>
+
+    <div class='metalog_options'>
+        {{render_checkbox(distribution_fields.metalog_boundedness,
+            onchange="displayConditionalFieldsByClass('metalog_boundedness','metalog_bounds',"+distribution_index+")")}}
+        <div class="metalog_bounds">
+            You may specify both bounds, or just one bound for a semi-bounded distribution.
+            {{render_field_nolabel(distribution_fields.metalog_bounds)}}
+        </div>
+        <div>
+        {{render_checkbox(distribution_fields.metalog_allow_numerical)}}
+            <div class = 'tooltip'>
+                More info.
+                <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
+                that minimizes the sum of square differences between the metalog CDF and your inputs. This is slower. </div>
+            </div>
+        </div>
+
+        <br> A distribution with a high degree of shape flexiblity, allowing it to often fit your inputa data
+        exactly or very closely. It can be unbounded, bounded, or semi-bounded.
+        First described in <a href="http://www.metalogdistributions.com/images/The_Metalog_Distributions_-_Keelin_2016.pdf">
+        Keelin 2016</a>.
+
+    </div>
+    <div class='generalized_beta_options'>
+        {{render_field(distribution_fields.generalized_beta_bounds)}}
+        <br> A four-parameter generalization of the Beta, with PDF:
+        $$ f(x) = \frac{\left(\frac{x-c}{d-c}\right)^{\alpha-1}  \left(1-\frac{x-c}{d-c}\right)^{\beta-1}}{(d-c)\mathrm{B}(\alpha,\beta)}$$
+        Where \(c\) is the lower bound and \(d\) is the upper bound.
+
+        See for example <a href="https://www.google.com/search?q=Nadarajah+and+Gupta+Handbook+of+Beta+Distribution">
+        Nadarajah and Gupta 2004</a>, Chapter 5, Section VII, p. 116.
+    </div>
+
+<div>
+{% if distribution_ouputs %}
+<div class="output_text">
+        {%for i in distribution_ouputs.description%}
+            <div>{{i}}</div>
+        {%endfor%}
+
+        {%for i in distribution_ouputs.errors%}
+            <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
+        {%endfor%}
+</div>
+{% endif %}
+</div>
+</div>
+
+<div class="results_pane">
+    {% if distribution_ouputs.plot %}
+        <div>{{ distribution_ouputs.plot|safe}}</div>
+        <script>makePlot({{ distribution_index}}, {{nToDisp}})</script>
+    {% endif %}
+
+    {% if distribution_ouputs.samples and nToDisp==1 %}
+    <div class="samples_container">
+        {{ distribution_ouputs.n_samples }} random samples:
+        <pre class="samples">{{ distribution_ouputs.samples}}</pre>
+        <div class="flexbox">
+            <button onclick="copySamplesClipboard()">Copy to clipboard</button>
+            <div style="padding-left: 1em" class="copySamplesResult"></div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+</div> {# End of Flexbox#}
+</div>
+{% endmacro %}
