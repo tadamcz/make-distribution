@@ -3,9 +3,7 @@ from scipy import optimize
 from scipy import stats
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 from metalogistic.metalogistic import MetaLogistic
-import scipy.stats
 
 mlog_lls_error_message = 'Linear least squares did not yield a valid metalog distribution for your data. ' \
 						 'Things that may help: (i) allow numerical methods using the checkbox,' \
@@ -68,7 +66,7 @@ class Distribution:
 				self.description.append('mu: ' + self.pretty(mu))
 				self.description.append('sigma: ' + self.pretty(sigma))
 
-			self.distribution_object = scipy.stats.norm(loc=mu, scale=sigma)
+			self.distribution_object = stats.norm(loc=mu, scale=sigma)
 
 		if self.family == 'lognormal':
 			self.description.append('Log-normal distribution')
@@ -96,7 +94,7 @@ class Distribution:
 				self.description.append('mu: ' + self.pretty(mu))
 				self.description.append('sigma: ' + self.pretty(sigma))
 
-			self.distribution_object = scipy.stats.lognorm(s=sigma, scale=math.exp(mu))
+			self.distribution_object = stats.lognorm(s=sigma, scale=math.exp(mu))
 
 		if self.family == 'beta':
 			for q in self.qs:
@@ -120,7 +118,7 @@ class Distribution:
 			self.description.append('alpha: ' + self.pretty(alpha))
 			self.description.append('beta: ' + self.pretty(beta))
 
-			self.distribution_object = scipy.stats.beta(alpha, beta)
+			self.distribution_object = stats.beta(alpha, beta)
 
 		if self.family == 'generalized_beta':
 			self.generalized_beta_lbound, self.generalized_beta_ubound = self.dictionary['generalized_beta_bounds']['From'], self.dictionary['generalized_beta_bounds']['To']
@@ -143,7 +141,7 @@ class Distribution:
 			self.description.append('alpha: ' + self.pretty(alpha))
 			self.description.append('beta: ' + self.pretty(beta))
 
-			self.distribution_object = scipy.stats.beta(alpha, beta, loc=loc, scale=scale)
+			self.distribution_object = stats.beta(alpha, beta, loc=loc, scale=scale)
 			self.distribution_object.a = self.generalized_beta_lbound
 			self.distribution_object.b = self.generalized_beta_ubound
 

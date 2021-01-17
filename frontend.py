@@ -1,10 +1,8 @@
 from flask import Flask, render_template
-from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, DecimalField, IntegerField
+from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, IntegerField
 from wtforms.validators import Optional, number_range
 from flask_wtf import FlaskForm
-import mpld3
 import decimal
-from sigfig import round
 
 import backend
 

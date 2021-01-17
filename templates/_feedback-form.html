@@ -1,0 +1,72 @@
+<div>Leave feedback. I read every message.
+    <div>
+        <form id="feedbackForm">
+            <style>
+
+                .feedbackContainer{display: flex; align-items: flex-start; }
+                .feedbackContainer > * {margin-right:1em; border-radius: 3px;}
+                .emailField {margin-right: 1em; height: 32px; width: 30%}
+                .hiddenField {display: none}
+                .feedbackMsgField {height: 64px; width: 100%}
+            </style>
+
+            <div class="feedbackContainer">
+                <textarea class="feedbackMsgField" name="message" id="message" required placeholder="message (required)"></textarea>
+                <input class = "emailField" name="email" id="email" placeholder="email (optional)">
+
+                <input class="hiddenField" name="url" value={{request.url}}>
+                <button>Send</button>
+            </div>
+            <div id="formResponse"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+window.addEventListener( "load", function () {
+  function sendData() {
+
+    // tell the user we've started sending the message
+    document.getElementById("formResponse").innerText = 'Sending...'
+
+    const XHR = new XMLHttpRequest();
+
+    // Bind the FormData object and the form element
+    const FD = new FormData( form );
+
+    // Define what happens on successful data submission
+    XHR.addEventListener( "load", function(event) {
+        response = JSON.parse(event.target.responseText);
+        console.log(response)
+        if (response.result == 'success') {
+            document.getElementById("formResponse").innerText = 'Message received'
+        }
+        else {
+            document.getElementById("formResponse").innerText = 'Error'+response.error+'. Email me instead: tmkadamcz@gmail.com'
+        }
+
+       ;
+    } );
+
+    // Define what happens in case of error
+    XHR.addEventListener( "error", function( event ) {
+      document.getElementById("formResponse").innerText = 'Something went wrong.'
+    } );
+
+    // Set up our request
+    XHR.open( "POST", "https://script.google.com/macros/s/AKfycbyoukBNkm-PunNWVoXkqc6AvNUgRbxXCfxD_pX7VvtlRordfgg/exec" );
+
+    // The data sent is what the user provided in the form
+    XHR.send( FD );
+  }
+
+  // Access the form element...
+  const form = document.getElementById( "feedbackForm" );
+
+  // ...and take over its submit event.
+  form.addEventListener( "submit", function ( event ) {
+    event.preventDefault();
+    sendData();
+  } );
+} );
+</script>
