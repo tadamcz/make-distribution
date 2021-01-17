@@ -1,2 +1,12 @@
-add shifted scaled beta
+*** see todos in code comments
+enforce distribution bounds on dragging circle
+enforce distribution bounds on shift-dragging line
+add logistic as fallback for metalog
 
+
+maybe:
+when adding point by clicking, where to add it in the form? in order?
+try to deal with overflow issues?
+submit form via ajax
+extreme custom domains for plot in mixture caused issues?
+think about whether to display invalid plots

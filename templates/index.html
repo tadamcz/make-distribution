@@ -1,89 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
     <meta charset="UTF-8">
     <title>Elicit probability distributions from quantiles</title>
     <link rel="stylesheet" href= {{url_for('static', filename='styles.css') }}>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+
+    <script src={{url_for('static', filename="plot.js")}}></script>
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 {% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+{% from "_distribution.html" import display_distribution_input_output%}
 
-<div class="flexbox">
-<form method="POST" id="dataInputForm">
-    <div style="margin-bottom: 1em">
-        {{render_field(form.family,onchange="display_metalog_options()") }}
-        {{render_field(form.nb_pairs,onchange="display_nb_pairs()")}}
-    </div>
+<script>
+    plotData = {} ;
+    UIObjs = Array.from({length:{{form.n_distributions_to_display.data}}}).map(x => Object()) ;
+</script>
 
-    {% for pair in form.pairs %}
-    <div id = {{'pair' ~ loop.index}}>
-        Pair {{loop.index}} {{render_field_nolabel(pair)}}
-    </div>
-    {% endfor %}
+<script>
+    function removeDistr(){
+    // todo: currently you can only remove the bottom-most distribution
+    n = parseInt($('#n_distributions_to_display').val())-1
+    $('#n_distributions_to_display').val(n)
 
-    {{ render_checkbox(form.plot_custom_domain_bool, onchange="display_conditional_fields('plot_custom_domain_bool','plot_custom_domain_FromTo')")}}
-    {{ render_field_nolabel(form.plot_custom_domain_FromTo)}}
+    displayNbDistributions(n)
+    displayAddDistrButton()
+    displayRemoveDistrButton()
 
-    <div id = 'metalog_options'>
-        {{render_checkbox(form.metalog_boundedness, onchange="display_conditional_fields('metalog_boundedness','metalog_bounds')")}}
-        <div id="metalog_bounds">
-            You may specify both bounds, or just one bound for a semi-bounded distribution.
-            <b>{{render_field(form.metalog_lower_bound)}}
-               {{render_field(form.metalog_upper_bound)}}</b>
-        </div>
+    submitForm()
+}
+</script>
 
 
-        <div>
-        {{render_checkbox(form.metalog_allow_numerical)}}
-            <div class = 'tooltip'>
-                More info.
-                <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
-                that minimizes the sum of square differences between the metalog CDF and your inputs. This is slower. </div>
+
+<div id="inputsOutputs">
+    <form method="POST" id="dataInputForm">
+        <div style="display: none">{{ render_field(form.n_distributions_to_display) }}</div>
+        <script>
+            n = parseInt($('#n_distributions_to_display').val())
+            if (n>1){
+            maxHeightPerDistr = window.innerHeight/(n+1)
+                -n*9 // to deal with padding
+            }
+            else {
+                maxHeightPerDistr = window.innerHeight
+            }
+
+             maxHeightPerPlot = maxHeightPerDistr/2
+        </script>
+
+        <div class="flexbox" id="distribution99">
+        <div class="left_pane">
+            Mixture
+            <div>
+                {{ render_checkbox(form.mixture_domain_for_plot_bool,
+                    onchange="displayConditionalFieldsByFieldType('mixture_domain_for_plot_bool','mixture_domain_for_plot_FromTo','99')")}}
+                {{ render_field_nolabel(form.mixture_domain_for_plot_FromTo) }}
             </div>
         </div>
-    </div>
+
+        <div class="results_pane">
+            {% if mixture is not none %}
+                {{ mixture.plot|safe }}
+                <script>makePlot(99)</script>
+            {% endif %}
+        </div>
+        </div>
+
+        {% for i in range(form.distributions|length) %}
+            {% if i<form.n_distributions_to_display.data and anyOutputs%}
+                {{ display_distribution_input_output(form.distributions[i], distributions_output[i], i, form.n_distributions_to_display.data)}}
+            {% else %}
+                {{ display_distribution_input_output(form.distributions[i], False, i, form.n_distributions_to_display.data)}}
+            {% endif %}
+        {% endfor %}
+        <input type="submit">
+    </form>
+    <script src={{url_for('static', filename='index.js') }}></script>
+    <a href="javascript:addDistr()" class="addDistrButton">Add another distribution to make a mixture</a>
+</div>
 
 
-    <div><input type="submit"> </div>
-    <div id="example"><a href="javascript:display_example()">Click here to see an example</a></div>
-</form>
 
-<script src={{url_for('static', filename='index.js') }}></script>
+<div id="examplesInstructions">
+Examples:<ul>
+<li><a href="javascript:displayMetalogExample()">Click here to see a metalog example</a>
+<li><a href="javascript:displayGenBetaExample()">Click here to see a generalized beta example</a>
+</ul>
+<p>Pro tip: use the browser's forward and back buttons to navigate your result history.</p>
 
-<div id="results">
-    {% if distribution %}
-        {%for i in distribution.description%}
-            <div>{{i}}</div>
-        {%endfor%}
 
-        {%for i in distribution.errors%}
-            <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
-        {%endfor%}
+<div id="plotInstructions">
+    {% if anyOutputs %}
+        <p><i>How to use the plot:
+            <ul>
+            <li> You can <b>drag</b> horizontal and vertical lines.
+            <li> <b>Shift-drag</b> any line to move all lines at the same time.
+            <li> <b>Alt-drag</b> any line to move all <span style="font-style:normal">greater</span> lines at the same time.
+            <li> <b>Alt-Shift-drag</b> any line to move all <span style="font-style:normal">lesser</span> lines at the same time.
+            <li> <b>Hover</b> over a point to display a draggable circle representing that point.
+            <li> <b>Alt-click</b> a point to remove it.
+            <li> <b>Shift-click</b> on an empty area to add a point.
+            </ul>
+        </i></p>
     {% endif %}
-
-    {% if plot %}
-        <div>{{plot|safe}}</div>
-    {% endif %}
-    <!--plot.js needs to be after the plot, so that the JSONs we pass to plot.js are defined-->
-    <script src={{url_for('static', filename="plot.js")}}></script>
 </div>
 
-{% if samples %}
-<div id="samples_container">
-    {{ distribution.n_samples }} random samples:
-    <pre id="samples">{{samples}}</pre>
-    <div class="flexbox">
-        <button onclick="copySamplesClipboard()">Copy to clipboard</button>
-        <div style="padding-left: 1em" id="copySamplesResult"></div>
-    </div>
 </div>
-{% endif %}
-</div>
-
-
-
-
 <br><div>
     By <a href='https://tadamcz.github.io/'>Tom Adamczewski</a>.
     Code <a href='https://github.com/tadamcz/elicitor'>on GitHub</a>.

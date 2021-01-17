@@ -42,6 +42,19 @@
   opacity: .5;
 }
 
+.quantile_rect {
+  cursor: grab;
+  opacity: .1;
+
+  stroke: lightgray;
+  stroke-width: 25;
+  stroke-opacity: 0;
+}
+
+.quantile_rect:hover {
+  opacity: .5;
+}
+
 .pdf_quantile_line {
   stroke: lightgray;
   stroke-width: 3;
@@ -53,24 +66,40 @@
   stroke-width: .5;
 }
 
+.dataPointCircle{
+  cursor: grab;
+  fill-opacity: 0;
+  stroke-width: 1px;
+  stroke-opacity: 1;
+}
+.dataPointCircle:hover {
+  stroke: black;
+}
+
 .flexbox {
   display: flex;
   flex-wrap: wrap;
 }
 
-#dataInputForm{
+.dataInputForm{
   max-width: 20em;
   margin-bottom: 1em;
 }
 
-#results {
+.results_pane {
   margin-left: 1em;
+  max-width: 50em;
 }
 
-#samples_container{
+.left_pane {
+  width: 20em;
+  display: inline-block;
+}
+
+.samples_container{
   max-width: 20em;
 }
-#samples {
+.samples {
   overflow-x: scroll;
   padding: 1em;
   display: block;
@@ -88,5 +117,43 @@
   fill: none;
   stroke: black;
   stroke-width: 1;
+}
 
+.output_text{
+   border: #cccccc 1px solid;
+   padding: 20px
+}
+
+.hidden_field{
+  display: none;
+}
+
+.metalog_options, .custom_domain_fields, .generalized_beta_options{
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.metalog_bounds{
+  margin-bottom: 1em;
+}
+
+.pair{
+  border-radius: 3px;
+  padding-left: 5px;
+}
+
+.distributionBox{
+  padding: 5px;
+}
+
+#inputsOutputs {
+  margin-bottom: 5em;
+}
+
+#examplesInstructions{
+  margin-bottom: 2em;
+}
+
+#distribution99{
+  padding: 0;
 }
