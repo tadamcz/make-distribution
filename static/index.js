@@ -201,8 +201,8 @@ function removePair(pairIndex,distributionIndex){
 
     for (let j = pairIndex; j < npairs+1; j++) {
 
-        distributionDiv.find('.pair'+(j-1)+' [fieldtype=P]').val( distributionDiv.find('.pair'+(j)+' [fieldtype=P]').val())
-        distributionDiv.find('.pair'+(j-1)+' [fieldtype=Q]').val( distributionDiv.find('.pair'+(j)+' [fieldtype=Q]').val())
+        distributionDiv.find('.pair'+(j)+' [fieldtype=P]').val( distributionDiv.find('.pair'+(j+1)+' [fieldtype=P]').val())
+        distributionDiv.find('.pair'+(j)+' [fieldtype=Q]').val( distributionDiv.find('.pair'+(j+1)+' [fieldtype=Q]').val())
     }
 
     distributionDiv.find('.pair'+npairs+' [fieldtype=P]').val('')
