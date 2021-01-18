@@ -157,3 +157,11 @@
 #distribution99{
   padding: 0;
 }
+
+#distribution1,#distribution2{
+  display: none;  /*  hide by default, only show if JS changes this. Avoid flickering when page is loaded. */
+}
+
+.pair, .metalog_options, .generalized_beta_options{
+  display: none;  /*  hide by default, only show if JS changes this. Avoids flickering when page is loaded.*/
+}
