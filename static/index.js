@@ -297,3 +297,12 @@ function removeDistr(distributionIndex){
     displayNbDistributions(new_n)
     submitForm()
 }
+
+function highlightErrors(){
+    for (let i = 0; i < nDistributionsInitial; i++) {
+        if ($('#distribution'+i+' .errors').get().length>0){
+            $('#distribution'+i).css('border-color','red')
+        }
+    }
+}
+highlightErrors()
