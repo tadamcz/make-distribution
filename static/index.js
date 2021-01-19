@@ -2,7 +2,7 @@ function displayNbDistributions(n){
     let i;
     for (i = 1; i < nDistributionsMax; i++) {
         if (i < n) {
-            document.getElementById("distribution"+i).style.display = "block"
+            document.getElementById("distribution"+i).style.display = "flex"
         } else {
             document.getElementById("distribution"+i).style.display = "none"
         }

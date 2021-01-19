@@ -203,7 +203,11 @@ def postRequest():
     if form.validate():
         return showResult(form)
     else:
-        return render_template('index.html', form=form, outputs_bool_array=[False]*MyForm.max_components, mixture=None)
+        return render_template('index.html',
+                               form=form,
+                               outputs_bool_array=[False]*MyForm.max_components,
+                               outputs_any = False,
+                               mixture=None)
 
 def showResult(form):
     distributions = form.parse_user_input()
@@ -221,10 +225,12 @@ def showResult(form):
         distributions[0].generateSampleString(NUMBER_RANDOM_SAMPLES)
 
     outputs_bool_array = [d.description is not None for d in distributions]
+    outputs_any = any(outputs_bool_array)
     return render_template('index.html',
                            form=form,
                            distributions_output=distributions,
                            outputs_bool_array=outputs_bool_array,
+                           outputs_any=outputs_any,
                            mixture=mixture)
 
 

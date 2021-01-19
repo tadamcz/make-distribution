@@ -7,7 +7,6 @@
 {% set nToDisp = nToDisp|string %}
 
 <div id="distribution{{distribution_index}}" class="distributionBox" distributionindex={{distribution_index}}>
-<div class="flexbox">
 <div class="left_pane">
     <div>
         <a href="javascript:removeDistr({{distribution_index}})" class="removeDistrButton">Remove mixture component</a>
@@ -94,7 +93,7 @@
 
 <div class="results_pane">
     {% if distribution_ouputs.plot %}
-        <div>{{ distribution_ouputs.plot|safe}}</div>
+        <div class="plots">{{ distribution_ouputs.plot|safe}}</div>
         <script>makePlot({{ distribution_index}}, {{nToDisp}})</script>
     {% endif %}
 
@@ -105,6 +104,5 @@
     {% endif %}
 </div>
 
-</div> {# End of Flexbox#}
 </div>
 {% endmacro %}

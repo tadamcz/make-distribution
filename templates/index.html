@@ -29,7 +29,7 @@
         <div class="hidden_field">{{ form.n_distributions_to_display }}</div>
         <script>
             n = parseInt($('#n_distributions_to_display').val())
-            if (n>1){
+            if (n>1 && {{ outputs_any|tojson }}){
             maxHeightPerDistr = window.innerHeight/(n+1)
                 -n*9 // to deal with padding
             }
@@ -40,7 +40,7 @@
              maxHeightPerPlot = maxHeightPerDistr/2
         </script>
 
-        <div class="flexbox" id="distribution99" distributionindex="99">
+        <div class="distributionBox" id="distribution99" distributionindex="99">
         <div class="left_pane">
             Mixture
             <div>
@@ -52,7 +52,7 @@
 
         <div class="results_pane">
             {% if mixture is not none %}
-                {{ mixture.plot|safe }}
+                <div class="plots"> {{ mixture.plot|safe }}</div>
                 <script>makePlot(99)</script>
 
                 <div class="samples_container">
