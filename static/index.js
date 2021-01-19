@@ -123,7 +123,8 @@ function displayConditionalFieldsByFieldType(checkBoxFieldType, fieldType, distr
 
     const checked = distributionDiv.find("[fieldtype="+checkBoxFieldType+"]").prop('checked')
     if (checked) {
-        distributionDiv.find("[fieldtype="+fieldType+"]").css('display','block')
+        distributionDiv.find("[fieldtype="+fieldType+"]").css('display','flex')
+        // as it happens, when we do by field type we always want a flexbox. A more general method would set a dictionary for this.
     }
     else {
         distributionDiv.find("[fieldtype="+fieldType+"]").css('display','none')
@@ -134,6 +135,7 @@ function displayConditionalFieldsByClass(checkBoxFieldType, classStr, distributi
     const checked = distributionDiv.find("[fieldtype="+checkBoxFieldType+"]").prop('checked')
     if (checked) {
         distributionDiv.find("."+classStr).css('display','block')
+        // as it happens, when we do by class we always want a block. A more general method would set a dictionary for this.
     }
     else {
         distributionDiv.find("."+classStr).css('display','none')

@@ -1,8 +1,10 @@
 from flask import Flask, render_template
 from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, IntegerField
 from wtforms.validators import Optional, number_range
+import wtforms.widgets as widgets
 from flask_wtf import FlaskForm
 import decimal
+import markupsafe
 
 import backend
 
@@ -10,6 +12,40 @@ app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
 
 NUMBER_RANDOM_SAMPLES = 5000
+
+class AdjacentDivsWidget(object):
+    """
+    Display the subfields of a WTForms field as divs inside a flexbox.
+    Each subfield div is itself a flexbox, to allow the label and the input box to each take the space they need.
+
+    Optional widths and margins for the <input> and <label> items must be set separately in your css.
+    The styles defined in this class only take care of putting spacing between the subfields.
+
+    Adapted from wtforms.widgets.ListWidget
+    """
+    def __init__(self):
+        self.html_tag = 'div'
+        self.style_parent = 'display:flex; justify-content:space-between'
+
+        self.html_tag_subfield = 'div'
+
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('id', field.id)
+        if 'class' in kwargs:
+            kwargs['class'] = kwargs['class']+'AdjacentDivsField'
+        else:
+            kwargs['class'] = 'AdjacentDivsField'
+        percent_width_per_subfield = str((1/(sum(1 for _ in field)))*100)
+        margin_px = str(5)
+        self.style_subfield = 'display:flex; flex-basis:calc(%s%% - %spx)' % (percent_width_per_subfield, margin_px)
+        html = ['<%s style="%s" %s>' % (self.html_tag, self.style_parent, widgets.html_params(**kwargs))]
+        for subfield in field:
+            open = '<%s style="%s">' % (self.html_tag_subfield, self.style_subfield)
+            close = '</%s>' % (self.html_tag_subfield)
+            content = '<label>%s</label> %s' % (subfield.label, subfield())
+            html.append(open+content+close)
+        html.append('</%s>' % self.html_tag)
+        return markupsafe.Markup(''.join(html))
 
 class QuantilePairForm(FlaskForm):
     def __init__(self, *args, **kwargs):
@@ -31,11 +67,11 @@ class FromToForm(FlaskForm):
 class DistributionForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(DistributionForm, self).__init__(*args, **kwargs)
-        self.metalog_bounds.From.label = 'Lower bound'
-        self.metalog_bounds.To.label = 'Upper bound'
+        self.metalog_bounds.From.label = 'Lower'
+        self.metalog_bounds.To.label = 'Upper'
 
-        self.generalized_beta_bounds.From.label = 'Lower bound'
-        self.generalized_beta_bounds.To.label = 'Upper bound'
+        self.generalized_beta_bounds.From.label = 'Lower'
+        self.generalized_beta_bounds.To.label = 'Upper'
 
         set_render_KWs(self)
 
@@ -43,15 +79,15 @@ class DistributionForm(FlaskForm):
     nb_pairs_to_display_hidden_field = IntegerField()
 
     max_pairs = 10
-    pairs = FieldList(FormField(QuantilePairForm), min_entries=max_pairs, max_entries=max_pairs)
+    pairs = FieldList(FormField(QuantilePairForm, widget=AdjacentDivsWidget()), min_entries=max_pairs, max_entries=max_pairs)
 
     plot_custom_domain_bool = BooleanField("Specify custom domain for plot?")
-    plot_custom_domain_FromTo = FormField(FromToForm)
+    plot_custom_domain_FromTo = FormField(FromToForm, widget=AdjacentDivsWidget())
     metalog_boundedness = BooleanField("Specify bounds for metalog?")
-    metalog_bounds = FormField(FromToForm)
+    metalog_bounds = FormField(FromToForm, widget=AdjacentDivsWidget())
     metalog_allow_numerical = BooleanField("Allow numerical approximation if no exact metalog fit?")
 
-    generalized_beta_bounds = FormField(FromToForm)
+    generalized_beta_bounds = FormField(FromToForm, widget=AdjacentDivsWidget())
 
 
 
@@ -67,7 +103,7 @@ class MyForm(FlaskForm):
     n_distributions_to_display = IntegerField("Number of distributions_output for mixture")
 
     mixture_domain_for_plot_bool = BooleanField("Specify custom domain for plot?")
-    mixture_domain_for_plot_FromTo = FormField(FromToForm, label='Domain for plot')
+    mixture_domain_for_plot_FromTo = FormField(FromToForm, widget=AdjacentDivsWidget())
 
 
 
