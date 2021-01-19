@@ -14,7 +14,7 @@ mlog_any_fit_method_error_message = 'The program was not able to fit a valid met
 
 class Distribution:
 	def __init__(self,dictionary):
-		self.samples = None
+		self.samples_string = None
 		self.description = []
 		self.errors = []
 
@@ -150,7 +150,6 @@ class Distribution:
 		# self.generatePlotDataSciPy()
 
 	def initMetalog(self):
-		self.n_samples = 5000
 		self.description.append('Meta-logistic distribution.')
 
 		self.metalog_boundedness = self.dictionary['metalog_boundedness']
@@ -183,11 +182,6 @@ class Distribution:
 			else:
 				self.errors.append(mlog_lls_error_message)
 		self.description.append('Fit method: ' + self.distribution_object.fit_method_used)
-		# self.generatePlotDataMetalog()
-		self.samples = np.array2string(self.distribution_object.rvs(size=self.n_samples).flatten(),
-									   separator=', ',
-									   threshold=self.n_samples + 1,
-									   max_line_width=float('inf'))
 
 
 	def generatePlotDataSciPy(self):
@@ -240,6 +234,11 @@ class Distribution:
 			self.generatePlotDataMetalog()
 		else:
 			self.generatePlotDataSciPy()
+
+	def generateSampleString(self, n):
+		if self.family == 'metalog':
+			self.n_samples = n
+			self.samples_string = samples_to_string(self.distribution_object.rvs(size=n))
 
 	def createPlot(self, plotIndex):
 		self.generatePlotData()
@@ -335,7 +334,6 @@ class MixtureDistribution(stats.rv_continuous):
 		self.components = components
 		self.weights = np.asarray(weights)
 		self.n_components = len(weights)
-
 		self.createPlot()
 
 	def _cdf(self, x):
@@ -348,9 +346,15 @@ class MixtureDistribution(stats.rv_continuous):
 
 	def _rvs(self, size=1, random_state=None):
 		samples = []
+		if isinstance(size,tuple):
+			size = tuple(int(i/self.n_components) for i in size)
 		for c in self.components:
-			samples.append(c.distribution_object.rvs(size=size/self.n_components))
+			samples.extend(c.distribution_object.rvs(size=size))
 		return samples
+
+	def generateSampleString(self, n):
+		self.n_samples = n
+		self.samples_string = samples_to_string(self.rvs(size=n))
 
 	def generatePlotData(self):
 		n_points_to_plot = self.components[0].n_points_to_plot  # arbitrarily choose the first one
@@ -403,3 +407,11 @@ class MixtureDistribution(stats.rv_continuous):
 		divpdf = '<div id="mixture_pdf_plot"></div>'
 
 		self.plot = divcdf+divpdf+js
+
+def samples_to_string(array):
+	return np.array2string(
+		array.flatten(),
+		separator=', ',
+		threshold=len(array)+1,
+		max_line_width=float('inf')
+	)

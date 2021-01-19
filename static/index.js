@@ -10,8 +10,6 @@ function displayNbDistributions(n){
     $('#n_distributions_to_display').val(n)
 
     if (n>1){
-        $('.samples_container').css('display','none') // todo make a permanent solution for this
-
         $('.distributionBox').css('border','grey 1px solid').css('border-radius','5px')
 
         $('.custom_domain_fields').css('display','none')
@@ -172,7 +170,7 @@ for (let i = 0; i < nDistributionsInitial; i++) {
 
 
 
-function copySamplesClipboard(){
+function copySamplesClipboard(button){
     var selectContents = function(el) {
       var range = document.createRange();
       range.selectNodeContents(el);
@@ -181,7 +179,9 @@ function copySamplesClipboard(){
       sel.addRange(range);
     };
 
-    var textField = document.querySelector('#samples');
+    distributionDiv = $(button).closest('[distributionindex]')
+
+    var textField = distributionDiv.find('.samples').get(0)
 
     /* Select the text field */
     selectContents(textField)
@@ -189,7 +189,7 @@ function copySamplesClipboard(){
     /* Copy the text inside the text field */
     document.execCommand("copy");
 
-    document.getElementById('copySamplesResult').innerText = 'Done!'
+    distributionDiv.find('.copySamplesResult').text('Done!')
 }
 
 function removePair(pairIndex,distributionIndex){

@@ -13,7 +13,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
 {% from "_distribution.html" import display_distribution_input_output%}
 
 <script>
@@ -40,7 +40,7 @@
              maxHeightPerPlot = maxHeightPerDistr/2
         </script>
 
-        <div class="flexbox" id="distribution99">
+        <div class="flexbox" id="distribution99" distributionindex="99">
         <div class="left_pane">
             Mixture
             <div>
@@ -54,6 +54,10 @@
             {% if mixture is not none %}
                 {{ mixture.plot|safe }}
                 <script>makePlot(99)</script>
+
+                <div class="samples_container">
+                    {{ render_samples(mixture.samples_string,mixture.n_samples) }}
+                </div>
             {% endif %}
         </div>
         </div>

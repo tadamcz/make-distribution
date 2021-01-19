@@ -1,4 +1,4 @@
-{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
 
 
 
@@ -98,14 +98,9 @@
         <script>makePlot({{ distribution_index}}, {{nToDisp}})</script>
     {% endif %}
 
-    {% if distribution_ouputs.samples and nToDisp==1 %}
+    {% if distribution_ouputs.samples_string%}
     <div class="samples_container">
-        {{ distribution_ouputs.n_samples }} random samples:
-        <pre class="samples">{{ distribution_ouputs.samples}}</pre>
-        <div class="flexbox">
-            <button onclick="copySamplesClipboard()">Copy to clipboard</button>
-            <div style="padding-left: 1em" class="copySamplesResult"></div>
-        </div>
+        {{ render_samples(distribution_ouputs.samples_string,distribution_ouputs.n_samples) }}
     </div>
     {% endif %}
 </div>

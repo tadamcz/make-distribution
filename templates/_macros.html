@@ -41,3 +41,12 @@
     </ul>
   {% endif %}
 {% endmacro %}
+
+{% macro render_samples(samples_string,n) %}
+{{ n }} random samples:
+<pre class="samples">{{samples_string}}</pre>
+<div class="flexbox">
+    <button type="button" onclick="copySamplesClipboard(this)">Copy to clipboard</button>
+    <div style="padding-left: 1em" class="copySamplesResult"></div>
+</div>
+{% endmacro %}

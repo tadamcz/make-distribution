@@ -9,6 +9,8 @@ import backend
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
 
+NUMBER_RANDOM_SAMPLES = 5000
+
 class QuantilePairForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(QuantilePairForm, self).__init__(*args, **kwargs)
@@ -212,9 +214,11 @@ def showResult(form):
 
     if form.n_distributions_to_display.data>1:
         mixture = backend.MixtureDistribution(components=distributions,weights=[1]*len(distributions))
+        mixture.generateSampleString(NUMBER_RANDOM_SAMPLES)
         mixture.createPlot()
     else:
         mixture = None
+        distributions[0].generateSampleString(NUMBER_RANDOM_SAMPLES)
 
     outputs_bool_array = [d.description is not None for d in distributions]
     return render_template('index.html',
