@@ -66,8 +66,6 @@ class MyForm(FlaskForm):
 
     mixture_domain_for_plot_bool = BooleanField("Specify custom domain for plot?")
     mixture_domain_for_plot_FromTo = FormField(FromToForm, label='Domain for plot')
-    # todo: force all plots to have same domain when mixtures are active.
-    # also hide custom domain option from components when mixture is active.
 
 
 
