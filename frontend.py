@@ -40,7 +40,8 @@ class DistributionForm(FlaskForm):
     family = SelectField(choices=[('metalog','Metalog'),('normal','Normal'), ('lognormal','Lognormal'), ('beta','Beta'),('generalized_beta','Generalized Beta')])
     nb_pairs_to_display_hidden_field = IntegerField()
 
-    pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
+    max_pairs = 10
+    pairs = FieldList(FormField(QuantilePairForm), min_entries=max_pairs, max_entries=max_pairs)
 
     plot_custom_domain_bool = BooleanField("Specify custom domain for plot?")
     plot_custom_domain_FromTo = FormField(FromToForm)
@@ -59,8 +60,8 @@ class MyForm(FlaskForm):
         super(MyForm, self).__init__(*args, **kwargs)
         set_render_KWs(self)
 
-    max_mixtures = 3
-    distributions = FieldList(FormField(DistributionForm), min_entries=max_mixtures,max_entries=max_mixtures)
+    max_components = 3
+    distributions = FieldList(FormField(DistributionForm), min_entries=max_components, max_entries=max_components)
     n_distributions_to_display = IntegerField("Number of distributions_output for mixture")
 
     mixture_domain_for_plot_bool = BooleanField("Specify custom domain for plot?")
@@ -156,8 +157,8 @@ class MyForm(FlaskForm):
                 min_plot = min([distribution.distribution_object.ppf(0.001) for distribution in distributions])
                 max_plot = max([distribution.distribution_object.ppf(1-0.001) for distribution in distributions])
 
-            for i in range(self.n_distributions_to_display.data):
-                distributions[i].plot_custom_domain = (min_plot,max_plot)
+            for distribution in distributions:
+                distribution.plot_custom_domain = (min_plot,max_plot)
 
         return distributions
 
@@ -202,19 +203,17 @@ def postRequest():
     if form.validate():
         return showResult(form)
     else:
-        return render_template('index.html', form=form, outputs_bool_array=[False]*MyForm.max_mixtures, mixture=None)
+        return render_template('index.html', form=form, outputs_bool_array=[False]*MyForm.max_components, mixture=None)
 
 def showResult(form):
     distributions = form.parse_user_input()
 
-    for i in range(form.n_distributions_to_display.data):
+    for i in range(len(distributions)):
         distribution = distributions[i]
         distribution.createPlot(i)
 
     if form.n_distributions_to_display.data>1:
-        n = form.n_distributions_to_display.data
-        components = [distributions[i] for i in range(n)]
-        mixture = backend.MixtureDistribution(components=components,weights=[1]*n)
+        mixture = backend.MixtureDistribution(components=distributions,weights=[1]*len(distributions))
         mixture.createPlot()
     else:
         mixture = None
