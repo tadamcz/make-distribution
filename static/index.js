@@ -273,3 +273,27 @@ function displayRemoveDistrButton(){
         $('.removeDistrButton').css('display','block')
     }
 }
+
+function removeDistr(distributionIndex){
+    new_n = parseInt($('#n_distributions_to_display').val())-1
+    $('#n_distributions_to_display').val(new_n)
+
+     for (let j = distributionIndex+1; j < nDistributionsMax; j++) {
+          formValues = $('#distribution'+j+' [fieldtype]').map(
+                function(){
+                    if ($(this).attr('type') === 'checkbox'){return $(this).prop('checked')}
+
+                    else {return $(this).val()}
+                }).get()
+
+          $('#distribution'+(j-1)+' [fieldtype]').map(
+              function (index,element){
+                  if ($(this).attr('type') === 'checkbox'){$(this).prop('checked', formValues[index])}
+
+                  else {$(this).val(formValues[index])}
+              }
+          )
+    }
+    displayNbDistributions(new_n)
+    submitForm()
+}

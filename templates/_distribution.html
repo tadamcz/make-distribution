@@ -10,7 +10,7 @@
 <div class="flexbox">
 <div class="left_pane">
     <div>
-        <a href="javascript:removeDistr()" class="removeDistrButton">Remove last mixture</a>
+        <a href="javascript:removeDistr({{distribution_index}})" class="removeDistrButton">Remove mixture component</a>
         {{render_field(
                         distribution_fields.family,onchange="displayDistributionSpecificOptions("+distribution_index+"),
                                                 submitForm()"
@@ -25,6 +25,7 @@
             </ul>
         {% endif %}
         <div class="hidden_field">{{ distribution_fields.nb_pairs_to_display_hidden_field(onchange="display_nb_pairs("+distribution_index+")")}}</div>
+        <div class="hidden_field">{{ distribution_fields.pop_from_list}} </div>
     </div>
 
     <div style="margin-bottom: 1em">

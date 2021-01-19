@@ -21,25 +21,12 @@
     UIObjs = Array.from({length:{{form.n_distributions_to_display.data}}}).map(x => Object()) ;
 </script>
 
-<script>
-    function removeDistr(){
-    // todo: currently you can only remove the bottom-most distribution
-    n = parseInt($('#n_distributions_to_display').val())-1
-    $('#n_distributions_to_display').val(n)
-
-    displayNbDistributions(n)
-    displayAddDistrButton()
-    displayRemoveDistrButton()
-
-    submitForm()
-}
-</script>
 
 
 
 <div id="inputsOutputs">
     <form method="POST" id="dataInputForm">
-        <div style="display: none">{{ render_field(form.n_distributions_to_display) }}</div>
+        <div class="hidden_field">{{ form.n_distributions_to_display }}</div>
         <script>
             n = parseInt($('#n_distributions_to_display').val())
             if (n>1){
@@ -72,7 +59,7 @@
         </div>
 
         {% for i in range(form.distributions|length) %}
-            {% if i<form.n_distributions_to_display.data and anyOutputs%}
+            {% if i<form.n_distributions_to_display.data and outputs_bool_array[i]%}
                 {{ display_distribution_input_output(form.distributions[i], distributions_output[i], i, form.n_distributions_to_display.data)}}
             {% else %}
                 {{ display_distribution_input_output(form.distributions[i], False, i, form.n_distributions_to_display.data)}}
