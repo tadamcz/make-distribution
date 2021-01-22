@@ -211,11 +211,11 @@ class Distribution:
 			left, right = self.plot_custom_domain
 			left, right = self.intersect_intervals([(left,right), (self.distribution_object.a, self.distribution_object.b)])
 
-			cdf_data = self.distribution_object.createCDFPlotData(x_from_to=(left, right), n=self.n_points_to_plot)
-			pdf_data = self.distribution_object.createPDFPlotData(x_from_to=(left, right), n=self.n_points_to_plot)
+			cdf_data = self.distribution_object.create_cdf_plot_data(x_from_to=(left, right), n=self.n_points_to_plot)
+			pdf_data = self.distribution_object.create_pdf_plot_data(x_from_to=(left, right), n=self.n_points_to_plot)
 		else:
-			cdf_data = self.distribution_object.createCDFPlotData(n=self.n_points_to_plot)
-			pdf_data = self.distribution_object.createPDFPlotData(n=self.n_points_to_plot)
+			cdf_data = self.distribution_object.create_cdf_plot_data(n=self.n_points_to_plot)
+			pdf_data = self.distribution_object.create_pdf_plot_data(n=self.n_points_to_plot)
 
 		self.x_axis_cdf = cdf_data['X-values']
 		self.y_axis_cdf = cdf_data['Probabilities']
