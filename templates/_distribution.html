@@ -83,9 +83,12 @@
             <div>{{i}}</div>
         {%endfor%}
 
-        {%for i in distribution_ouputs.errors%}
-            <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
-        {%endfor%}
+        {% if distribution_ouputs.errors %}
+            {%for i in distribution_ouputs.errors%}
+                <div class="errors">{{i}}</div>
+            {%endfor%}
+            <a href="javascript:window.history.back()">Go back.</a>
+        {% endif %}
 </div>
 {% endif %}
 </div>
