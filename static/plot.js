@@ -283,7 +283,7 @@ function makePlot(distributionIndex,nDistributions) {
 
         function endDragDataPoint(event, d) {
             if (!event.sourceEvent.altKey) {
-                document.getElementById('dataInputForm').submit()
+                dragEnd()
             }
         }
 
