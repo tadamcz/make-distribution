@@ -171,10 +171,22 @@
   padding: 0;
 }
 
-#distribution1,#distribution2{
+#distribution1,#distribution2, .mixtureComponentOptions{
   display: none;  /*  hide by default, only show if JS changes this. Avoid flickering when page is loaded. */
 }
 
 .pair, .metalog_options, .generalized_beta_options{
   display: none;  /*  hide by default, only show if JS changes this. Avoids flickering when page is loaded.*/
+}
+
+.mixtureComponentOptions {
+  display: flex;
+}
+
+.mixtureComponentOptions > :not(:last-child) {
+  margin-right: 1em;
+}
+
+[fieldtype=mixture_component_weight] {
+  width: 2em;
 }

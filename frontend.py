@@ -75,6 +75,7 @@ class DistributionForm(FlaskForm):
 
         set_render_KWs(self)
 
+    mixture_component_weight = FloatField('Weight in mixture',default=1, validators=[number_range(min=0,max=float('inf'),message='Weight cannot be negative')])
     family = SelectField(choices=[('metalog','Metalog'),('normal','Normal'), ('lognormal','Lognormal'), ('beta','Beta'),('generalized_beta','Generalized Beta')])
     nb_pairs_to_display_hidden_field = IntegerField()
 
@@ -255,7 +256,8 @@ def showResult(form):
 
     if form.n_distributions_to_display.data>1:
         all_distributions_valid = all([d.valid_distribution for d in distributions])
-        mixture = backend.MixtureDistribution(components=distributions,weights=[1]*len(distributions))
+        weights = [d.dictionary['mixture_component_weight'] for d in distributions]
+        mixture = backend.MixtureDistribution(components=distributions,weights=weights)
         if all_distributions_valid:
             mixture.generateSampleString(NUMBER_RANDOM_SAMPLES)
             mixture.createPlot()

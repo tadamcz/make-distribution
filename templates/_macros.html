@@ -3,6 +3,14 @@
       {{ field.label }}
       {{ field(**kwargs)|safe }}
   </div>
+    {% if field.type == 'FieldList' or field.type == 'FormField' %}
+        {{ errors_hierarchical_field(field) }}
+    {% else %}
+        {{ errors_childless_field(field) }}
+    {% endif %}
+{% endmacro %}
+
+{% macro errors_hierarchical_field(field) %}
   {% if field.errors %}
     <ul class=errors>
     {% for field_w_error in field.errors %}
@@ -14,19 +22,26 @@
   {% endif %}
 {% endmacro %}
 
+{% macro errors_childless_field(field) %}
+    {% if field.errors %}
+        <ul class=errors>
+        {% for error in field.errors %}
+            <li>{{ error|e }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+
 {% macro render_field_nolabel(field) %}
   <div>
       {{ field(**kwargs)|safe }}
   </div>
-  {% if field.errors %}
-    <ul class=errors>
-    {% for field_w_error in field.errors %}
-        {% for error in field.errors[field_w_error] %}
-        <li>{{ error }}</li>
-        {% endfor %}
-    {% endfor %}
-    </ul>
-  {% endif %}
+  {% if field.type == 'FieldList' or field.type == 'FormField' %}
+        {{ errors_hierarchical_field(field) }}
+    {% else %}
+        {{ errors_childless_field(field) }}
+    {% endif %}
 {% endmacro %}
 
 {% macro render_checkbox(field) %}

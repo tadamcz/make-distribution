@@ -9,7 +9,9 @@
 <div id="distribution{{distribution_index}}" class="distributionBox" distributionindex={{distribution_index}}>
 <div class="left_pane">
     <div>
-        <a href="javascript:removeDistr({{distribution_index}})" class="removeDistrButton">Remove mixture component</a>
+        <div class="mixtureComponentOptions">
+            <a href="javascript:removeDistr({{distribution_index}})">Remove distribution</a> {{ render_field(distribution_fields.mixture_component_weight) }}
+        </div>
         {{render_field(
                         distribution_fields.family,onchange="displayDistributionSpecificOptions("+distribution_index+"),
                                                 submitForm()"

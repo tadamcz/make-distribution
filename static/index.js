@@ -25,7 +25,7 @@ nDistributionsInitial = $('#n_distributions_to_display').val()
 nDistributionsMax = 3
 displayNbDistributions(nDistributionsInitial)
 displayAddDistrButton()
-displayRemoveDistrButton()
+displayMixtureComponentOptions()
 
 $('.left_pane').css('max-height',maxHeightPerDistr+'px')
         .css('overflow-y','auto').css('overflow-x','hidden')
@@ -248,7 +248,7 @@ function addDistr(){
 
     displayNbDistributions(n)
     displayAddDistrButton()
-    displayRemoveDistrButton()
+    displayMixtureComponentOptions()
 
     new_index = n-1
     displayNbPairs(new_index)
@@ -267,12 +267,12 @@ function displayAddDistrButton() {
     }
 }
 
-function displayRemoveDistrButton(){
+function displayMixtureComponentOptions(){
     if (parseInt($('#n_distributions_to_display').val())===1){
-        $('.removeDistrButton').css('display','none')
+        $('.mixtureComponentOptions').css('display','none')
     }
     else {
-        $('.removeDistrButton').css('display','block')
+        $('.mixtureComponentOptions').css('display','flex')
     }
 }
 
