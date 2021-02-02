@@ -250,15 +250,19 @@ def showResult(form):
 
     for i in range(len(distributions)):
         distribution = distributions[i]
-        distribution.createPlot(i)
+        if distribution.valid_distribution:
+            distribution.createPlot(i)
 
     if form.n_distributions_to_display.data>1:
+        all_distributions_valid = all([d.valid_distribution for d in distributions])
         mixture = backend.MixtureDistribution(components=distributions,weights=[1]*len(distributions))
-        mixture.generateSampleString(NUMBER_RANDOM_SAMPLES)
-        mixture.createPlot()
+        if all_distributions_valid:
+            mixture.generateSampleString(NUMBER_RANDOM_SAMPLES)
+            mixture.createPlot()
     else:
         mixture = None
-        distributions[0].generateSampleString(NUMBER_RANDOM_SAMPLES)
+        if distributions[0].valid_distribution:
+            distributions[0].generateSampleString(NUMBER_RANDOM_SAMPLES)
 
     outputs_bool_array = [d.description is not None for d in distributions]
     outputs_any = any(outputs_bool_array)
