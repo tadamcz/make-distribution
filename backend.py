@@ -5,18 +5,13 @@ import math
 import numpy as np
 from metalogistic.metalogistic import MetaLogistic
 
-mlog_lls_error_message = 'Linear least squares did not yield a valid metalog distribution for your data. ' \
-						 'Things that may help: (i) allow numerical methods using the checkbox,' \
-						 '(ii) add more input pairs, (iii) choose slightly different or less extreme inputs.'
-
-mlog_any_fit_method_error_message = 'The program was not able to fit a valid metalog distribution for your data. ' \
-									'Things that may help: (i) add more input pairs, (ii) choose slightly different or less extreme inputs.'
 
 class Distribution:
 	def __init__(self,dictionary):
 		self.samples_string = None
 		self.description = []
 		self.errors = []
+		self.valid_distribution = True
 
 		self.dictionary = dictionary
 		self.family = dictionary['family']
@@ -164,24 +159,30 @@ class Distribution:
 		else:
 			self.metalog_fit_method = 'Linear least squares'
 
-		try:
-			self.distribution_object = MetaLogistic(self.ps, self.qs,
-													lbound=self.metalog_lower_bound,
-													ubound=self.metalog_upper_bound,
-													fit_method=self.metalog_fit_method)
-		except TimeoutError:
-			self.errors.append("Timed out while attempting to fit distribution.")
-			return
-		except Exception as mlog_exception:
-			self.errors.append(mlog_exception)
-			return
+		self.distribution_object = MetaLogistic(
+			self.ps, self.qs,
+			lbound=self.metalog_lower_bound,
+			ubound=self.metalog_upper_bound,
+			fit_method=self.metalog_fit_method)
 
-		if not self.distribution_object.valid_distribution:
-			if self.dictionary['metalog_allow_numerical']:
-				self.errors.append(mlog_any_fit_method_error_message)
-			else:
-				self.errors.append(mlog_lls_error_message)
-		self.description.append('Fit method: ' + self.distribution_object.fit_method_used)
+
+		candidates = []
+		for candidate in self.distribution_object.candidates_all:
+			candidates.append(
+				'Method: %s, terms: %s, valid: %s.' % (candidate.fit_method, candidate.term, candidate.valid_distribution)
+			)
+
+		self.valid_distribution = self.distribution_object.valid_distribution
+		if self.valid_distribution:
+			self.description.append('Fit method: %s' % self.distribution_object.fit_method_used)
+			if self.distribution_object.term_used != self.distribution_object.cdf_len:
+				self.description.append('Terms: %s' % self.distribution_object.term_used)
+
+		else:
+			# todo better error messages
+			self.errors.append("The program could not find a valid distribution. The following were attempted:")
+			for c in candidates:
+				self.errors.append(c)
 
 
 	def generatePlotDataSciPy(self):
@@ -224,10 +225,7 @@ class Distribution:
 		self.y_axis_pdf = pdf_data['Densities']
 
 		if min(self.y_axis_pdf<0):
-			if self.dictionary['metalog_allow_numerical']:
-				self.errors.append(mlog_any_fit_method_error_message)
-			else:
-				self.errors.append(mlog_lls_error_message)
+			self.errors.append("The program could not find a valid distribution")  # todo better error message
 
 	def generatePlotData(self):
 		if self.family == 'metalog':
