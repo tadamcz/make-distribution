@@ -5,18 +5,13 @@ import math
 import numpy as np
 from metalogistic.metalogistic import MetaLogistic
 
-mlog_lls_error_message = 'Linear least squares did not yield a valid metalog distribution for your data. ' \
-						 'Things that may help: (i) allow numerical methods using the checkbox,' \
-						 '(ii) add more input pairs, (iii) choose slightly different or less extreme inputs.'
-
-mlog_any_fit_method_error_message = 'The program was not able to fit a valid metalog distribution for your data. ' \
-									'Things that may help: (i) add more input pairs, (ii) choose slightly different or less extreme inputs.'
 
 class Distribution:
 	def __init__(self,dictionary):
-		self.samples = None
+		self.samples_string = None
 		self.description = []
 		self.errors = []
+		self.valid_distribution = True
 
 		self.dictionary = dictionary
 		self.family = dictionary['family']
@@ -150,7 +145,6 @@ class Distribution:
 		# self.generatePlotDataSciPy()
 
 	def initMetalog(self):
-		self.n_samples = 5000
 		self.description.append('Meta-logistic distribution.')
 
 		self.metalog_boundedness = self.dictionary['metalog_boundedness']
@@ -165,29 +159,30 @@ class Distribution:
 		else:
 			self.metalog_fit_method = 'Linear least squares'
 
-		try:
-			self.distribution_object = MetaLogistic(self.ps, self.qs,
-													lbound=self.metalog_lower_bound,
-													ubound=self.metalog_upper_bound,
-													fit_method=self.metalog_fit_method)
-		except TimeoutError:
-			self.errors.append("Timed out while attempting to fit distribution.")
-			return
-		except Exception as mlog_exception:
-			self.errors.append(mlog_exception)
-			return
+		self.distribution_object = MetaLogistic(
+			self.ps, self.qs,
+			lbound=self.metalog_lower_bound,
+			ubound=self.metalog_upper_bound,
+			fit_method=self.metalog_fit_method)
 
-		if not self.distribution_object.valid_distribution:
-			if self.dictionary['metalog_allow_numerical']:
-				self.errors.append(mlog_any_fit_method_error_message)
-			else:
-				self.errors.append(mlog_lls_error_message)
-		self.description.append('Fit method: ' + self.distribution_object.fit_method_used)
-		# self.generatePlotDataMetalog()
-		self.samples = np.array2string(self.distribution_object.rvs(size=self.n_samples).flatten(),
-									   separator=', ',
-									   threshold=self.n_samples + 1,
-									   max_line_width=float('inf'))
+
+		candidates = []
+		for candidate in self.distribution_object.candidates_all:
+			candidates.append(
+				'Method: %s, terms: %s, valid: %s.' % (candidate.fit_method, candidate.term, candidate.valid_distribution)
+			)
+
+		self.valid_distribution = self.distribution_object.valid_distribution
+		if self.valid_distribution:
+			self.description.append('Fit method: %s' % self.distribution_object.fit_method_used)
+			if self.distribution_object.term_used != self.distribution_object.cdf_len:
+				self.description.append('Terms: %s' % self.distribution_object.term_used)
+
+		else:
+			# todo better error messages
+			self.errors.append("The program could not find a valid distribution. The following were attempted:")
+			for c in candidates:
+				self.errors.append(c)
 
 
 	def generatePlotDataSciPy(self):
@@ -217,11 +212,11 @@ class Distribution:
 			left, right = self.plot_custom_domain
 			left, right = self.intersect_intervals([(left,right), (self.distribution_object.a, self.distribution_object.b)])
 
-			cdf_data = self.distribution_object.createCDFPlotData(x_from_to=(left, right), n=self.n_points_to_plot)
-			pdf_data = self.distribution_object.createPDFPlotData(x_from_to=(left, right), n=self.n_points_to_plot)
+			cdf_data = self.distribution_object.create_cdf_plot_data(x_from_to=(left, right), n=self.n_points_to_plot)
+			pdf_data = self.distribution_object.create_pdf_plot_data(x_from_to=(left, right), n=self.n_points_to_plot)
 		else:
-			cdf_data = self.distribution_object.createCDFPlotData(n=self.n_points_to_plot)
-			pdf_data = self.distribution_object.createPDFPlotData(n=self.n_points_to_plot)
+			cdf_data = self.distribution_object.create_cdf_plot_data(n=self.n_points_to_plot)
+			pdf_data = self.distribution_object.create_pdf_plot_data(n=self.n_points_to_plot)
 
 		self.x_axis_cdf = cdf_data['X-values']
 		self.y_axis_cdf = cdf_data['Probabilities']
@@ -230,16 +225,18 @@ class Distribution:
 		self.y_axis_pdf = pdf_data['Densities']
 
 		if min(self.y_axis_pdf<0):
-			if self.dictionary['metalog_allow_numerical']:
-				self.errors.append(mlog_any_fit_method_error_message)
-			else:
-				self.errors.append(mlog_lls_error_message)
+			self.errors.append("The program could not find a valid distribution")  # todo better error message
 
 	def generatePlotData(self):
 		if self.family == 'metalog':
 			self.generatePlotDataMetalog()
 		else:
 			self.generatePlotDataSciPy()
+
+	def generateSampleString(self, n):
+		if self.family == 'metalog':
+			self.n_samples = n
+			self.samples_string = samples_to_string(self.distribution_object.rvs(size=n))
 
 	def createPlot(self, plotIndex):
 		self.generatePlotData()
@@ -335,7 +332,6 @@ class MixtureDistribution(stats.rv_continuous):
 		self.components = components
 		self.weights = np.asarray(weights)
 		self.n_components = len(weights)
-
 		self.createPlot()
 
 	def _cdf(self, x):
@@ -348,9 +344,15 @@ class MixtureDistribution(stats.rv_continuous):
 
 	def _rvs(self, size=1, random_state=None):
 		samples = []
+		if isinstance(size,tuple):
+			size = tuple(int(i/self.n_components) for i in size)
 		for c in self.components:
-			samples.append(c.distribution_object.rvs(size=size/self.n_components))
+			samples.extend(c.distribution_object.rvs(size=size))
 		return samples
+
+	def generateSampleString(self, n):
+		self.n_samples = n
+		self.samples_string = samples_to_string(self.rvs(size=n))
 
 	def generatePlotData(self):
 		n_points_to_plot = self.components[0].n_points_to_plot  # arbitrarily choose the first one
@@ -403,3 +405,11 @@ class MixtureDistribution(stats.rv_continuous):
 		divpdf = '<div id="mixture_pdf_plot"></div>'
 
 		self.plot = divcdf+divpdf+js
+
+def samples_to_string(array):
+	return np.array2string(
+		array.flatten(),
+		separator=', ',
+		threshold=len(array)+1,
+		max_line_width=float('inf')
+	)

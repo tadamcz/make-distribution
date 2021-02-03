@@ -1,12 +1,20 @@
 *** see todos in code comments
-enforce distribution bounds on dragging circle
-enforce distribution bounds on shift-dragging line
-add logistic as fallback for metalog
+when input data is non-increasing:
+    * show an 'are you sure?' message in red
+    * deal with case where two pairs have the same probability (currently crashes the app)
+when we are not able to give the desired plot domains (mixture-level or distribution-level) for a metalog (due to the inherent imprecision in brentq), give a red warning message
 
 
 maybe:
+there should be a validation error message when mlog bounds checked, but no bounds selected
+enforce distribution bounds on dragging circle
+enforce distribution bounds on shift-dragging line
+add closed-form feasibility for 4-term metalogs
+reduce the number of data points for mixtures?
+try to see if there are ways of optimizing mixtures of metalogs
+allow setting number of terms for metalog
+explicitly provide jacobian? (probably not possible due to no explicit expression for CDF)
 when adding point by clicking, where to add it in the form? in order?
 try to deal with overflow issues?
 submit form via ajax
-extreme custom domains for plot in mixture caused issues?
 think about whether to display invalid plots

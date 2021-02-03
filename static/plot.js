@@ -283,7 +283,7 @@ function makePlot(distributionIndex,nDistributions) {
 
         function endDragDataPoint(event, d) {
             if (!event.sourceEvent.altKey) {
-                document.getElementById('dataInputForm').submit()
+                dragEnd()
             }
         }
 
@@ -517,6 +517,7 @@ function makePlot(distributionIndex,nDistributions) {
 
 
             if (nDistributions>1) {
+                $('#mixture_domain_for_plot_bool').prop('checked',true)
                 $('#mixture_domain_for_plot_FromTo-From').val(mixturePlotData.cdf_metadata.xmin.toPrecision(3))
                 $('#mixture_domain_for_plot_FromTo-To').val(mixturePlotData.cdf_metadata.xmax.toPrecision(3))
             }

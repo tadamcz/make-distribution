@@ -2,7 +2,7 @@ function displayNbDistributions(n){
     let i;
     for (i = 1; i < nDistributionsMax; i++) {
         if (i < n) {
-            document.getElementById("distribution"+i).style.display = "block"
+            document.getElementById("distribution"+i).style.display = "flex"
         } else {
             document.getElementById("distribution"+i).style.display = "none"
         }
@@ -10,8 +10,6 @@ function displayNbDistributions(n){
     $('#n_distributions_to_display').val(n)
 
     if (n>1){
-        $('.samples_container').css('display','none') // todo make a permanent solution for this
-
         $('.distributionBox').css('border','grey 1px solid').css('border-radius','5px')
 
         $('.custom_domain_fields').css('display','none')
@@ -27,7 +25,7 @@ nDistributionsInitial = $('#n_distributions_to_display').val()
 nDistributionsMax = 3
 displayNbDistributions(nDistributionsInitial)
 displayAddDistrButton()
-displayRemoveDistrButton()
+displayMixtureComponentOptions()
 
 $('.left_pane').css('max-height',maxHeightPerDistr+'px')
         .css('overflow-y','auto').css('overflow-x','hidden')
@@ -125,7 +123,8 @@ function displayConditionalFieldsByFieldType(checkBoxFieldType, fieldType, distr
 
     const checked = distributionDiv.find("[fieldtype="+checkBoxFieldType+"]").prop('checked')
     if (checked) {
-        distributionDiv.find("[fieldtype="+fieldType+"]").css('display','block')
+        distributionDiv.find("[fieldtype="+fieldType+"]").css('display','flex')
+        // as it happens, when we do by field type we always want a flexbox. A more general method would set a dictionary for this.
     }
     else {
         distributionDiv.find("[fieldtype="+fieldType+"]").css('display','none')
@@ -136,6 +135,7 @@ function displayConditionalFieldsByClass(checkBoxFieldType, classStr, distributi
     const checked = distributionDiv.find("[fieldtype="+checkBoxFieldType+"]").prop('checked')
     if (checked) {
         distributionDiv.find("."+classStr).css('display','block')
+        // as it happens, when we do by class we always want a block. A more general method would set a dictionary for this.
     }
     else {
         distributionDiv.find("."+classStr).css('display','none')
@@ -172,7 +172,7 @@ for (let i = 0; i < nDistributionsInitial; i++) {
 
 
 
-function copySamplesClipboard(){
+function copySamplesClipboard(button){
     var selectContents = function(el) {
       var range = document.createRange();
       range.selectNodeContents(el);
@@ -181,7 +181,9 @@ function copySamplesClipboard(){
       sel.addRange(range);
     };
 
-    var textField = document.querySelector('#samples');
+    distributionDiv = $(button).closest('[distributionindex]')
+
+    var textField = distributionDiv.find('.samples').get(0)
 
     /* Select the text field */
     selectContents(textField)
@@ -189,7 +191,7 @@ function copySamplesClipboard(){
     /* Copy the text inside the text field */
     document.execCommand("copy");
 
-    document.getElementById('copySamplesResult').innerText = 'Done!'
+    distributionDiv.find('.copySamplesResult').text('Done!')
 }
 
 function removePair(pairIndex,distributionIndex){
@@ -246,7 +248,7 @@ function addDistr(){
 
     displayNbDistributions(n)
     displayAddDistrButton()
-    displayRemoveDistrButton()
+    displayMixtureComponentOptions()
 
     new_index = n-1
     displayNbPairs(new_index)
@@ -265,11 +267,44 @@ function displayAddDistrButton() {
     }
 }
 
-function displayRemoveDistrButton(){
+function displayMixtureComponentOptions(){
     if (parseInt($('#n_distributions_to_display').val())===1){
-        $('.removeDistrButton').css('display','none')
+        $('.mixtureComponentOptions').css('display','none')
     }
     else {
-        $('.removeDistrButton').css('display','block')
+        $('.mixtureComponentOptions').css('display','flex')
     }
 }
+
+function removeDistr(distributionIndex){
+    new_n = parseInt($('#n_distributions_to_display').val())-1
+    $('#n_distributions_to_display').val(new_n)
+
+     for (let j = distributionIndex+1; j < nDistributionsMax; j++) {
+          formValues = $('#distribution'+j+' [fieldtype]').map(
+                function(){
+                    if ($(this).attr('type') === 'checkbox'){return $(this).prop('checked')}
+
+                    else {return $(this).val()}
+                }).get()
+
+          $('#distribution'+(j-1)+' [fieldtype]').map(
+              function (index,element){
+                  if ($(this).attr('type') === 'checkbox'){$(this).prop('checked', formValues[index])}
+
+                  else {$(this).val(formValues[index])}
+              }
+          )
+    }
+    displayNbDistributions(new_n)
+    submitForm()
+}
+
+function highlightErrors(){
+    for (let i = 0; i < nDistributionsInitial; i++) {
+        if ($('#distribution'+i+' .errors').get().length>0){
+            $('#distribution'+i).css('border-color','red')
+        }
+    }
+}
+highlightErrors()

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% include "_analytics.html" %}
     <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
     <meta charset="UTF-8">
     <title>Elicit probability distributions from quantiles</title>
@@ -13,7 +14,7 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
 {% from "_distribution.html" import display_distribution_input_output%}
 
 <script>
@@ -21,28 +22,15 @@
     UIObjs = Array.from({length:{{form.n_distributions_to_display.data}}}).map(x => Object()) ;
 </script>
 
-<script>
-    function removeDistr(){
-    // todo: currently you can only remove the bottom-most distribution
-    n = parseInt($('#n_distributions_to_display').val())-1
-    $('#n_distributions_to_display').val(n)
-
-    displayNbDistributions(n)
-    displayAddDistrButton()
-    displayRemoveDistrButton()
-
-    submitForm()
-}
-</script>
 
 
 
 <div id="inputsOutputs">
     <form method="POST" id="dataInputForm">
-        <div style="display: none">{{ render_field(form.n_distributions_to_display) }}</div>
+        <div class="hidden_field">{{ form.n_distributions_to_display }}</div>
         <script>
             n = parseInt($('#n_distributions_to_display').val())
-            if (n>1){
+            if (n>1 && {{ outputs_any|tojson }}){
             maxHeightPerDistr = window.innerHeight/(n+1)
                 -n*9 // to deal with padding
             }
@@ -53,7 +41,7 @@
              maxHeightPerPlot = maxHeightPerDistr/2
         </script>
 
-        <div class="flexbox" id="distribution99">
+        <div class="distributionBox" id="distribution99" distributionindex="99">
         <div class="left_pane">
             Mixture
             <div>
@@ -65,14 +53,18 @@
 
         <div class="results_pane">
             {% if mixture is not none %}
-                {{ mixture.plot|safe }}
+                <div class="plots"> {{ mixture.plot|safe }}</div>
                 <script>makePlot(99)</script>
+
+                <div class="samples_container">
+                    {{ render_samples(mixture.samples_string,mixture.n_samples) }}
+                </div>
             {% endif %}
         </div>
         </div>
 
         {% for i in range(form.distributions|length) %}
-            {% if i<form.n_distributions_to_display.data and anyOutputs%}
+            {% if i<form.n_distributions_to_display.data and outputs_bool_array[i]%}
                 {{ display_distribution_input_output(form.distributions[i], distributions_output[i], i, form.n_distributions_to_display.data)}}
             {% else %}
                 {{ display_distribution_input_output(form.distributions[i], False, i, form.n_distributions_to_display.data)}}

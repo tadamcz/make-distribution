@@ -1,4 +1,4 @@
-{% from "_formhelpers.html" import render_field, render_field_nolabel, render_checkbox %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
 
 
 
@@ -7,10 +7,11 @@
 {% set nToDisp = nToDisp|string %}
 
 <div id="distribution{{distribution_index}}" class="distributionBox" distributionindex={{distribution_index}}>
-<div class="flexbox">
 <div class="left_pane">
     <div>
-        <a href="javascript:removeDistr()" class="removeDistrButton">Remove last mixture</a>
+        <div class="mixtureComponentOptions">
+            <a href="javascript:removeDistr({{distribution_index}})">Remove distribution</a> {{ render_field(distribution_fields.mixture_component_weight) }}
+        </div>
         {{render_field(
                         distribution_fields.family,onchange="displayDistributionSpecificOptions("+distribution_index+"),
                                                 submitForm()"
@@ -25,6 +26,7 @@
             </ul>
         {% endif %}
         <div class="hidden_field">{{ distribution_fields.nb_pairs_to_display_hidden_field(onchange="display_nb_pairs("+distribution_index+")")}}</div>
+        <div class="hidden_field">{{ distribution_fields.pop_from_list}} </div>
     </div>
 
     <div style="margin-bottom: 1em">
@@ -83,9 +85,12 @@
             <div>{{i}}</div>
         {%endfor%}
 
-        {%for i in distribution_ouputs.errors%}
-            <div class="errors">{{i}}</div> <a href="javascript:window.history.back()">Go back.</a>
-        {%endfor%}
+        {% if distribution_ouputs.errors %}
+            {%for i in distribution_ouputs.errors%}
+                <div class="errors">{{i}}</div>
+            {%endfor%}
+            <a href="javascript:window.history.back()">Go back.</a>
+        {% endif %}
 </div>
 {% endif %}
 </div>
@@ -93,22 +98,16 @@
 
 <div class="results_pane">
     {% if distribution_ouputs.plot %}
-        <div>{{ distribution_ouputs.plot|safe}}</div>
+        <div class="plots">{{ distribution_ouputs.plot|safe}}</div>
         <script>makePlot({{ distribution_index}}, {{nToDisp}})</script>
     {% endif %}
 
-    {% if distribution_ouputs.samples and nToDisp==1 %}
+    {% if distribution_ouputs.samples_string%}
     <div class="samples_container">
-        {{ distribution_ouputs.n_samples }} random samples:
-        <pre class="samples">{{ distribution_ouputs.samples}}</pre>
-        <div class="flexbox">
-            <button onclick="copySamplesClipboard()">Copy to clipboard</button>
-            <div style="padding-left: 1em" class="copySamplesResult"></div>
-        </div>
+        {{ render_samples(distribution_ouputs.samples_string,distribution_ouputs.n_samples) }}
     </div>
     {% endif %}
 </div>
 
-</div> {# End of Flexbox#}
 </div>
 {% endmacro %}

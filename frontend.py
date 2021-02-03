@@ -1,13 +1,51 @@
 from flask import Flask, render_template
 from wtforms import SelectField, FloatField, FormField, BooleanField, FieldList, IntegerField
 from wtforms.validators import Optional, number_range
+import wtforms.widgets as widgets
 from flask_wtf import FlaskForm
 import decimal
+import markupsafe
 
 import backend
 
 app = Flask(__name__)
 app.config['WTF_CSRF_ENABLED'] = False  # not needed, there are no user accounts
+
+NUMBER_RANDOM_SAMPLES = 5000
+
+class AdjacentDivsWidget(object):
+    """
+    Display the subfields of a WTForms field as divs inside a flexbox.
+    Each subfield div is itself a flexbox, to allow the label and the input box to each take the space they need.
+
+    Optional widths and margins for the <input> and <label> items must be set separately in your css.
+    The styles defined in this class only take care of putting spacing between the subfields.
+
+    Adapted from wtforms.widgets.ListWidget
+    """
+    def __init__(self):
+        self.html_tag = 'div'
+        self.style_parent = 'display:flex; justify-content:space-between'
+
+        self.html_tag_subfield = 'div'
+
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('id', field.id)
+        if 'class' in kwargs:
+            kwargs['class'] = kwargs['class']+'AdjacentDivsField'
+        else:
+            kwargs['class'] = 'AdjacentDivsField'
+        percent_width_per_subfield = str((1/(sum(1 for _ in field)))*100)
+        margin_px = str(5)
+        self.style_subfield = 'display:flex; flex-basis:calc(%s%% - %spx)' % (percent_width_per_subfield, margin_px)
+        html = ['<%s style="%s" %s>' % (self.html_tag, self.style_parent, widgets.html_params(**kwargs))]
+        for subfield in field:
+            open = '<%s style="%s">' % (self.html_tag_subfield, self.style_subfield)
+            close = '</%s>' % (self.html_tag_subfield)
+            content = '<label>%s</label> %s' % (subfield.label, subfield())
+            html.append(open+content+close)
+        html.append('</%s>' % self.html_tag)
+        return markupsafe.Markup(''.join(html))
 
 class QuantilePairForm(FlaskForm):
     def __init__(self, *args, **kwargs):
@@ -29,26 +67,28 @@ class FromToForm(FlaskForm):
 class DistributionForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(DistributionForm, self).__init__(*args, **kwargs)
-        self.metalog_bounds.From.label = 'Lower bound'
-        self.metalog_bounds.To.label = 'Upper bound'
+        self.metalog_bounds.From.label = 'Lower'
+        self.metalog_bounds.To.label = 'Upper'
 
-        self.generalized_beta_bounds.From.label = 'Lower bound'
-        self.generalized_beta_bounds.To.label = 'Upper bound'
+        self.generalized_beta_bounds.From.label = 'Lower'
+        self.generalized_beta_bounds.To.label = 'Upper'
 
         set_render_KWs(self)
 
+    mixture_component_weight = FloatField('Weight in mixture',default=1, validators=[number_range(min=0,max=float('inf'),message='Weight cannot be negative')])
     family = SelectField(choices=[('metalog','Metalog'),('normal','Normal'), ('lognormal','Lognormal'), ('beta','Beta'),('generalized_beta','Generalized Beta')])
     nb_pairs_to_display_hidden_field = IntegerField()
 
-    pairs = FieldList(FormField(QuantilePairForm), min_entries=10)
+    max_pairs = 10
+    pairs = FieldList(FormField(QuantilePairForm, widget=AdjacentDivsWidget()), min_entries=max_pairs, max_entries=max_pairs)
 
     plot_custom_domain_bool = BooleanField("Specify custom domain for plot?")
-    plot_custom_domain_FromTo = FormField(FromToForm)
+    plot_custom_domain_FromTo = FormField(FromToForm, widget=AdjacentDivsWidget())
     metalog_boundedness = BooleanField("Specify bounds for metalog?")
-    metalog_bounds = FormField(FromToForm)
+    metalog_bounds = FormField(FromToForm, widget=AdjacentDivsWidget())
     metalog_allow_numerical = BooleanField("Allow numerical approximation if no exact metalog fit?")
 
-    generalized_beta_bounds = FormField(FromToForm)
+    generalized_beta_bounds = FormField(FromToForm, widget=AdjacentDivsWidget())
 
 
 
@@ -59,14 +99,12 @@ class MyForm(FlaskForm):
         super(MyForm, self).__init__(*args, **kwargs)
         set_render_KWs(self)
 
-    max_mixtures = 3
-    distributions = FieldList(FormField(DistributionForm), min_entries=max_mixtures,max_entries=max_mixtures)
+    max_components = 3
+    distributions = FieldList(FormField(DistributionForm), min_entries=max_components, max_entries=max_components)
     n_distributions_to_display = IntegerField("Number of distributions_output for mixture")
 
     mixture_domain_for_plot_bool = BooleanField("Specify custom domain for plot?")
-    mixture_domain_for_plot_FromTo = FormField(FromToForm, label='Domain for plot')
-    # todo: force all plots to have same domain when mixtures are active.
-    # also hide custom domain option from components when mixture is active.
+    mixture_domain_for_plot_FromTo = FormField(FromToForm, widget=AdjacentDivsWidget())
 
 
 
@@ -156,8 +194,8 @@ class MyForm(FlaskForm):
                 min_plot = min([distribution.distribution_object.ppf(0.001) for distribution in distributions])
                 max_plot = max([distribution.distribution_object.ppf(1-0.001) for distribution in distributions])
 
-            for i in range(self.n_distributions_to_display.data):
-                distributions[i].plot_custom_domain = (min_plot,max_plot)
+            for distribution in distributions:
+                distribution.plot_custom_domain = (min_plot,max_plot)
 
         return distributions
 
@@ -202,28 +240,39 @@ def postRequest():
     if form.validate():
         return showResult(form)
     else:
-        return render_template('index.html', form=form, anyOutputs=False, mixture=None)
+        return render_template('index.html',
+                               form=form,
+                               outputs_bool_array=[False]*MyForm.max_components,
+                               outputs_any = False,
+                               mixture=None)
 
 def showResult(form):
     distributions = form.parse_user_input()
 
-    for i in range(form.n_distributions_to_display.data):
+    for i in range(len(distributions)):
         distribution = distributions[i]
-        distribution.createPlot(i)
+        if distribution.valid_distribution:
+            distribution.createPlot(i)
 
     if form.n_distributions_to_display.data>1:
-        n = form.n_distributions_to_display.data
-        components = [distributions[i] for i in range(n)]
-        mixture = backend.MixtureDistribution(components=components,weights=[1]*n)
-        mixture.createPlot()
+        all_distributions_valid = all([d.valid_distribution for d in distributions])
+        weights = [d.dictionary['mixture_component_weight'] for d in distributions]
+        mixture = backend.MixtureDistribution(components=distributions,weights=weights)
+        if all_distributions_valid:
+            mixture.generateSampleString(NUMBER_RANDOM_SAMPLES)
+            mixture.createPlot()
     else:
         mixture = None
+        if distributions[0].valid_distribution:
+            distributions[0].generateSampleString(NUMBER_RANDOM_SAMPLES)
 
-    anyOutputs = any([d.description is not None for d in distributions])
+    outputs_bool_array = [d.description is not None for d in distributions]
+    outputs_any = any(outputs_bool_array)
     return render_template('index.html',
                            form=form,
                            distributions_output=distributions,
-                           anyOutputs=anyOutputs,
+                           outputs_bool_array=outputs_bool_array,
+                           outputs_any=outputs_any,
                            mixture=mixture)
 
 
