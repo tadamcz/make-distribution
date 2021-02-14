@@ -238,8 +238,9 @@ class Distribution:
 			self.n_samples = n
 			self.samples_string = samples_to_string(self.distribution_object.rvs(size=n))
 
-	def createPlot(self, plotIndex):
-		self.generatePlotData()
+	def createPlot(self, plotIndex, generate_data=True):
+		if generate_data:
+			self.generatePlotData()
 		cdf_jsonlike = [{'x': self.x_axis_cdf[i], 'y': self.y_axis_cdf[i]} for i in range(len(self.x_axis_cdf))]
 		pdf_jsonlike = [{'x': self.x_axis_pdf[i], 'y': self.y_axis_pdf[i]} for i in range(len(self.x_axis_pdf))]
 
@@ -355,30 +356,27 @@ class MixtureDistribution(stats.rv_continuous):
 		self.samples_string = samples_to_string(self.rvs(size=n))
 
 	def generatePlotData(self):
-		n_points_to_plot = self.components[0].n_points_to_plot  # arbitrarily choose the first one
-		left, right = self.components[0].plot_custom_domain
+		n_points_to_plot = 150
+		left, right = self.components[0].plot_custom_domain  # arbitrarily choose the first one
 
 		self.x_axis_cdf, self.x_axis_pdf = (np.linspace(left,right,n_points_to_plot),)*2
 
-		cdf_matrix_to_average = np.empty(shape=(0,n_points_to_plot))
-		pdf_matrix_to_average = np.empty(shape=(0,n_points_to_plot))
+		cdf_vectors_to_average = []
+		pdf_vectors_to_average = []
+
 		for i,c in enumerate(self.components):
+			c.x_axis_cdf, c.x_axis_pdf = self.x_axis_cdf, self.x_axis_pdf
 
-			if c.family == 'metalog':
-				cdf_matrix_to_average = np.vstack((cdf_matrix_to_average,
-												   c.distribution_object.cdf(self.x_axis_cdf)))
+			c.y_axis_cdf = c.distribution_object.cdf(self.x_axis_cdf)
+			cdf_vectors_to_average.append(c.y_axis_cdf)
 
-				pdf_matrix_to_average = np.vstack((pdf_matrix_to_average,
-												   c.distribution_object.pdf(self.x_axis_pdf)))
-			else:
-				cdf_matrix_to_average = np.vstack((cdf_matrix_to_average,
-												   c.y_axis_cdf))
+			c.y_axis_pdf = c.distribution_object.pdf(self.x_axis_pdf)
+			pdf_vectors_to_average.append(c.y_axis_pdf)
 
-				pdf_matrix_to_average = np.vstack((pdf_matrix_to_average,
-												   c.y_axis_pdf))
+			c.createPlot(i, generate_data=False)
 
-		self.y_axis_cdf = np.average(cdf_matrix_to_average,weights=self.weights,axis=0)
-		self.y_axis_pdf = np.average(pdf_matrix_to_average,weights=self.weights,axis=0)
+		self.y_axis_cdf = np.average(cdf_vectors_to_average,weights=self.weights, axis=0)
+		self.y_axis_pdf = np.average(pdf_vectors_to_average,weights=self.weights, axis=0)
 
 
 	def createPlot(self):

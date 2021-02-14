@@ -249,11 +249,6 @@ def postRequest():
 def showResult(form):
     distributions = form.parse_user_input()
 
-    for i in range(len(distributions)):
-        distribution = distributions[i]
-        if distribution.valid_distribution:
-            distribution.createPlot(i)
-
     if form.n_distributions_to_display.data>1:
         all_distributions_valid = all([d.valid_distribution for d in distributions])
         weights = [d.dictionary['mixture_component_weight'] for d in distributions]
@@ -263,8 +258,10 @@ def showResult(form):
             mixture.createPlot()
     else:
         mixture = None
-        if distributions[0].valid_distribution:
-            distributions[0].generateSampleString(NUMBER_RANDOM_SAMPLES)
+        distribution = distributions[0]
+        if distribution.valid_distribution:
+            distribution.createPlot(0)
+            distribution.generateSampleString(NUMBER_RANDOM_SAMPLES)
 
     outputs_bool_array = [d.description is not None for d in distributions]
     outputs_any = any(outputs_bool_array)
