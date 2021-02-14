@@ -4,7 +4,15 @@
     {% include "_analytics.html" %}
     <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
     <meta charset="UTF-8">
-    <title>Elicit probability distributions from quantiles</title>
+
+    {# Title and description  #}
+    <title>Create a probability distribution from percentiles</title>
+    <meta name="description" content="
+    Fit probability distributions to quantiles (percentiles, points on a CDF). Go from a few known points to a complete distribution: fully characterize uncertainties. Make distributions for use in Monte Carlo simulation or forecasting.">
+
+    {#  Other meta tags  #}
+    {% include "_meta_tags.html" %}
+
     <link rel="stylesheet" href= {{url_for('static', filename='styles.css') }}>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
