@@ -65,3 +65,23 @@
     <div style="padding-left: 1em" class="copySamplesResult"></div>
 </div>
 {% endmacro %}
+
+{% macro tooltip_from_div(div_id) %}
+{% set unique_class = range(1000)|random %}
+<span style="cursor: pointer" class="info_hover {{ unique_class }}" title=""> &nbsp &#8505; &nbsp</span>
+<script>
+$(document).ready( function () {
+    $('.info_hover.{{unique_class }}').tooltip({
+        content: function () {
+            return $("#{{ div_id }}").html();
+        },
+        hide: {delay: 400},
+        show: false, // no fade-in
+        open: function (event, ui) {
+            $(ui.tooltip).appendTo(this);
+        }
+    })
+}
+)
+</script>
+{% endmacro %}

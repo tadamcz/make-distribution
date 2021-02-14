@@ -1,4 +1,4 @@
-{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
+{% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples, tooltip_from_div %}
 
 
 
@@ -12,11 +12,34 @@
         <div class="mixtureComponentOptions">
             <a href="javascript:removeDistr({{distribution_index}})">Remove distribution</a> {{ render_field(distribution_fields.mixture_component_weight) }}
         </div>
-        {{render_field(
-                        distribution_fields.family,onchange="displayDistributionSpecificOptions("+distribution_index+"),
-                                                submitForm()"
-                        )
-          }}
+
+
+        <div style="display: flex">
+            {{render_field(distribution_fields.family,
+                            onchange="displayDistributionSpecificOptions("+distribution_index+"), submitForm()")}}
+
+            <div class="generalized_beta">
+                {{ tooltip_from_div('beta_info') }}
+                <div style="display: none" id="beta_info">A four-parameter generalization of the Beta, with PDF:
+                $$ f(x) = \frac{\left(\frac{x-c}{d-c}\right)^{\alpha-1}  \left(1-\frac{x-c}{d-c}\right)^{\beta-1}}{(d-c)\mathrm{B}(\alpha,\beta)}$$
+                Where \(c\) is the lower bound and \(d\) is the upper bound.
+
+                See for example <a href="https://www.google.com/search?q=Nadarajah+and+Gupta+Handbook+of+Beta+Distribution">
+                Nadarajah and Gupta 2004</a>, Chapter 5, Section VII, p. 116.</div>
+            </div>
+
+            <div class="metalog">
+                {{ tooltip_from_div('metalog_info') }}
+                <div style="display: none" id="metalog_info">
+                    A distribution with a high degree of shape flexiblity, allowing it to often fit your inputa data
+                    exactly or very closely. It can be unbounded, bounded, or semi-bounded.
+                    First described in <a href="http://www.metalogdistributions.com/images/The_Metalog_Distributions_-_Keelin_2016.pdf">
+                    Keelin 2016</a>.
+                </div>
+            </div>
+
+
+        </div>
 
         {% if distribution_fields.nb_pairs_to_display_hidden_field.errors %}
             <ul class=errors>
@@ -46,7 +69,7 @@
         {{ render_field_nolabel(distribution_fields.plot_custom_domain_FromTo)}}
     </div>
 
-    <div class='metalog_options'>
+    <div class='metalog metalog_options'>
         {{render_checkbox(distribution_fields.metalog_boundedness,
             onchange="displayConditionalFieldsByClass('metalog_boundedness','metalog_bounds',"+distribution_index+")")}}
         <div class="metalog_bounds">
@@ -55,27 +78,13 @@
         </div>
         <div>
         {{render_checkbox(distribution_fields.metalog_allow_numerical)}}
-            <div class = 'tooltip'>
-                More info.
-                <div class="tooltiptext">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
-                that minimizes the sum of square differences between the metalog CDF and your inputs. This is slower. </div>
-            </div>
+            {{ tooltip_from_div('metalog_numeric_explanation') }}
+            <div style="display: none" id="metalog_numeric_explanation">If there is no valid metalog for your inputs, this checkbox will allow the application to attempt to find the metalog
+            that minimizes the sum of square differences between the metalog CDF and your inputs. This is slower. </div>
         </div>
-
-        <br> A distribution with a high degree of shape flexiblity, allowing it to often fit your inputa data
-        exactly or very closely. It can be unbounded, bounded, or semi-bounded.
-        First described in <a href="http://www.metalogdistributions.com/images/The_Metalog_Distributions_-_Keelin_2016.pdf">
-        Keelin 2016</a>.
-
     </div>
-    <div class='generalized_beta_options'>
+    <div class='generalized_beta generalized_beta_options'>
         {{render_field(distribution_fields.generalized_beta_bounds)}}
-        <br> A four-parameter generalization of the Beta, with PDF:
-        $$ f(x) = \frac{\left(\frac{x-c}{d-c}\right)^{\alpha-1}  \left(1-\frac{x-c}{d-c}\right)^{\beta-1}}{(d-c)\mathrm{B}(\alpha,\beta)}$$
-        Where \(c\) is the lower bound and \(d\) is the upper bound.
-
-        See for example <a href="https://www.google.com/search?q=Nadarajah+and+Gupta+Handbook+of+Beta+Distribution">
-        Nadarajah and Gupta 2004</a>, Chapter 5, Section VII, p. 116.
     </div>
 
 <div>

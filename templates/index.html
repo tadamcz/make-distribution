@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     {% include "_analytics.html" %}
-    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
+
     <meta charset="UTF-8">
 
     {# Title and description  #}
@@ -13,13 +13,21 @@
     {#  Other meta tags  #}
     {% include "_meta_tags.html" %}
 
-    <link rel="stylesheet" href= {{url_for('static', filename='styles.css') }}>
+    {# JQuery and JQuery UI #}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src={{url_for('static', filename="jquery-ui.1.12.1-custom.min.js")}}></script>
+    <link rel="stylesheet" href= {{url_for('static', filename='jquery-ui.min.css') }}>
 
+    {# D3 and plot.js #}
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src={{url_for('static', filename="plot.js")}}></script>
 
+    {# MathJax   #}
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    {# Styles and Icons #}
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
 {% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
@@ -29,9 +37,6 @@
     plotData = {} ;
     UIObjs = Array.from({length:{{form.n_distributions_to_display.data}}}).map(x => Object()) ;
 </script>
-
-
-
 
 <div id="inputsOutputs">
     <form method="POST" id="dataInputForm">

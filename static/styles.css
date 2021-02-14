@@ -1,30 +1,3 @@
-/* Tooltip container */
-.tooltip {
-  position: relative;
-  display: inline-block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 25em;
-  background-color: black;
-  color: #fff;
-  text-align: left;
-  padding: 5px 5px;
-  border-radius: 6px;
-
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 1;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
-
 .errors {color: red}
 
 .line {
@@ -171,12 +144,8 @@
   padding: 0;
 }
 
-#distribution1,#distribution2, .mixtureComponentOptions{
+.pair, .metalog_options, .generalized_beta_options, #distribution1,#distribution2, .mixtureComponentOptions{
   display: none;  /*  hide by default, only show if JS changes this. Avoid flickering when page is loaded. */
-}
-
-.pair, .metalog_options, .generalized_beta_options{
-  display: none;  /*  hide by default, only show if JS changes this. Avoids flickering when page is loaded.*/
 }
 
 .mixtureComponentOptions {

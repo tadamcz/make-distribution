@@ -153,17 +153,17 @@ function displayDistributionSpecificOptions(distributionIndex) {
 
     const family = distributionDiv.find('[fieldtype=family]').val();
     if (family === 'metalog') {
-        distributionDiv.find('.metalog_options').css('display','block')
+        distributionDiv.find('.metalog').css('display','block')
     }
     else {
-       distributionDiv.find('.metalog_options').css('display','none')
+       distributionDiv.find('.metalog').css('display','none')
     }
 
     if (family === 'generalized_beta') {
-       distributionDiv.find('.generalized_beta_options').css('display','block')
+       distributionDiv.find('.generalized_beta').css('display','block')
     }
     else {
-       distributionDiv.find('.generalized_beta_options').css('display','none')
+       distributionDiv.find('.generalized_beta').css('display','none')
     }
 }
 for (let i = 0; i < nDistributionsInitial; i++) {
