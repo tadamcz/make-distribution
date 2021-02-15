@@ -26,8 +26,9 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     {# Styles and Icons #}
-    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="balloon.min.css")}}/>
+    <link rel="stylesheet" type="text/css" href={{url_for('static', filename="styles.css")}}/>
 </head>
 <body>
 {% from "_macros.html" import render_field, render_field_nolabel, render_checkbox, render_samples %}
@@ -86,7 +87,7 @@
         <input type="submit">
     </form>
     <script src={{url_for('static', filename='index.js') }}></script>
-    <a href="javascript:addDistr()" class="addDistrButton">Add another distribution to make a mixture</a>
+    <a href="javascript:addDistr()" class="addDistrButton"><span class="material-icons">add_circle_outline</span> Add another distribution to make a mixture</a>
 </div>
 
 

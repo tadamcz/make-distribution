@@ -10,7 +10,7 @@
 <div class="left_pane">
     <div>
         <div class="mixtureComponentOptions">
-            <a href="javascript:removeDistr({{distribution_index}})">Remove distribution</a> {{ render_field(distribution_fields.mixture_component_weight) }}
+            <a class="remove_distr_button" href="javascript:removeDistr({{distribution_index}})"><span class="material-icons">highlight_off</span>Remove distribution</a> {{ render_field(distribution_fields.mixture_component_weight) }}
         </div>
 
 
@@ -52,13 +52,13 @@
         <div class="hidden_field">{{ distribution_fields.pop_from_list}} </div>
     </div>
 
-    <div style="margin-bottom: 1em">
-        <a class="add_pair_button" href="javascript:addPair({{distribution_index}})">Add pair</a>
+    <div>
+        <a class="add_pair_button" href="javascript:addPair({{distribution_index}})"><span class="material-icons">add_circle_outline</span>Add pair</a>
     </div>
     {% for pair in distribution_fields.pairs %}
     <div class="pair {{'pair' ~ loop.index0}}">
         Pair {{loop.index}}
-        <a class="remove_pair_button" href="javascript:removePair({{loop.index0}}, {{distribution_index}})">Remove</a>
+        <a class="remove_pair_button" href="javascript:removePair({{loop.index0}}, {{distribution_index}})"><span class="material-icons" aria-label="remove pair" data-balloon-pos="right">highlight_off</span></a>
         {{render_field_nolabel(pair)}}
     </div>
     {% endfor %}

@@ -100,7 +100,8 @@
 
 .output_text{
    border: #cccccc 1px solid;
-   padding: 20px
+   padding: 5px;
+   margin-top: 1em;
 }
 
 .hidden_field{
@@ -158,4 +159,23 @@
 
 [fieldtype=mixture_component_weight] {
   width: 2em;
+}
+
+.material-icons{
+  font-size: 1em;
+  vertical-align: text-top;
+}
+
+.remove_pair_button {
+  color: black;
+}
+
+.add_pair_button, .remove_distr_button, .addDistrButton {
+  color: black;
+  text-decoration: none;
+}
+
+.add_pair_button{
+  margin-top: 1em;
+  display: block;
 }
