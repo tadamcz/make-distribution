@@ -5,7 +5,7 @@ function makePlot(distributionIndex,nDistributions) {
     if (maxHeightPerPlot>minHeighShowTitle) {
         margin = {
             top: maxHeightPerPlot / 10,
-            right: 70,
+            right: 10,
             bottom: maxHeightPerPlot / 10,
             left: 70
         }
@@ -13,7 +13,7 @@ function makePlot(distributionIndex,nDistributions) {
     else {
         margin = {
             top: 20,
-            right: 70,
+            right: 10,
             bottom: 20,
             left: 70
         }

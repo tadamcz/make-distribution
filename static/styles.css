@@ -66,7 +66,7 @@
 
 .left_pane {
   min-width: 20em;
-  width: 20em;
+  width: 22em;
 }
 
 .results_pane {
@@ -76,7 +76,7 @@
 }
 
 .samples_container{
-  max-width: 20em;
+  max-width: 10em;
 }
 .samples {
   overflow-x: scroll;
