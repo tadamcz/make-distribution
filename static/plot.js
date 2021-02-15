@@ -213,7 +213,7 @@ function makePlot(distributionIndex,nDistributions) {
 
             UIObjs[distributionIndex].DataPointCircles.push(
                 plane_cdf.append("path")
-                    .attr('d', d3.symbol().type(d3.symbolCircle).size(6000))
+                    .attr('d', d3.symbol().type(d3.symbolCircle).size(9*height))
                     .attr('transform', 'translate(' + xScale(x) + ',' + cdf_yScale(y) + ')')
                     .attr('class', 'dataPointCircle')
                     .attr('quantile_index', index)
