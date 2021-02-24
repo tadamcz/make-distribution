@@ -86,7 +86,7 @@ class DistributionForm(FlaskForm):
     plot_custom_domain_FromTo = FormField(FromToForm, widget=AdjacentDivsWidget())
     metalog_boundedness = BooleanField("Specify bounds for metalog?")
     metalog_bounds = FormField(FromToForm, widget=AdjacentDivsWidget())
-    metalog_allow_numerical = BooleanField("Allow numerical approximation if no exact metalog fit?")
+    metalog_allow_numerical = BooleanField("Attempt numerical fit if no valid linear least squares fit?")
 
     generalized_beta_bounds = FormField(FromToForm, widget=AdjacentDivsWidget())
 
