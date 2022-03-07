@@ -3,7 +3,7 @@ from scipy import optimize
 from scipy import stats
 import math
 import numpy as np
-from metalogistic.metalogistic import MetaLogistic
+from metalogistic import MetaLogistic
 
 
 class Distribution:
