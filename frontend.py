@@ -224,12 +224,20 @@ def getRequest():
     form.n_distributions_to_display.data = 1
     for distribution in form.distributions:
         distribution.family.data = 'metalog'
-        distribution.nb_pairs_to_display_hidden_field.data = 2
+        distribution.nb_pairs_to_display_hidden_field.data = 3
         distribution.metalog_allow_numerical.data = True
         distribution.pairs[0]['P'].data = .1
-        distribution.pairs[0]['Q'].data = -100
-        distribution.pairs[1]['P'].data = .9
-        distribution.pairs[1]['Q'].data = 100
+        distribution.pairs[0]['Q'].data = -20
+
+        distribution.pairs[1]['P'].data = .5
+        distribution.pairs[1]['Q'].data = -1
+
+        distribution.pairs[2]['P'].data = .9
+        distribution.pairs[2]['Q'].data = 50
+
+        distribution.plot_custom_domain_bool.data = True
+        distribution.plot_custom_domain_FromTo['From'].data = -100
+        distribution.plot_custom_domain_FromTo['To'].data = 100
 
     return showResult(form)
 
