@@ -179,3 +179,7 @@
   margin-top: 1em;
   display: block;
 }
+
+.grecaptcha-badge {
+  visibility: hidden;
+}
