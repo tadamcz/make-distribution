@@ -1,3 +1,6 @@
 [submodule "metalogistic"]
 	path = metalogistic
 	url = https://github.com/tadamcz/metalogistic
+[submodule "metalog"]
+	path = metalog
+	url = git@github.com:tadamcz/metalog.git
