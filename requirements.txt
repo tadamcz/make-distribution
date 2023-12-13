@@ -1,4 +1,4 @@
--e metalogistic # -e for editable
+-e metalog # -e for editable
 click==7.1.2
 cycler==0.10.0
 Flask==1.1.4
